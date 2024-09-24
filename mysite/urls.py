@@ -16,10 +16,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.views.generic import TemplateView
 from django.views.generic import RedirectView
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     #path('', RedirectView.as_view(url='https://www.dreamanalytica.com/', permanent=True)),
     path("", include("main.urls")),
+    path('app-ads.txt', TemplateView.as_view(template_name="app-ads.txt", content_type='text/plain')),
 ]

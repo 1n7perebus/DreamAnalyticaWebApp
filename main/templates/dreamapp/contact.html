@@ -1,0 +1,85 @@
+{% extends 'dreamapp/header.html' %}
+{% block content %}
+<head>
+    {% load static %}
+    {{ form.media }}
+    <style>
+        /* Responsive Typography */
+        @media only screen and (min-width: 600px) and (max-width: 992px) {
+            .helper-text {
+                font-size: 18px !important;
+            }
+
+            label.exo-200 {
+                font-size: 20px !important;
+            }
+
+            input.exo-200,
+            textarea.exo-200,
+            span.exo-200 {
+                font-size: 24px !important;
+            }
+        }
+        /* Ensure input fields and labels scale nicely on mobile */
+        .input-field {
+            margin-bottom: 1.5em;
+        }
+
+
+    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body>
+    <div class="centered-container animate">
+        <div class="form-wrapper animate" >
+            {% if messages %}
+                <ul class="messages">
+                    {% for message in messages %}
+                        <li class="{{ message.tags }} exo-200 center" style="color: #c00000;">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            <form class="container flow-text animate" method="POST">
+                <h4 class="exo-200h left-align flow-text animate" style="padding-bottom:1em">CONTACT FORM</h4>
+                {% csrf_token %}
+                <div class="row">
+                    <div class="input-field col s12 exo-200 animate">
+                        <input id="email" name="email" type="email" class="mobile-exo200 validate exo-200" required>
+                        <label class="exo-200" for="email">Email*</label>
+                    </div>
+                    <div class="input-field col s12 exo-200 animate">
+                        <input id="name" name="name" type="text" class="mobile-exo200 validate exo-200" required>
+                        <label class="exo-200" for="name">Name*</label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="input-field col s12 exo-200 animate">
+                        <input id="phone" name="phone" type="tel" class="validate exo-200" placeholder="+00000000000"
+                            inputmode="numeric" pattern="^\+[0-9]{1,4}[0-9]+$"
+                            onkeypress="return event.charCode >= 43 && event.charCode <= 57">
+                        <label for="phone">WhatsApp# +00000000000</label>
+                        <span class="helper-text"
+                            data-error="Invalid phone number format. Please enter a valid phone number in WhatsApp format starting with the '+' symbol followed by the area code."></span>
+                    </div>
+                </div>
+                <button class="btn btn-small center hoverable exo-200 animate" type="submit">
+                    <b class="center mobile-exo200">[ SUBMIT ]</b>
+                </button>
+            </form>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+          const elements = document.querySelectorAll('.animate');
+    
+          elements.forEach((el, index) => {
+            setTimeout(() => {
+              el.classList.add('flash-text-pop');
+            }, index * 80); // Delay between each element's animation (300ms)
+          });
+        });
+      </script>
+</body>
+
+{% endblock %}

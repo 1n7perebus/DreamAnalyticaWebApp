@@ -9,96 +9,218 @@
   <meta name="google-adsense-account" content="ca-pub-5864886611650170">
 
   <style>
-    .teal-green {
-        color: #008080; /* teal green */
+    /* Color Scheme */
+    :root {
+      --primary-cyan: #42c9c6;
+      /* Updated primary color */
+      --secondary-pink: #ff00a0;
+      /* More vibrant neon pink */
+      --tertiary-purple: #6a00ff;
+      /* Neon purple replacing blue */
+      --background-dark: #272425;
+      /* Dark background remains the same */
+      --light-gray: #dadada;
+      --white: #e7e7e7;
     }
-    .maroon-red {
-        color: #800000; /* maroon red */
+
+    body {
+      background-color: var(--background-dark);
+      color: var(--light-gray);
     }
-    .neutral-color {
-        color: #808080; /* gray for neutral */
+
+
+    .card {
+      background-color: var(--background-dark);
+      border: 1px solid var(--primary-cyan);
+      box-shadow: 0 0 10px 1px var(--primary-cyan);
+      border-radius: 15px;
     }
-</style>
+
+    /* Stacked Bar Styling */
+    .stacked-bar-container {
+      width: 100%;
+      background-color: var(--background-dark);
+      display: flex;
+      height: 20px;
+      margin: 20px 0;
+      position: relative;
+      border-radius: 15px;
+      overflow: visible;
+    }
+
+    .stacked-bar {
+      height: 100%;
+      text-align: center;
+      line-height: 30px;
+      color: var(--white);
+      box-sizing: border-box;
+      border-radius: 0;
+      overflow: hidden;
+    }
+
+    .stacked-bar:first-child {
+      background-color: var(--secondary-pink);
+      box-shadow: 0 0 5px 5px var(--secondary-pink);
+      border-top-left-radius: 10px;
+      border-bottom-left-radius: 10px;
+    }
+
+    .stacked-bar:last-child {
+      background-color: var(--primary-cyan);
+      box-shadow: 0 0 5px 5px var(--primary-cyan);
+      border-top-right-radius: 10px;
+      border-bottom-right-radius: 10px;
+    }
+
+    /* Button Styling */
+    button {
+      background-color: var(--tertiary-purple);
+      /* Updated to neon purple */
+      color: var(--white);
+      border-radius: 5px;
+      box-shadow: 0 0 2px var(--tertiary-purple);
+      transition: all 0.3s ease;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 40px var(--tertiary-purple);
+    }
+
+    /* Add animation keyframes */
+    @keyframes fadeInUp {
+      0% {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes scaleUp {
+      0% {
+        opacity: 0;
+        transform: scale(0.8);
+      }
+
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    /* Animation class for each element */
+    .animate {
+      opacity: 0;
+    }
+
+    .animate.fade-in-up {
+      animation: fadeInUp 1s ease forwards;
+    }
+
+    .animate.scale-up {
+      animation: scaleUp 1s ease forwards;
+    }
+  </style>
 </head>
 
 <body>
-  <div class="container" style="margin-top: 5em;margin-bottom: 2em;">
-    <h4 class="goldman-regular mobile-exo200h" style="padding-left:1em">// WALL OF DREAMS</h4>
-    <a class="exo-200t {{ health_color }}" style="font-size: 15px;padding-left:2em">
-      DREAM HEALTH SCORE: <b>{{ average_scale }}</b> - {{ health_status|upper }}
-    </a>
-    <p class="exo-200t flow-text left-align" style="padding-left:2em">—</p>
+  <div class="container animate" style="margin-top: 5em;margin-bottom: 2em;">
+    <div class="container animate" style="margin-top: 3em; margin-bottom: 1em;">
+      <h4 class="goldman-regular mobile-exo200h right-align animate">// WALL OF DREAMS</h4>
+      <p class="exo-200t flow-text right-align animate">
+        DREAM HEALTH SCORE:
+        <b class="{{ health_color }}" style="color: {{ health_color }}">{{ average_scale }} -
+          {{ health_status|upper }}</b>
+      </p>
 
-  </div>
+      <div class="stacked-bar-container animate" style="margin-bottom:2em">
+        {% for gender, percentage in sorted_gender_percentages %}
+        <div class="stacked-bar animate"
+          style="width: {{ percentage }}%; background-color: {% cycle '#FF007D' '#42c9c6' '#0047FF' %}; box-shadow: 0 0 10px 0px {% cycle '#FF007D' '#53FFFB' '#0047FF' %};">
+          {% if percentage > 5 %}
+          {{ gender }}: {{ percentage|floatformat:2 }}%
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
 
-  <div class="container" style="margin-top: 1em; margin-bottom: 1em;">
-    {% for item in dreams_with_replies %}
-    {% if item.dream.active == True %}
-    <div class="flow-text">
-      <div class="card horizontal" style="border:1px solid #4accb2;border-radius:20px">
-        <div class="card-stacked">
-          <div class="card-content">
-            <p class="exo-200t flow-text">[ {{ item.dream.mbti_type }} ] {{ item.dream.name }}</p>
-            <p class="exo-200t flow-text"><strong>DREAM SCORE:</strong> {{item.dream.scale}}</p>
-            <p class="Exo-200t flow-text">{{ item.dream.title }}</p>
-            <p class="dream-text exo-300t flow-text">{{ item.dream.dream }}</p>
-            <br>
-            <p class="exo-200d right-align">{{ item.dream.pub }}</p>
-            <div class="" style="border-top: 1px solid rgba(160, 160, 160, 0.2);margin:1em 0 1em 0"></div>
-            <p class="exo-200 flow-text"><strong>Analysis:</strong></p>
-            {% for reply in item.replies %}
-            <p class="dream-text exo-300t flow-text" style="padding:1em">{{ reply.reply }}</p>
-            <p class="exo-200d right-align">{{ reply.pub }}</p>
-            {% empty %}
-            <p class="exo-200 flow-text"></p>
-            {% endfor %}
-            {% if request.user.is_authenticated %}
-            <form method="POST" action="">
-              {% csrf_token %}
-              <input type="hidden" name="dream_email" value="{{ item.dream.email }}">
-              <div class="row">
-                <div class="input-field col s12 exo-200">
-                  <textarea id="textarea1" name="reply" class="validate materialize-textarea exo-200"></textarea>
-                  <label for="textarea1">Reply*</label>
+      <!-- Dreams with Replies -->
+      {% for item in dreams_with_replies %}
+      {% if item.dream.active %}
+      <div class="flow-text animate">
+        <div class="card horizontal animate">
+          <div class="card-stacked animate">
+            <div class="card-content animate">
+              <p class="exo-200t flow-text">[ {{ item.dream.mbti_type }} ] {{ item.dream.name }}</p>
+              <p class="exo-200t flow-text"><strong>DREAM SCORE:</strong> {{item.dream.scale}}</p>
+              <p class="exo-200t flow-text">{{ item.dream.title }}</p>
+              <p class="dream-text exo-300t flow-text">{{ item.dream.dream }}</p>
+              <p class="exo-200d right-align">{{ item.dream.pub }}</p>
+
+              <div class="divider animate" style="border-top: 1px solid rgba(160, 160, 160, 0.2);margin:1em 0;"></div>
+              <p class="exo-200 flow-text"><strong>Analysis:</strong></p>
+              {% for reply in item.replies %}
+              <p class="dream-text exo-300t flow-text animate" style="padding:1em">{{ reply.reply }}</p>
+              <p class="exo-200d right-align animate">{{ reply.pub }}</p>
+              {% endfor %}
+
+              <!-- Reply Form -->
+              {% if request.user.is_authenticated %}
+              <form method="POST" action="">
+                {% csrf_token %}
+                <div class="row">
+                  <div class="input-field col s12 exo-200 animate">
+                    <textarea id="textarea1" name="reply" class="validate materialize-textarea exo-200"></textarea>
+                    <label for="textarea1">Reply*</label>
+                  </div>
                 </div>
-              </div>
-              <button class="btn btn-small center hoverable exo-200" type="submit" style="width:100%;margin-top:0.5rem">
-                [ <b class="center">SUBMIT</b> ]
-              </button>
-            </form>
-            {% endif %}
+                <button class="btn btn-small center hoverable exo-200 animate" type="submit"
+                  style="width:100%;margin-top:0.5rem">
+                  [ <b class="center">SUBMIT</b> ]
+                </button>
+              </form>
+              {% endif %}
+            </div>
           </div>
         </div>
       </div>
+      {% endif %}
+      {% endfor %}
     </div>
-    {% endif %}
-    {% endfor %}
-</div>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const elements = document.querySelectorAll('.animate');
 
-</div>
+      elements.forEach((el, index) => {
+        setTimeout(() => {
+          el.classList.add('flash-text-pop');
+        }, index * 80); // Delay between each element's animation (300ms)
+      });
+    });
+  </script>
+
+</body>
+
+{% endblock %}
+
+
+
+<!--
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5864886611650170"
       crossorigin="anonymous"></script>
-    <!-- horizontal -->
     <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-5864886611650170" data-ad-slot="9254178418"
       data-ad-format="auto" data-full-width-responsive="true"></ins>
     <script>
       (adsbygoogle = window.adsbygoogle || []).push({});
     </script>
-  </div>
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5864886611650170"
-    crossorigin="anonymous"></script>
-  <!-- Square -->
-  <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-5864886611650170" data-ad-slot="7437667898"
-    data-ad-format="auto" data-full-width-responsive="true"></ins>
-  <script>
-    (adsbygoogle = window.adsbygoogle || []).push({});
-  </script>
-  <style>
-    .dream-text {
-      white-space: pre-wrap;
-    }
-  </style>
-  <!--
+
+
+
   <script>
     var all_json_data = {{all_json_data | safe}};
 
@@ -130,5 +252,3 @@
     });
   </script>
 -->
-</body>
-{% endblock %}

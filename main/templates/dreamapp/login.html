@@ -1,0 +1,191 @@
+{% extends 'dreamapp/header.html' %}
+
+{% block sidenav %}
+<!-- No sidenav for the login page -->
+{% endblock sidenav %}
+
+{% block content %}
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+    <title>Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 400px;
+            margin: 50px auto;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border: 1px solid #4accb2;
+            border-radius: 20px;
+            background-color: #e2e2e2;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            font-size: 24px;
+            text-align: center;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            color: red;
+            margin-bottom: 10px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-top: 10px;
+        }
+
+        input {
+            padding: 8px;
+            margin-top: 5px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        a {
+            color: #4CAF50;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        p {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .g-signin2 {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+    </style>
+    <!-- Include Google Sign-In script -->
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+
+    <meta name="google-signin-client_id"
+        content="915694272692-dr7nbn2tv5101nja17e2v6nc1kurt3bn.apps.googleusercontent.com">
+        
+</head>
+<body>
+    <div class="container">
+        <h2 class="exo-200t">LOGIN</h2>
+        {% if messages %}
+        <ul>
+            {% for message in messages %}
+            <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        <form method="post">
+            {% csrf_token %}
+            <label class="exo-200" for="email">Email:</label>
+            <input class="exo-200" type="email" name="email" id="email" required>
+            <label class="exo-200" for="password">Password:</label>
+            <input class="exo-200" type="password" name="password" id="password" required>
+            <button class="btn btn-small center hoverable exo-200" type="submit"
+                style="width:100%;margin-top:0.5rem;z-index: 10;">
+                <b class="center mobile-exo200">[ SUBMIT ]</b>
+            </button>
+        </form>
+        <p class="exo-200">Don't have an account? <a href="{% url 'main:register' %}">Register here</a>.</p>
+        <!-- Google Sign-In Button -->
+        <div class="g-signin2" data-onsuccess="onSignIn"></div>
+    <script>
+        function onSignIn(googleUser) {
+            var profile = googleUser.getBasicProfile();
+            var id_token = googleUser.getAuthResponse().id_token;
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', 'https://7674-103-6-150-37.ngrok-free.app/google/auth/callback/');
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    console.log('Signed in as: ' + xhr.responseText);
+                    // Redirect to another page if necessary
+                    window.location.href = "{% url 'main:index' %}";
+                } else {
+                    console.error('Sign-in error: ' + xhr.responseText);
+                }
+            };
+            xhr.send('code=' + id_token);
+        }
+    </script>
+        
+
+        <div id="buttonDiv" style="border-radius:15px"></div>
+        <script>
+            function handleCredentialResponse(response) {
+                console.log('Encoded JWT ID token: ' + response.credential);
+                const id_token = response.credential;
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', '{% url "main:google_auth_callback" %}');
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                xhr.onload = function () {
+                    if (xhr.status === 200) {
+                        window.location.href = "{% url 'main:index' %}";
+                    } else {
+                        console.error('Error logging in with Google', xhr.responseText);
+                    }
+                };
+                xhr.onerror = function () {
+                    console.error('Network error occurred');
+                };
+                xhr.send('code=' + id_token);
+            }
+
+            window.onload = function () {
+                try {
+                    google.accounts.id.initialize({
+                        client_id: '915694272692-dr7nbn2tv5101nja17e2v6nc1kurt3bn.apps.googleusercontent.com',
+                        callback: handleCredentialResponse
+                    });
+                    google.accounts.id.renderButton(
+                        document.getElementById('buttonDiv'), {
+                            theme: "outline",
+                            size: "large",
+                        }
+                    );
+                    google.accounts.id.prompt();
+                } catch (error) {
+                    console.error('Error initializing Google Sign-In', error);
+                }
+            };
+        </script>
+</body>
+</html>
+{% endblock %}

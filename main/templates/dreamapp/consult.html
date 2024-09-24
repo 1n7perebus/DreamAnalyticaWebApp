@@ -2,7 +2,6 @@
 {% block content %}
 <head>
     {% load static %}
-   
     {{ form.media }}
     <style>
         @media only screen and (min-width: 600px) and (max-width: 992px) {
@@ -25,9 +24,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 
-<body style="padding-top:3em;">
-    <div class="container" style="margin-top:5em">
-        <div class="container" style="border:1px solid #4accb2;border-radius:20px;padding:2em 0 2em 0">
+    <div class="centered-container animate" style="margin-top:8em">
+        <div class="form-wrapper animate" style="border:1px solid #4accb2;border-radius:20px;padding:2em 0 2em 0">
             {% if messages %}
             <ul class="messages">
                 {% for message in messages %}
@@ -35,16 +33,16 @@
                 {% endfor %}
             </ul>
         {% endif %}
-            <form class="container flow-text" method="POST">
+            <form class="container flow-text animate" method="POST">
                 <h4 class="exo-200h left-align flow-text" style="padding-bottom:1em">Contact us, share your dream to the
                     wall, or both!</h4>
                 {% csrf_token %}
                 <div class="row">
-                    <div class="input-field col s6 exo-200">
+                    <div class="input-field col s6 exo-200 animate">
                         <input id="email" name="email" type="email" class="mobile-exo200 validate exo-200" required>
                         <label class="exo-200" for="email">Email*</label>
                     </div>
-                    <div class="input-field col s6 exo-200">
+                    <div class="input-field col s6 exo-200 animate">
                         <input id="name" name="name" type="text" class="mobile-exo200 validate exo-200" required>
                         <label class="exo-200" for="name">Name*</label>
                     </div>
@@ -60,7 +58,7 @@
                     </div>
                 </div>-->
                 <div class="row">
-                    <div class="input-field col s12 exo-200">
+                    <div class="input-field col s12 exo-200 animate">
                         <input id="title" name="title" type="text" class="validate exo-200" maxlength="40"
                             oninput="updateCharCount(this)" required>
                         <label for="title">Dream Name* (Max 50 characters)</label>
@@ -68,20 +66,22 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="input-field col s12 exo-200">
+                    <div class="input-field col s12 exo-200 animate">
                         <textarea id="textarea1" name="dream" class="validate materialize-textarea exo-200 flow-text"
                             style="height:200px" required></textarea>
                         <label class="exo-200" for="textarea1">Dream*</label>
                     </div>
                 </div>
                 <div class="row">
-                    <div class="input-field col s6 exo-200" style="z-index: 2;">
-                        <label >
-                            <input type="checkbox" name="active" />
-                            <span class="exo-200">Share dream publicly*</span>
-                        </label>
+                    <div class="input-field col s6 exo-200 animate" style="position: relative; z-index: 10;" required>
+                        <select name="gender" id="gender" style="color:white;z-index: 1;">
+                            {% for gender_choice in gender_choices %}
+                                <option value="{{ gender_choice.0 }}" style="background:black;">{{ gender_choice.1 }}</option>
+                            {% endfor %}
+                        </select>
+                        <label class="exo-200" for="gender">Gender*</label>
                     </div>
-                    <div class="input-field col s6 exo-200" style="position: relative; z-index: 10;" required>
+                    <div class="input-field col s6 exo-200 animate" style="position: relative; z-index: 10;" required>
                         <select name="mbti_type" id="mbti_type" style="color:white;z-index: 1;">
                             <option class="mobile-exo200" style="font-size: 11px;">Select Your Personality Type*
                             </option>
@@ -91,7 +91,9 @@
                         </select>
                         <label class="exo-200" for="mbti_type">Personality Type*</label>
                     </div>
-                        <div class="conatiner">
+                    
+                    
+                        <div class="conatiner animate">
                         <div class="input-field exo-200 center" style="padding-top:2em;">
                             <div class="center" data-toggle="buttons" style="display: inline-flex;margin-top:1em">
                                 {% for choice in dream_form.fields.scale.choices %}
@@ -104,13 +106,20 @@
                                 {% endfor %}
                             </div>
                         </div>
-                        <div class="container">
+                        <div class="container animate">
                             <a class="exo-200 left">BAD DREAM</a>
                             <a class="exo-200 right">GOOD DREAM</a>
                         </div>
                     </div>
-                </br></br>
-                    <p class="exo-200">If you don't know your personality type, head to <a
+                </br>
+                <div class="input-field col s12 exo-200 animate" style="z-index: 2;">
+                    <label >
+                        <input type="checkbox" name="active" />
+                        <span class="exo-200">Share dream publicly*</span>
+                    </label>
+                </div>
+            </br></br>
+                    <p class="exo-200 animate">If you don't know your personality type, head to <a
                             class="exo-200 highlight-blue" style="text-decoration: underline;"
                             href="https://www.16personalities.com/free-personality-test">www.16personalities.com</a> and
                         take the free test to find out!</p>
@@ -145,7 +154,17 @@
             charCountSpan.textContent = remainingChars;
         }
     </script>
+      <script>
+        document.addEventListener('DOMContentLoaded', function () {
+          const elements = document.querySelectorAll('.animate');
+    
+          elements.forEach((el, index) => {
+            setTimeout(() => {
+              el.classList.add('flash-text-pop');
+            }, index * 80); // Delay between each element's animation (300ms)
+          });
+        });
+      </script>
 
-</body>
 
 {% endblock %}

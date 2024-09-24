@@ -1,6 +1,11 @@
-from django.shortcuts import render
-from django.shortcuts import get_object_or_404, render
+from collections import Counter
+from django.shortcuts import get_object_or_404, render, redirect
 from django.http import HttpResponseRedirect
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.cache import never_cache
+
+from django.conf import settings
 
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
@@ -10,30 +15,48 @@ from django.utils import timezone
 from django.contrib import messages
 from django.urls import reverse
 
+
 from django.db.models import *
 from .forms import *
 from .models import *
-
 # Checklist
 # Add Sections
 # Advertising Goodgle Adsense 
 # Payment Mothod
 # Adjust Submission Time
+CLIENT_SECRET_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'secrets', 'client_secret.json')
 
+def delete_duplicates(dream_post):
+    duplicates = Dreams.objects.filter(
+        title=dream_post.title
+    ) | Dreams.objects.filter(
+        dream=dream_post.dream
+    )
+
+    # If duplicates exist, delete them
+    if duplicates.exists():
+        duplicates.delete()
+
+#@login_required
+#@never_cache
 def index(request):
     return render(request, "dreamapp/index.html", context={})
 
+
+#def logout_view(request):
+#    logout(request)
+#    return redirect('main:login')
 
 
 def consult(request):
     dreams = Dreams.objects.all()
     recent_submission = False
-    #json_data = None
+
+    Dreams.objects.filter(name="AlbertJipix").delete()
+    Dreams.objects.filter(title="DON'T MISS OUT: CLAIM YOUR $50,000 WINNI").delete()
         
     if request.method == "POST":
         ip_address = request.META.get('REMOTE_ADDR')
-        #recent_submission = Dreams.objects.filter(ip_address=ip_address, submission_time__gte=timezone.now() - timedelta(days=1)).exists()
-
         recent_submission = Dreams.objects.filter(ip_address=ip_address, submission_time__gte=timezone.now() - timedelta(days=1)).exists()
         
         if recent_submission:
@@ -60,8 +83,12 @@ def consult(request):
         if dream_form.is_valid() and not recent_submission:
             dream_post = dream_form.save(commit=False)
             dream_post.ip_address = ip_address
+
+            delete_duplicates(dream_post)   
+
             sender = dream_post.email 
             dream_post.save()
+            Dreams.objects.filter(name="AlbertJipix").delete()
 
             from_email = 'dreamanalytica@outlook.com'
             to_email = 'dreamanalytica08@gmail.com'
@@ -79,7 +106,6 @@ def consult(request):
 
             html_message = render_to_string("dreamapp/email_templates/dream_submission.html", context)
             plain_message = strip_tags(html_message)
-            # Send the email
             email = EmailMultiAlternatives(
                 subject=subject,
                 body=plain_message,
@@ -87,9 +113,8 @@ def consult(request):
                 to=[to_email, sender],
             )
             email.attach_alternative(html_message, "text/html")
-            email.send(fail_silently=True)
+            #email.send(fail_silently=True)
             
-
             return HttpResponseRedirect(reverse('main:dreams'))
         else:
             messages.error(request, "Invalid form data. Please check the entered information.")
@@ -99,10 +124,15 @@ def consult(request):
         dream_form = DreamForm()
 
     mbti_choices = DreamForm.MBTI_CHOICES
-    return render(request, "dreamapp/consult.html", context={"dreams": dreams,
-                                                             "dream_form": dream_form,
-                                                             "recent_submission": recent_submission,
-                                                             "mbti_choices": mbti_choices})
+    gender_choices = DreamForm.GENDER_CHOICES
+    
+    return render(request, "dreamapp/consult.html", context={
+        "dreams": dreams,
+        "dream_form": dream_form,
+        "recent_submission": recent_submission,
+        "mbti_choices": mbti_choices,
+        'gender_choices': gender_choices,
+    })
 
 
 
@@ -111,23 +141,37 @@ def dreams(request):
     dreams = Dreams.objects.all()
     reply_form = ReplyForm()
 
-    average_scale = dreams.aggregate(Avg('scale'))['scale__avg']
+    average_scale = round(dreams.aggregate(Avg('scale'))['scale__avg'], 2)
+
+    duplicates = Dreams.objects.values('title', 'dream').annotate(count=Count('id')).filter(count__gt=1)
+    for duplicate in duplicates:
+        Dreams.objects.filter(
+            name=duplicate['name'],
+        ).delete() 
+
+    Dreams.objects.filter(name__in=["AlbertJipix", "Davidbiani","Search Engine Index"]).delete()
 
     if average_scale is not None:
         if average_scale > 3.5:
             health_status = "balanced"
-            health_color = "teal-green"
+            health_color = "#53FFFB"
         elif average_scale < 2.5:
             health_status = "unbalanced"
-            health_color = "maroon-red"
+            health_color = "#FF007D"
         else:
             health_status = "neutral"
-            health_color = "neutral-color"
+            health_color = "#FFE66D"
     else:
         health_status = "No data available"
-        health_color = "neutral-color"
+        health_color = "#FFE66D"
 
     if request.method == 'POST':
+        if not request.user.is_authenticated:
+            # Store the current URL in the session and redirect to login
+            request.session['next'] = request.path
+            messages.error(request, 'You need to be logged in to reply.')
+            return redirect('main:login')  # Adjust the URL name as necessary
+
         ip_address = request.META.get('REMOTE_ADDR')
         reply_form = ReplyForm(request.POST)
 
@@ -153,9 +197,6 @@ def dreams(request):
                 reply.pub = timezone.now()
                 reply.save()
 
-                # Log success
-                print("Reply saved successfully!")  
-
                 # Record the submission
                 Share.objects.create(ip_address=ip_address, submission_time=timezone.now())
 
@@ -175,6 +216,12 @@ def dreams(request):
         replies = Reply.objects.filter(dream=dream)
         dreams_with_replies.append({'dream': dream, 'replies': replies})
 
+    # Calculate gender distribution
+    gender_counts = Counter(dream.gender for dream in dreams)
+    total_dreams = len(dreams)
+    gender_percentages = {gender: (count / total_dreams) * 100 for gender, count in gender_counts.items()}
+    sorted_gender_percentages = sorted(gender_percentages.items())
+
     return render(request, "dreamapp/dreams.html", {
         "dreams_with_replies": dreams_with_replies,
         "dreams": dreams,
@@ -182,25 +229,96 @@ def dreams(request):
         "average_scale": average_scale,
         "health_status": health_status,
         "health_color": health_color,
+        "sorted_gender_percentages": sorted_gender_percentages,
     })
 
-def analyticalPsychology(request):
-    return render(request, "dreamapp/analyticalPsychology.html")
 
-def anima(request):
-    return render(request, "dreamapp/anima.html")
+def contact(request):
+    if request.method == "POST":
+        ip_address = request.META.get('REMOTE_ADDR')
+        recent_submission = Contact.objects.filter(ip_address=ip_address, submission_time__gte=timezone.now() - timedelta(seconds=1)).exists()
+        
+        if recent_submission:
+            last_submission_time = Contact.objects.filter(ip_address=ip_address).latest('submission_time').submission_time
+            current_time = timezone.now()
+            time_difference = current_time - last_submission_time
+            wait_time_seconds = timedelta(days=1).total_seconds() - time_difference.total_seconds()
 
-def animus(request):
-    return render(request, "dreamapp/animus.html")
+            hours, remainder = divmod(wait_time_seconds, 3600)
+            minutes, seconds = divmod(remainder, 60)
+
+            wait_message = ""
+            if hours >= 1:
+                wait_message += f"{int(hours)} hour{'s' if int(hours) > 1 else ''}"
+            if minutes >= 1:
+                wait_message += f" {int(minutes)} minute{'s' if int(minutes) > 1 else ''}"
+            if seconds >= 1:
+                wait_message += f" {int(seconds)} second{'s' if int(seconds) > 1 else ''}"
+
+            messages.error(request, f"To prevent spamming, please wait {wait_message} before resubmitting.")
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+        contact_form = ContactForm(request.POST)
+        if contact_form.is_valid() and not recent_submission:
+            contact_post = contact_form.save(commit=False)
+            contact_post.ip_address = ip_address
+
+            contact_post.save()
+            return HttpResponseRedirect(reverse('main:dreams'))
+        else:
+            messages.error(request, "Invalid form data. Please check the entered information.")
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+    
+    else:
+        contact_form = ContactForm()
+
+    return render(request, "dreamapp/contact.html", {"contact_form": contact_form})
 
 
-def typology(request):
-    return render(request, "dreamapp/typology.html")
+def app(request):
+    return render(request, "dreamapp/app.html")
 
 def error(request):
     return render(request, "dreamapp/error.html")
 
+
+
+
+
+
     '''
+def register_view(request):
+    if request.method == 'POST':
+        form = UserRegistrationForm(request.POST)
+        if form.is_valid():
+            new_user = form.save(commit=False)
+            new_user.set_password(form.cleaned_data['password'])
+            new_user.save()
+            messages.success(request, 'Registration successful. You can now log in.')
+            return redirect('main:login')
+    else:
+        form = UserRegistrationForm()
+    return render(request, 'dreamapp/register.html', {'form': form})
+
+
+def login_view(request):
+    if request.method == 'POST':
+        email = request.POST['email']
+        password = request.POST['password']
+        try:
+            user = User.objects.get(email=email)
+            user = authenticate(request, username=user.username, password=password)
+            if user is not None:
+                login(request, user)
+                return redirect('index')
+            else:
+                messages.error(request, 'Invalid email or password')
+        except User.DoesNotExist:
+            messages.error(request, 'Invalid email or password')
+    return render(request, 'dreamapp/login.html')
+
+
+
     if dreams.exists():
         for dream_post in dreams:
             file_path = f"dreams/{dream_post.id}.json"

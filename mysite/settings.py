@@ -28,6 +28,13 @@ EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')  # SMTP username or email ad
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')  # SMTP password
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
+GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID')
+GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET')
+GOOGLE_REDIRECT_URI = os.environ.get('GOOGLE_REDIRECT_URI')
+
+#GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID')
+#GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET')
+#GOOGLE_REDIRECT_URI = os.environ.get('GOOGLE_REDIRECT_URI')
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
@@ -37,9 +44,9 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ["127.0.0.1", "erebus0013.pythonanywhere.com", "www.dreamanalytica.com", "dreamanalytica.com", "http://www.dreamanalytica.com/", "dreamanalytica.com/"]
+ALLOWED_HOSTS = ["erebus0013.pythonanywhere.com", "www.dreamanalytica.com", "dreamanalytica.com", "http://www.dreamanalytica.com/", "dreamanalytica.com/", "localhost", "127.0.0.1","http://localhost:8000", "7674-103-6-150-37.ngrok-free.app"]
 
-
+LOGIN_URL = '/login/'
 # Application definition
 
 INSTALLED_APPS = [

@@ -5,6 +5,7 @@ name = "pypi"
 
 [packages]
 django = "*"
+google-auth-oauthlib = "*"
 
 [dev-packages]
 

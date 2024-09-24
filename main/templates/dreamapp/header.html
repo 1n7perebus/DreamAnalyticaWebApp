@@ -1,3 +1,6 @@
+<!DOCTYPE html>
+<html>
+
 <head>
   {% load static %}
   <link href="{% static 'main/css/materialize.min.css' %}" rel="stylesheet">
@@ -11,56 +14,91 @@
   <link rel="stylesheet"
     href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,100..900;1,100..900&display=swap"
     rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Goldman:wght@400;700&display=swap" rel="stylesheet">
   {{ form.media }}
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    /* Add animation keyframes for the header elements */
+    @keyframes fadeInUp {
+      0% {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    /* Animation class for each element */
+    .animate {
+      opacity: 0;
+    }
+
+    .animate.fade-in-up {
+      animation: fadeInUp 1s ease forwards;
+    }
+  </style>
 </head>
 
-<nav class="nav-extended" style="box-shadow:none">
-  <div class="nav-wrapper">
-    <div class="brand-logo-wrapper center">
-      <a href="/" class="brand-logo center goldman-regular" style="text-shadow: 0px 0 3px #585757;">
-        <span class="goldman-bold" style="display: inline-block; margin-right: 5px; letter-spacing: 4px;">DREAM</span>
-        <span class="exo-200" style="font-size:38px;display: inline-block; letter-spacing: 6px;">ANALYTICA</span>
+<nav class="nav-extended animate" style="box-shadow:none;">
+  <div class="nav-wrapper container animate">
+    <div class="brand-logo-wrapper right-align ">
+      <a href="/" class="brand-logo right goldman-regular highlight-blue ">
+        <span class="exo-300h animate"
+          style="color:#42c9c6;text-shadow: 0 0 5px #42c9c6;font-size:26px;letter-spacing: 40px;margin-right:-15px;margin-bottom:-2em">DREAM</span>
+        <span class="exo-200 animate"
+          style="font-size:20px;letter-spacing: 21px;text-shadow: 0 0 5px #a0a0a0">ANALYTICA</span>
       </a>
     </div>
-    <a href="#" data-target="mobile-nav" class="sidenav-trigger"><i class="material-icons">menu</i></a>
-    <ul class="left hide-on-med-and-down">
-      <li><a class="goldman-regular highlight-blue" href="/">Home</a></li>
-      <li><a class="goldman-regular highlight-blue" href="/consult">Form</a></li>
-      <li><a class="goldman-regular highlight-blue" href="/dreams">Dreams</a></li>
-      <!--
-      <li><a class="goldman-regular highlight-blue" href="/analyticalPsychology.html">Analytical Psychology</a></li>
-      <li ><a class="goldman-regular highlight-blue" href="/individuation.html">Individuation</a></li>
-      -->
+    {% block sidenav %}
+    <a href="#" data-target="mobile-nav" class="sidenav-trigger animate"><i class="material-icons">menu</i></a>
+    <ul id="nav-mobile" class="left hide-on-med-and-down animate">
+      <li><a class="goldman-regular highlight-blue animate" href="/">Home</a></li>
+      <li><a class="goldman-regular highlight-blue animate" href="/dreams">Wall Of Dreams</a></li>
+      <li><a class="goldman-regular highlight-blue animate" href="/consult">Dream Form</a></li>
+      <li><a class="goldman-regular highlight-blue animate" href="/contact">Contact</a></li>
+      <li><a class="goldman-regular highlight-blue animate" href="/app">App</a></li>
     </ul>
+    {% endblock sidenav %}
   </div>
 </nav>
 
 <ul class="sidenav" id="mobile-nav" style="border-right:1px solid rgb(99, 134, 128);">
-  <li style="margin:1.5em 0 1.5em 0;"><a class="exo-200 highlight-blue" style="font-size:22px;padding:1em;;" href="/">Home</a>
-  </li>
-  <li style="margin:1.5em 0 1.5em 0"><a class="exo-200 highlight-blue" style="font-size:22px;padding:1em;"
-      href="/consult">Contact Form</a></li>
-  <li style="margin:1.5em 0 1.5em 0"><a class="exo-200 highlight-blue" style="font-size:22px;padding:1em;"
+  <li style="margin:1.5em 0 1.5em 0;"><a class="exo-200 highlight-blue animate" style="font-size:22px;padding:1em;"
+      href="/">Home</a></li>
+  <li style="margin:1.5em 0 1.5em 0;"><a class="exo-200 highlight-blue animate" style="font-size:22px;padding:1em;"
       href="/dreams">Wall Of Dreams</a></li>
-  <!--
-  <li><a class="goldman-regular" href="/analyticalPsychology.html">Analytical Psychology</a></li>
-  <li class="goldman-regular"><a href="/individuation.html">Individuation</a></li>
-  -->
+  <li style="margin:1.5em 0 1.5em 0;"><a class="exo-200 highlight-blue animate" style="font-size:22px;padding:1em;"
+      href="/consult">Dream Form</a></li>
+  <li style="margin:1.5em 0 1.5em 0;"><a class="exo-200 highlight-blue animate" style="font-size:22px;padding:1em;"
+      href="/contact">Contact Form</a></li>
+  <li style="margin:1.5em 0 1.5em 0;"><a class="exo-200 highlight-blue animate" style="font-size:22px;padding:1em;"
+      href="/app">Dream Analytica App</a></li>
 </ul>
 
-<body style="margin-bottom:10em;background:#dadada;">
+
+<body style="margin-bottom:10em;background:#272425;">
   {% block content %}
   {% endblock %}
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const elements = document.querySelectorAll('.animate');
+
+      elements.forEach((el, index) => {
+        setTimeout(() => {
+          el.classList.add('fade-in-up');
+        }, index * 100); // Delay between each element's animation (300ms)
+      });
+    });
+  </script>
 </body>
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     M.AutoInit();
   });
 </script>
-</body>
+
+</html>

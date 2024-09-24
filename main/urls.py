@@ -9,12 +9,13 @@ urlpatterns = [
     path("", views.index, name="index"),
     path('dreams/', views.dreams, name='dreams'),
     path('consult/', views.consult, name='consult'),
-    path('analyticalPsychology/', views.analyticalPsychology, name='analyticalPsychology'),
-    path('animus/', views.animus, name='animus'),
-    path('anima/', views.anima, name='anima'),
-    path('typology/', views.typology, name='typology'),
+    path('contact/', views.contact, name='contact'),
+    path('app/', views.app, name='app'),
     path("error/", views.error, name="error"),
     path('dreams/<uuid:dream_id>/', views.dreams, name='specific_dream'),
     re_path(r'^static/(?P<path>.*)$', serve,{'document_root': settings.STATIC_ROOT}),
 ]
 
+    #path('login/', views.login_view, name='login'),
+    #path('register/', views.register_view, name='register'),
+    #path('logout/', views.logout_view, name='logout'),
