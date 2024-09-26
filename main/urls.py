@@ -11,6 +11,7 @@ urlpatterns = [
     path('consult/', views.consult, name='consult'),
     path('contact/', views.contact, name='contact'),
     path('app/', views.app, name='app'),
+    path("about/", views.about, name="about"),
     path("error/", views.error, name="error"),
     path('dreams/<uuid:dream_id>/', views.dreams, name='specific_dream'),
     re_path(r'^static/(?P<path>.*)$', serve,{'document_root': settings.STATIC_ROOT}),

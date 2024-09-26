@@ -9234,19 +9234,21 @@ input[type=range]::-ms-thumb {
     @keyframes fadeInUp {
 		0% {
 		  opacity: 0;
-		  transform: translateY(-50px);
+		  transform: translateY(150px);
+		  transform: scale(1.2);
 		}
   
 		100% {
 		  opacity: 0;
 		  transform: translateY(0);
+		  transform: scale(1);
 		}
 	  }
   
 	  @keyframes scaleUp {
 		0% {
 		  opacity: 0;
-		  transform: scale(.1);
+		  transform: scale(1.2);
 		}
 		
   
@@ -9259,7 +9261,7 @@ input[type=range]::-ms-thumb {
 	  /* Animation class for each element */
 	  .animate {
 		opacity: 0;
-		transform: scale(.2);
+		transform: scale(1);
 	  }
   
 	  .animate.fade-in-up {
@@ -9272,8 +9274,9 @@ input[type=range]::-ms-thumb {
 
 	  @keyframes flashTextPop {
 		0% {
-		  opacity: 0;
+		  opacity: 1;
 		  transform: scale(1.2);
+		  
 		  color: rgba(255, 255, 255, 0.5); /* Start with dimmed color */
 		}
 		50% {
@@ -9291,6 +9294,6 @@ input[type=range]::-ms-thumb {
 	  }
 	  	  
 	  .animate.flash-text-pop {
-		animation: flashTextPop .4s ease forwards;
+		animation: flashTextPop .1s ease forwards;
 	  }
 

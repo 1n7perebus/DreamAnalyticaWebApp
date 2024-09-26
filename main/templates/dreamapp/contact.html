@@ -31,7 +31,7 @@
 </head>
 
 <body>
-    <div class="centered-container animate">
+    <div class="centered-container">
         <div class="form-wrapper animate" >
             {% if messages %}
                 <ul class="messages">
@@ -40,31 +40,32 @@
                     {% endfor %}
                 </ul>
             {% endif %}
-            <form class="container flow-text animate" method="POST">
+            <form class="container flow-text" method="POST">
                 <h4 class="exo-200h left-align flow-text animate" style="padding-bottom:1em">CONTACT FORM</h4>
                 {% csrf_token %}
                 <div class="row">
                     <div class="input-field col s12 exo-200 animate">
-                        <input id="email" name="email" type="email" class="mobile-exo200 validate exo-200" required>
-                        <label class="exo-200" for="email">Email*</label>
+                        <input id="email" name="email" type="email" class="mobile-exo200 validate exo-200 animate" required>
+                        <label class="exo-200 animate" for="email">Email*</label>
                     </div>
                     <div class="input-field col s12 exo-200 animate">
-                        <input id="name" name="name" type="text" class="mobile-exo200 validate exo-200" required>
-                        <label class="exo-200" for="name">Name*</label>
+                        <input id="name" name="name" type="text" class="mobile-exo200 validate exo-200 animate" required>
+                        <label class="exo-200 animate" for="name">Name*</label>
                     </div>
                 </div>
                 <div class="row">
                     <div class="input-field col s12 exo-200 animate">
-                        <input id="phone" name="phone" type="tel" class="validate exo-200" placeholder="+00000000000"
+                        <input id="phone" name="phone" type="tel" class="validate exo-200 animate" placeholder="+00000000000"
                             inputmode="numeric" pattern="^\+[0-9]{1,4}[0-9]+$"
                             onkeypress="return event.charCode >= 43 && event.charCode <= 57">
                         <label for="phone">WhatsApp# +00000000000</label>
-                        <span class="helper-text"
+                        <span class="helper-text animate"
                             data-error="Invalid phone number format. Please enter a valid phone number in WhatsApp format starting with the '+' symbol followed by the area code."></span>
                     </div>
                 </div>
-                <button class="btn btn-small center hoverable exo-200 animate" type="submit">
-                    <b class="center mobile-exo200">[ SUBMIT ]</b>
+                <button class="btn btn-small center hoverable exo-200 animate" type="submit"
+                    style="width:100%;margin-top:0.5rem;z-index: 10;">
+                    <b class="center mobile-exo200 animate">[ SUBMIT ]</b>
                 </button>
             </form>
         </div>

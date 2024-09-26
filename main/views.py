@@ -278,6 +278,9 @@ def contact(request):
 def app(request):
     return render(request, "dreamapp/app.html")
 
+def about(request):
+    return render(request, "dreamapp/about.html")
+
 def error(request):
     return render(request, "dreamapp/error.html")
 
