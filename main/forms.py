@@ -83,7 +83,8 @@ class ContactForm(forms.ModelForm):
     email = forms.EmailField(required=True, label="Email")
     name = forms.CharField(required=True, label="Name")
     phone = PhoneNumberField(required=False, label="Phone Number")
+    desc = forms.CharField(required=False)
 
     class Meta:
         model = Contact
-        fields = ['email', 'name', 'phone']
+        fields = ['email', 'name', 'phone', 'desc']

@@ -87,6 +87,7 @@ class Contact(models.Model):
     name = models.CharField(max_length=50, default="")
     email = models.EmailField(max_length=200, default="")
     phone = PhoneNumberField(default="+10000000000")
+    desc = models.TextField(default="")
     pub = models.DateTimeField("date published", default=timezone.now)
 
     class Meta:

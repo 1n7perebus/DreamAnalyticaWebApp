@@ -233,6 +233,8 @@ def dreams(request):
     })
 
 
+from django.contrib import messages
+
 def contact(request):
     if request.method == "POST":
         ip_address = request.META.get('REMOTE_ADDR')
@@ -264,6 +266,10 @@ def contact(request):
             contact_post.ip_address = ip_address
 
             contact_post.save()
+            
+            # Add a success message here
+            messages.success(request, "Form submitted successfully!")
+            
             return HttpResponseRedirect(reverse('main:dreams'))
         else:
             messages.error(request, "Invalid form data. Please check the entered information.")
@@ -273,6 +279,7 @@ def contact(request):
         contact_form = ContactForm()
 
     return render(request, "dreamapp/contact.html", {"contact_form": contact_form})
+
 
 
 def app(request):

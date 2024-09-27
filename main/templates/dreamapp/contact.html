@@ -59,8 +59,15 @@
                             inputmode="numeric" pattern="^\+[0-9]{1,4}[0-9]+$"
                             onkeypress="return event.charCode >= 43 && event.charCode <= 57">
                         <label for="phone">WhatsApp# +00000000000</label>
-                        <span class="helper-text animate"
+                        <span class="helper-text"
                             data-error="Invalid phone number format. Please enter a valid phone number in WhatsApp format starting with the '+' symbol followed by the area code."></span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="input-field col s12 exo-200 animate">
+                        <textarea id="textarea1" name="desc" class="validate materialize-textarea exo-200 flow-text"
+                            style="height:200px" required></textarea>
+                        <label class="exo-200" for="textarea1">Brief description (optional)</label>
                     </div>
                 </div>
                 <button class="btn btn-small center hoverable exo-200 animate" type="submit"
@@ -79,6 +86,8 @@
               el.classList.add('flash-text-pop');
             }, index * 80); // Delay between each element's animation (300ms)
           });
+
+
         });
       </script>
 </body>

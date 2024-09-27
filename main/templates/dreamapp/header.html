@@ -67,18 +67,18 @@
   </div>
 </nav>
 
-<ul class="sidenav" id="mobile-nav" style="border-right:1px solid rgb(99, 134, 128);">
-  <li style="margin:1.5em 0 1.5em 0;"><a class="exo-200 highlight-blue animate" style="font-size:22px;"
+<ul class="sidenav" id="mobile-nav" style="">
+  <li style="margin:1.5em 0 1.5em 0;"><a class="exo-300t highlight-blue animate" style="font-size:22px;"
       href="/">HOME</a></li>
-  <li style="margin:1.5em 0 1.5em 0;"><a class="exo-200 highlight-blue animate" style="font-size:22px;"
+  <li style="margin:1.5em 0 1.5em 0;"><a class="exo-300t highlight-blue animate" style="font-size:22px;"
       href="/dreams">WALL OF DREAMS</a></li>
-  <li style="margin:1.5em 0 1.5em 0;"><a class="exo-200 highlight-blue animate" style="font-size:22px;"
+  <li style="margin:1.5em 0 1.5em 0;"><a class="exo-300t highlight-blue animate" style="font-size:22px;"
       href="/consult">POST DREAM</a></li>
-  <li style="margin:1.5em 0 1.5em 0;"><a class="exo-200 highlight-blue animate" style="font-size:22px;"
+  <li style="margin:1.5em 0 1.5em 0;"><a class="exo-300t highlight-blue animate" style="font-size:22px;"
       href="/contact">CONTACT US</a></li>
-  <li style="margin:1.5em 0 1.5em 0;"><a class="exo-200 highlight-blue animate" style="font-size:22px;"
+  <li style="margin:1.5em 0 1.5em 0;"><a class="exo-300t highlight-blue animate" style="font-size:22px;"
       href="/app">MOBILE APP</a></li>
-  <li style="margin:1.5em 0 1.5em 0;"><a class="exo-200 highlight-blue animate" style="font-size:22px;"
+  <li style="margin:1.5em 0 1.5em 0;"><a class="exo-300t highlight-blue animate" style="font-size:22px;"
     href="/about">ABOUT</a></li>
 </ul>
 
@@ -89,12 +89,18 @@
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       const elements = document.querySelectorAll('.animate');
-
+      
       elements.forEach((el, index) => {
         setTimeout(() => {
           el.classList.add('fade-in-up');
         }, index * 90); // Delay between each element's animation (300ms)
       });
+      {% if messages %}
+                {% for message in messages %}
+                  var toastHTML = '<a class="exo-300t">{{ message }}</a>';
+                    M.toast({html: toastHTML, classes: "{{ message.tags }}", displayLength: 8000});
+                {% endfor %}
+            {% endif %}
     });
   </script>
 </body>
