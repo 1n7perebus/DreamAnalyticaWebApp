@@ -1,170 +1,286 @@
 {% extends 'dreamapp/header.html' %}
 {% block content %}
-<head>
-    {% load static %}
-    {{ form.media }}
-    <style>
-        @media only screen and (min-width: 600px) and (max-width: 992px) {
-            .helper-text {
-                font-size: 18px !important;
-            }
 
-            label.exo-200 {
-                font-size: 20px !important;
-            }
-
-            input.exo-200,
-            textarea.exo-200,
-            span.exo-200 {
-                font-size: 24px !important;
-            }
-        }
-    </style>
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
-
-    <div class="centered-container animate" style="margin-top:8em">
-        <div class="form-wrapper animate" style="border:1px solid #4accb2;border-radius:20px;padding:2em 0 2em 0">
-            {% if messages %}
-            <ul class="messages">
-                {% for message in messages %}
-                    <li class="{{ message.tags }} exo-200 center" style="color: #c00000;">{{ message }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-            <form class="container flow-text animate" method="POST">
-                <h4 class="exo-200h left-align flow-text" style="padding-bottom:1em">Contact us, share your dream to the
-                    wall, or both!</h4>
-                {% csrf_token %}
-                <div class="row">
-                    <div class="input-field col s6 exo-200 animate">
-                        <input id="email" name="email" type="email" class="mobile-exo200 validate exo-200" required>
-                        <label class="exo-200" for="email">Email*</label>
-                    </div>
-                    <div class="input-field col s6 exo-200 animate">
-                        <input id="name" name="name" type="text" class="mobile-exo200 validate exo-200" required>
-                        <label class="exo-200" for="name">Name*</label>
-                    </div>
-                </div>
-                <!--<div class="row">
-                    <div class="input-field col s12 exo-200">
-                        <input id="phone" name="phone" type="tel" class="validate exo-200"
-                            pattern="^\+[0-9]{1,4}[0-9]+$"
-                            onkeypress="return event.charCode >= 43 && event.charCode <= 57">
-                        <label class="exo-200" for="phone">WhatsApp# (optional) +XXXXXXXXXX</label>
-                        <span class="helper-text"
-                            data-error="Please enter a valid phone number in WhatsApp format starting with the '+' symbol followed by the area code (do not inlcude spaces)"></span>
-                    </div>
-                </div>-->
-                <div class="row">
-                    <div class="input-field col s12 exo-200 animate">
-                        <input id="title" name="title" type="text" class="validate exo-200" maxlength="40"
-                            oninput="updateCharCount(this)" required>
-                        <label for="title">Dream Name* (Max 50 characters)</label>
-                        <span class="char-count">40</span> characters remaining
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="input-field col s12 exo-200 animate">
-                        <textarea id="textarea1" name="dream" class="validate materialize-textarea exo-200 flow-text"
-                            style="height:200px" required></textarea>
-                        <label class="exo-200" for="textarea1">Dream*</label>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="input-field col s6 exo-200 animate" style="position: relative; z-index: 10;" required>
-                        <select name="gender" id="gender" style="color:white;z-index: 1;">
-                            {% for gender_choice in gender_choices %}
-                                <option value="{{ gender_choice.0 }}" style="background:black;">{{ gender_choice.1 }}</option>
-                            {% endfor %}
-                        </select>
-                        <label class="exo-200" for="gender">Gender*</label>
-                    </div>
-                    <div class="input-field col s6 exo-200 animate" style="position: relative; z-index: 10;" required>
-                        <select name="mbti_type" id="mbti_type" style="color:white;z-index: 1;">
-                            <option class="mobile-exo200" style="font-size: 11px;">Select Your Personality Type*
-                            </option>
-                            {% for mbti_choice in mbti_choices %}
-                            <option value="{{ mbti_choice.0 }}" style="background:black;">{{ mbti_choice.1 }}</option>
-                            {% endfor %}
-                        </select>
-                        <label class="exo-200" for="mbti_type">Personality Type*</label>
-                    </div>
-                    
-                    
-                        <div class="conatiner animate">
-                        <div class="input-field exo-200 center" style="padding-top:2em;">
-                            <div class="center" data-toggle="buttons" style="display: inline-flex;margin-top:1em">
-                                {% for choice in dream_form.fields.scale.choices %}
-                                <label class="" style="margin-right: 5px;">
-                                    <input type="radio" name="scale" value="{{ choice.0 }}"
-                                        {% if dream_form.scale.value == choice.0 %}checked{% endif %}>
-                                    {{ choice.1 }}
-                                    <span></span>
-                                </label>
-                                {% endfor %}
-                            </div>
-                        </div>
-                        <div class="container animate">
-                            <a class="exo-200 left">BAD DREAM</a>
-                            <a class="exo-200 right">GOOD DREAM</a>
-                        </div>
-                    </div>
-                </br>
-                <div class="input-field col s12 exo-200 animate" style="z-index: 2;">
-                    <label >
-                        <input type="checkbox" name="active" />
-                        <span class="exo-200">Share dream publicly*</span>
-                    </label>
-                </div>
-            </br></br>
-                    <p class="exo-200 animate">If you don't know your personality type, head to <a
-                            class="exo-200 highlight-blue" style="text-decoration: underline;"
-                            href="https://www.16personalities.com/free-personality-test">www.16personalities.com</a> and
-                        take the free test to find out!</p>
-                </div>
-                <button class="btn btn-small center hoverable exo-200" type="submit"
-                    style="width:100%;margin-top:0.5rem;z-index: 10;">
-                    <b class="center mobile-exo200">[ SUBMIT ]</b>
-                </button>
-            </form>
-
-        </div>
-    </div>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5864886611650170"
-        crossorigin="anonymous"></script>
-    <!-- Horizontal -->
-    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-5864886611650170" data-ad-slot="7852600863"
-        data-ad-format="auto" data-full-width-responsive="true"></ins>
-    <script>
-        (adsbygoogle = window.adsbygoogle || []).push({});
-    </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            var elems = document.querySelectorAll('select');
-            M.FormSelect.init(elems);
-        });
-
-
-        function updateCharCount(input) {
-            const maxLength = 40;
-            const charCountSpan = input.parentElement.querySelector('.char-count');
-            const remainingChars = maxLength - input.value.length;
-            charCountSpan.textContent = remainingChars;
-        }
-    </script>
-      <script>
-        document.addEventListener('DOMContentLoaded', function () {
-          const elements = document.querySelectorAll('.animate');
+<div class="container" style="margin: 4em auto;">
+  <div class="form-card animate" style="background: rgba(66, 201, 198, 0.05); border-radius: 20px; border: 1px solid rgba(66, 201, 198, 0.2); padding: 3em 2em;">
+    <h3 class="goldman-regular center-align gradient-text">Share Your Dream</h3>
     
-          elements.forEach((el, index) => {
-            setTimeout(() => {
-              el.classList.add('flash-text-pop');
-            }, index * 80); // Delay between each element's animation (300ms)
-          });
-        });
-      </script>
+    <!-- Form Messages -->
+    {% if messages %}
+    <div class="messages-container" style="margin: 2em 0;">
+      {% for message in messages %}
+      <div class="message {{ message.tags }} center-align" style="padding: 1em; border-radius: 10px; background: rgba(192, 0, 0, 0.1);">
+        <span class="exo-200">{{ message }}</span>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
 
+    <!-- Dream Form -->
+    <form method="POST" class="dream-form">
+      {% csrf_token %}
+      
+      <!-- Personal Info -->
+      <div class="row">
+        <div class="col s12 m6">
+          <div class="input-field animate">
+            <input id="email" name="email" type="email" class="validate" required>
+            <label for="email">Email</label>
+          </div>
+        </div>
+        <div class="col s12 m6">
+          <div class="input-field animate">
+            <input id="name" name="name" type="text" class="validate" required>
+            <label for="name">Name</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dream Details -->
+      <div class="input-field animate">
+        <input id="title" name="title" type="text" class="validate" maxlength="40" required>
+        <label for="title">Dream Title</label>
+        <span class="character-counter helper-text" style="color: #a0a0a0;">40 characters remaining</span>
+      </div>
+
+      <div class="input-field animate">
+        <textarea id="dream" name="dream" class="materialize-textarea" required></textarea>
+        <label for="dream">Your Dream</label>
+      </div>
+
+      <!-- Classifications -->
+      <div class="row">
+        <div class="col s12 m6">
+          <div class="input-field animate">
+            <select name="gender" required>
+              {% for gender_choice in gender_choices %}
+              <option value="{{ gender_choice.0 }}">{{ gender_choice.1 }}</option>
+              {% endfor %}
+            </select>
+            <label>Gender</label>
+          </div>
+        </div>
+        <div class="col s12 m6">
+          <div class="input-field animate">
+            <select name="mbti_type" required>
+              <option value="" disabled selected>Choose your type</option>
+              {% for mbti_choice in mbti_choices %}
+              <option value="{{ mbti_choice.0 }}">{{ mbti_choice.1 }}</option>
+              {% endfor %}
+            </select>
+            <label>Personality Type</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dream Scale -->
+      <div class="dream-scale animate" style="margin: 3em 0;">
+        <h6 class="center-align exo-200t">How would you rate this dream?</h6>
+        <div class="scale-container center-align" style="margin: 2em 0;">
+          {% for choice in dream_form.fields.scale.choices %}
+          <label class="scale-option" style="margin: 0 1em;">
+            <input type="radio" name="scale" value="{{ choice.0 }}" required>
+            <span class="exo-200t">{{ choice.1 }}</span>
+          </label>
+          {% endfor %}
+        </div>
+        <div class="scale-labels" style="display: flex; justify-content: space-between;">
+          <span class="exo-200">Negative</span>
+          <span class="exo-200">Positive</span>
+        </div>
+      </div>
+
+      <!-- Privacy Option -->
+      <div class="privacy-option animate" style="margin: 2em 0;">
+        <label>
+          <input type="checkbox" name="active" />
+          <span class="exo-200t">Share my dream on the Wall of Dreams</span>
+        </label>
+      </div>
+
+      <!-- MBTI Info -->
+      <p class="exo-200t animate" style="margin: 2em 0; color: #a0a0a0;">
+        Don't know your personality type? Take the free test at 
+        <a href="https://www.16personalities.com/free-personality-test" target="_blank" 
+           class="highlight-blue">16personalities.com</a>
+      </p>
+
+      <!-- Submit Button -->
+      <button class="btn-large waves-effect waves-light hoverable animate" type="submit" 
+              style="width:100%;background:transparent;border:2px solid #42c9c6;border-radius:30px">
+        <span class="exo-200t">Submit Dream</span>
+      </button>
+    </form>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Initialize select fields with custom options
+    var elems = document.querySelectorAll('select');
+    var instances = M.FormSelect.init(elems, {
+      dropdownOptions: {
+        container: document.body,
+        coverTrigger: false,
+        constrainWidth: false
+      }
+    });
+
+    // Handle dropdown positioning
+    elems.forEach(elem => {
+      const wrapper = elem.closest('.select-wrapper');
+      const input = wrapper.querySelector('input.select-dropdown');
+      
+      input.addEventListener('click', function(e) {
+        const dropdown = wrapper.querySelector('.dropdown-content');
+        if (dropdown) {
+          const rect = input.getBoundingClientRect();
+          dropdown.style.top = `${rect.bottom}px !important`;
+          dropdown.style.left = `${rect.left}px !important`;
+          dropdown.style.width = `${rect.width}px !important`;
+        }
+      });
+    });
+
+    // Character counter
+    const titleInput = document.getElementById('title');
+    const counter = document.querySelector('.character-counter');
+    
+    titleInput.addEventListener('input', function() {
+      const remaining = 40 - this.value.length;
+      counter.textContent = `${remaining} characters remaining`;
+    });
+
+    // Animation
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('fade-in');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, {
+      threshold: 0.1
+    });
+
+    document.querySelectorAll('.animate').forEach(element => {
+      observer.observe(element);
+    });
+  });
+</script>
+
+<style>
+  .fade-in {
+    animation: fadeIn 0.6s ease forwards;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .helper-text {
+    color: #a0a0a0 !important;
+  }
+
+  .character-counter {
+    color: #a0a0a0 !important;
+  }
+
+  .input-field input:focus,
+  .input-field textarea:focus {
+    border-bottom: 1px solid #42c9c6 !important;
+    box-shadow: 0 1px 0 0 #42c9c6 !important;
+  }
+
+  .input-field input:focus + label,
+  .input-field textarea:focus + label {
+    color: #42c9c6 !important;
+  }
+
+  .scale-option {
+    display: inline-block;
+    margin: 0 1em;
+  }
+
+  .scale-option input[type="radio"]:checked + span {
+    color: #42c9c6;
+  }
+
+  /* Create stacking context for the form container */
+  .form-card {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Ensure form sections have proper stacking */
+  .dream-form {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Reset z-index for all form sections */
+  .input-field {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Push dream scale back */
+  .dream-scale {
+    position: relative;
+    z-index: 0 !important;
+  }
+
+  .privacy-option {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Ensure dropdowns stay on top */
+  .select-wrapper {
+    position: relative !important;
+    z-index: 1100 !important;
+  }
+
+  .dropdown-content {
+    background-color: #272425 !important;
+    border: 1px solid rgba(66, 201, 198, 0.2);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5) !important;
+    z-index: 1200 !important;
+  }
+
+  /* Ensure the select input stays above dream scale */
+  .select-wrapper input.select-dropdown {
+    position: relative;
+    z-index: 1100 !important;
+    color: #c5c5c5 !important;
+    border-bottom: 1px solid rgba(66, 201, 198, 0.2) !important;
+  }
+
+  /* Ensure classifications section stays above dream scale */
+  .row .input-field {
+    position: relative;
+    z-index: 1100 !important;
+  }
+
+  /* Style dropdown options */
+  .dropdown-content li > span {
+    color: #c5c5c5 !important;
+  }
+
+  .dropdown-content li:hover {
+    background-color: rgba(66, 201, 198, 0.1) !important;
+  }
+
+  .dropdown-content li.selected {
+    background-color: rgba(66, 201, 198, 0.2) !important;
+  }
+</style>
 
 {% endblock %}

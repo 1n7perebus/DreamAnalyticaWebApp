@@ -1,210 +1,157 @@
 {% extends 'dreamapp/header.html' %}
 {% block content %}
 
-<head>
-  {% load static %}
-  {{ form.media }}
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5864886611650170"
-    crossorigin="anonymous"></script>
-  <meta name="google-adsense-account" content="ca-pub-5864886611650170">
-
-  <style>
-    /* Color Scheme */
-    :root {
-      --primary-cyan: #42c9c6;
-      /* Updated primary color */
-      --secondary-pink: #ff00a0;
-      /* More vibrant neon pink */
-      --tertiary-purple: #6a00ff;
-      /* Neon purple replacing blue */
-      --background-dark: #272425;
-      /* Dark background remains the same */
-      --light-gray: #dadada;
-      --white: #e7e7e7;
-    }
-
-    body {
-      background-color: var(--background-dark);
-      color: var(--light-gray);
-    }
-
-
-    .card {
-      background-color: var(--background-dark);
-      border: 1px solid var(--primary-cyan);
-      box-shadow: 0 0 10px 1px var(--primary-cyan);
-      border-radius: 15px;
-    }
-
-    /* Stacked Bar Styling */
-    .stacked-bar-container {
-      width: 100%;
-      background-color: var(--background-dark);
-      display: flex;
-      height: 20px;
-      margin: 20px 0;
-      position: relative;
-      border-radius: 15px;
-      overflow: visible;
-    }
-
-    .stacked-bar {
-      height: 100%;
-      text-align: center;
-      line-height: 30px;
-      color: var(--white);
-      box-sizing: border-box;
-      border-radius: 0;
-      overflow: hidden;
-    }
-
-    .stacked-bar:first-child {
-      background-color: var(--secondary-pink);
-      box-shadow: 0 0 5px 5px var(--secondary-pink);
-      border-top-left-radius: 10px;
-      border-bottom-left-radius: 10px;
-    }
-
-    .stacked-bar:last-child {
-      background-color: var(--primary-cyan);
-      box-shadow: 0 0 5px 5px var(--primary-cyan);
-      border-top-right-radius: 10px;
-      border-bottom-right-radius: 10px;
-    }
-
-    /* Button Styling */
-    button {
-      background-color: var(--tertiary-purple);
-      /* Updated to neon purple */
-      color: var(--white);
-      border-radius: 5px;
-      box-shadow: 0 0 2px var(--tertiary-purple);
-      transition: all 0.3s ease;
-    }
-
-    button:hover {
-      transform: scale(1.05);
-      box-shadow: 0 0 40px var(--tertiary-purple);
-    }
-
-    /* Add animation keyframes */
-    @keyframes fadeInUp {
-      0% {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-
-      100% {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes scaleUp {
-      0% {
-        opacity: 0;
-        transform: scale(0.8);
-      }
-
-      100% {
-        opacity: 1;
-        transform: scale(1);
-      }
-    }
-
-    /* Animation class for each element */
-    .animate {
-      opacity: 0;
-    }
-
-    .animate.fade-in-up {
-      animation: fadeInUp 1s ease forwards;
-    }
-
-    .animate.scale-up {
-      animation: scaleUp 1s ease forwards;
-    }
-  </style>
-</head>
-
-<body>
-  <div class="container animate" style="margin-top: 5em;margin-bottom: 2em;">
-    <div class="container animate" style="margin-top: 3em; margin-bottom: 1em;">
-      <h4 class="goldman-regular mobile-exo200h right-align animate">// WALL OF DREAMS</h4>
-      <p class="exo-200t flow-text right-align animate">
-        DREAM HEALTH SCORE:
-        <b class="{{ health_color }}" style="color: {{ health_color }}">{{ average_scale }} -
-          {{ health_status|upper }}</b>
+<div class="container" style="margin-top: 4em;">
+  <!-- Health Score Section -->
+  <section class="health-score-section animate">
+    <h3 class="goldman-regular center-align gradient-text">Wall of Dreams</h3>
+    <div class="stats-card" style="background: rgba(66, 201, 198, 0.05); border-radius: 15px; padding: 2em; margin: 2em 0;">
+      <p class="exo-200t center-align">
+        DREAM HEALTH SCORE
+        <span class="score-value {{ health_color }}" style="display: block; font-size: 2rem; margin: 0.5em 0;">
+          {{ average_scale }} - {{ health_status|upper }}
+        </span>
       </p>
-
-      <div class="stacked-bar-container animate" style="margin-bottom:2em">
-        {% for gender, percentage in sorted_gender_percentages %}
-        <div class="stacked-bar animate"
-          style="width: {{ percentage }}%; background-color: {% cycle '#FF007D' '#42c9c6' '#0047FF' %}; box-shadow: 0 0 10px 0px {% cycle '#FF007D' '#53FFFB' '#0047FF' %};">
-          {% if percentage > 5 %}
-          {{ gender }}: {{ percentage|floatformat:2 }}%
-          {% endif %}
+      
+      <!-- Gender Distribution -->
+      <div class="gender-stats">
+        <h6 class="exo-200t center-align" style="margin: 2em 0 1em;">Gender Distribution</h6>
+        <div class="stats-bars">
+          {% for gender, percentage in sorted_gender_percentages %}
+          <div class="stat-bar animate" style="margin-bottom: 1em;">
+            <div class="stat-label exo-200t">{{ gender }}</div>
+            <div class="progress" style="background: rgba(66, 201, 198, 0.1); border-radius: 20px;">
+              <div class="determinate" style="width: {{ percentage }}%; background: {% cycle '#FF007D' '#42c9c6' '#0047FF' %}; border-radius: 20px;"></div>
+            </div>
+            <div class="stat-value exo-200t right-align">{{ percentage|floatformat:1 }}%</div>
+          </div>
+          {% endfor %}
         </div>
-        {% endfor %}
       </div>
+    </div>
+  </section>
 
-      <!-- Dreams with Replies -->
-      {% for item in dreams_with_replies %}
-      {% if item.dream.active %}
-      <div class="flow-text animate">
-        <div class="card horizontal animate">
-          <div class="card-stacked animate">
-            <div class="card-content animate">
-              <p class="exo-200t flow-text">[ {{ item.dream.mbti_type }} ] {{ item.dream.name }}</p>
-              <p class="exo-200t flow-text"><strong>DREAM SCORE:</strong> {{item.dream.scale}}</p>
-              <p class="exo-200t flow-text">{{ item.dream.title }}</p>
-              <p class="dream-text exo-300t flow-text">{{ item.dream.dream }}</p>
-              <p class="exo-200d right-align">{{ item.dream.pub }}</p>
-
-              <div class="divider animate" style="border-top: 1px solid rgba(160, 160, 160, 0.2);margin:1em 0;"></div>
-              <p class="exo-200 flow-text"><strong>Analysis:</strong></p>
-              {% for reply in item.replies %}
-              <p class="dream-text exo-300t flow-text animate" style="padding:1em">{{ reply.reply }}</p>
-              <p class="exo-200d right-align animate">{{ reply.pub }}</p>
-              {% endfor %}
-
-              <!-- Reply Form -->
-              {% if request.user.is_authenticated %}
-              <form method="POST" action="">
-                {% csrf_token %}
-                <div class="row">
-                  <div class="input-field col s12 exo-200 animate">
-                    <textarea id="textarea1" name="reply" class="validate materialize-textarea exo-200"></textarea>
-                    <label for="textarea1">Reply*</label>
-                  </div>
-                </div>
-                <button class="btn btn-small center hoverable exo-200 animate" type="submit"
-                  style="width:100%;margin-top:0.5rem">
-                  [ <b class="center">SUBMIT</b> ]
-                </button>
-              </form>
-              {% endif %}
+  <!-- Dreams List -->
+  <section class="dreams-list">
+    {% for item in dreams_with_replies %}
+    {% if item.dream.active %}
+    <div class="dream-card animate" style="margin: 2em 0;">
+      <div class="card" style="background: rgba(66, 201, 198, 0.05); border-radius: 15px; border: 1px solid rgba(66, 201, 198, 0.2);">
+        <div class="card-content">
+          <!-- Dream Header -->
+          <div class="dream-header" style="margin-bottom: 1.5em;">
+            <span class="exo-200t">{{ item.dream.mbti_type }}</span>
+            <h5 class="goldman-regular">{{ item.dream.name }}</h5>
+            <div class="dream-meta">
+              <span class="exo-200t">Score: {{item.dream.scale}}</span>
+              <span class="exo-200t" style="margin-left: 1em;">{{ item.dream.title }}</span>
             </div>
           </div>
+
+          <!-- Dream Content -->
+          <div class="dream-content">
+            <p class="dream-text exo-300t flow-text">{{ item.dream.dream }}</p>
+            <p class="exo-200d right-align" style="margin-top: 1em;">{{ item.dream.pub }}</p>
+          </div>
+
+          <!-- Analysis Section -->
+          {% if item.replies %}
+          <div class="analysis-section" style="margin-top: 2em; padding-top: 2em; border-top: 1px solid rgba(66, 201, 198, 0.2);">
+            <h6 class="goldman-regular">Analysis</h6>
+            {% for reply in item.replies %}
+            <div class="analysis-item animate" style="margin: 1em 0; padding: 1em; background: rgba(66, 201, 198, 0.05); border-radius: 10px;">
+              <p class="exo-300t flow-text">{{ reply.reply }}</p>
+              <p class="exo-200d right-align">{{ reply.pub }}</p>
+            </div>
+            {% endfor %}
+          </div>
+          {% endif %}
+
+          <!-- Reply Form -->
+          {% if request.user.is_authenticated %}
+          <form method="POST" action="" class="reply-form animate" style="margin-top: 2em;">
+            {% csrf_token %}
+            <div class="input-field">
+              <textarea name="reply" class="materialize-textarea exo-200" required></textarea>
+              <label>Add Analysis</label>
+            </div>
+            <button class="btn-large waves-effect waves-light hoverable" type="submit" 
+                    style="width:100%;background:transparent;border:2px solid #42c9c6;border-radius:30px">
+              <span class="exo-200t">Submit Analysis</span>
+            </button>
+          </form>
+          {% endif %}
         </div>
       </div>
-      {% endif %}
-      {% endfor %}
     </div>
-  </div>
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      const elements = document.querySelectorAll('.animate');
+    {% endif %}
+    {% endfor %}
+  </section>
+</div>
 
-      elements.forEach((el, index) => {
-        setTimeout(() => {
-          el.classList.add('flash-text-pop');
-        }, index * 80); // Delay between each element's animation (300ms)
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('fade-in');
+          observer.unobserve(entry.target);
+        }
       });
+    }, {
+      threshold: 0.1
     });
-  </script>
 
-</body>
+    document.querySelectorAll('.animate').forEach(element => {
+      observer.observe(element);
+    });
+  });
+</script>
+
+<style>
+  .fade-in {
+    animation: fadeIn 0.6s ease forwards;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .stat-bar {
+    display: grid;
+    grid-template-columns: 100px 1fr 60px;
+    gap: 1em;
+    align-items: center;
+  }
+
+  .progress {
+    margin: 0;
+    height: 10px;
+  }
+
+  .dream-card {
+    transition: transform 0.3s ease;
+  }
+
+  .dream-card:hover {
+    transform: translateY(-5px);
+  }
+
+  .analysis-item {
+    transition: all 0.3s ease;
+  }
+
+  .analysis-item:hover {
+    background: rgba(66, 201, 198, 0.1);
+  }
+</style>
 
 {% endblock %}
 

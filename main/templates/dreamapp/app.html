@@ -1,112 +1,207 @@
 {% extends 'dreamapp/header.html' %}
 {% block content %}
 
-<head>
-    {% load static %}
-    {{ form.media }}
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5864886611650170"
-        crossorigin="anonymous"></script>
-    <meta name="google-adsense-account" content="ca-pub-5864886611650170">
-</head>
-
-<body
-    style="margin: 0; padding: 0; height: 100vh; display: flex; align-items: center; justify-content: center;background:#272425;">
-    <div class="container ">
-        <div class="container ">
-            <h4 class="goldman-regular mobile-exo200h right-align animate" style="margin-top:3em">// Dream Analytica</br><a
-                    class="exo-200t animate" style="font-size: 15px;color: #42c9c6;text-shadow:0 0 3px #42c9c6;">A CARL JUNG
-                    PSYCHOLOGY APP</a></h4>
-            <p class="exo-200text flow-text left-align animate">
-                <b class="exo-200t animate">ABOUT</b>
-                </br>
-                <span class="animate">
-                Embark on a captivating journey into the profound realm of Carl Jung’s analytical psychology with our
-                app. Uncover the mysteries of dream analysis and discover how these insights can profoundly impact your
-                daily life, fostering improved psychological well-being. Immerse yourself in a contemporary and
-                user-friendly exploration of Jungian psychology, skillfully crafted to demystify intricate concepts.
-            </span>
-                </br></br>
-                <span class="animate">
-                Whether you’re a psychology enthusiast or a newcomer to Jungian concepts, our app provides a
-                comprehensive and enlightening resource for anyone seeking personal growth and a deeper understanding of
-                the human psyche. Download now and embark on a transformative journey into the world of analytical
-                psychology.
-            </span>
-                </br></br>
-                <span class="animate">
-                <b>Our Commitment to Privacy:</b> At Dream Analytica, we prioritize your privacy and transparency. Our
-                app is
-                designed with a steadfast commitment to safeguarding your personal data. We want you to feel secure in
-                your exploration of dreams and Jungian psychology, which is why our app operates on the principle of
-                zero data collection.
-            </span>
-                </br></br>
-                <span class="animate">
-                <b>No Data Collection, No Login Credentials:</b> Dream Analytica does not collect any form of data, be
-                it
-                personal or usage-related. We respect your privacy and believe that your journey into dream analysis
-                should be solely yours. There are no intrusive data collection practices, and you can enjoy the app
-                without the need for any login credentials. Your experiences with Dream Analytica are yours alone.
-            </span>
-                </br></br>
-                <span class="animate">
-                <b>Local Dream Journal Storage:</b> Our dream journal feature is designed to enhance your personal
-                exploration
-                without compromising your privacy. The data you enter into the dream journal is stored exclusively on
-                your local device. We do not transfer, store, or access any of your dream entries externally. This
-                ensures that your dream reflections and personal insights remain securely in your hands.
-            </span>
-                </br></br>
-                <span class="animate">
-                <b>Empowering Education for All:</b> Dream Analytica is more than just an app; it’s an educational tool
-                crafted
-                to make the intriguing world of dream analysis and Jungian psychology accessible to everyone. Whether
-                you’re a seasoned enthusiast or a newcomer to these concepts, our app is your guide to understanding the
-                depths of your mind.
-            </span>
-                </br></br>
-                <span class="animate">
-                <b>How to Reach Us:</b> If you have any questions, encounter issues, or simply want to share your
-                thoughts,
-                we’re here for you. You can reach out to us with through the contact information below. Your feedback is
-                invaluable, and we’re dedicated to ensuring your experience with Dream Analytica is as enriching as
-                possible.
-            </span>
-                </br></br>
-                Thank you for choosing Dream Analytica, where your dreams and privacy are our top priorities.
-                </br></br>
-                <b class="exo-200t animate">CONTACT</b>
-                </br>
-                DREAMANALYTICA8@GMAIL.COM
-                </br></br>
-                <a class="left" href="https://apps.apple.com/us/app/dreamanalytica/id6473673370" target="_blank">
-                    <img class="hoverable" src="{% static 'main/images/logo.png' %}" alt="App Logo"
-                        style="width: 80px; height: 80px;border-radius: 10px;">
+<div class="container" style="margin: 4em auto;">
+    <div class="app-card animate" style="background: rgba(66, 201, 198, 0.05); border-radius: 20px; border: 1px solid rgba(66, 201, 198, 0.2); padding: 3em 2em;">
+        
+        <!-- Header Section -->
+        <section class="header-section animate">
+            <h3 class="goldman-regular gradient-text center-align">Dream Analytica</h3>
+            <h5 class="exo-200t center-align" style="color: #42c9c6;">A CARL JUNG PSYCHOLOGY APP</h5>
+            
+            <!-- App Store Links -->
+            <div class="app-store-links animate" style="margin: 2em 0;">
+                <a href="https://apps.apple.com/us/app/dreamanalytica/id6473673370" target="_blank" class="store-link">
+                    <img class="hoverable store-badge" 
+                         src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us?size=250x83" 
+                         alt="Download on App Store">
                 </a>
+                
+                <a href="https://play.google.com/store/apps/details?id=com.erebus0013.DreamAnalytica" target="_blank" class="store-link">
+                    <img class="hoverable store-badge" 
+                         src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" 
+                         alt="Get it on Google Play">
+                </a>
+            </div>
+        </section>
+
+        <!-- Introduction Section -->
+        <section class="intro-section animate">
+            <p class="exo-200text flow-text center-align">
+                Embark on a captivating journey into the profound realm of Carl Jung's analytical psychology. Uncover the mysteries of dream analysis and discover insights that can profoundly impact your daily life.
             </p>
-        </div>
+        </section>
+
+        <!-- Features Grid -->
+        <section class="features-grid animate" style="margin-top: 4em;">
+            <div class="row">
+                <div class="col s12 m4 animate">
+                    <div class="feature-card">
+                        <i class="material-icons" style="color:#42c9c6;font-size:2.5rem">lock</i>
+                        <h5 class="goldman-regular">Privacy First</h5>
+                        <p class="exo-200text">Zero data collection, no login required. Your dreams stay on your device.</p>
+                    </div>
+                </div>
+                <div class="col s12 m4 animate">
+                    <div class="feature-card">
+                        <i class="material-icons" style="color:#42c9c6;font-size:2.5rem">book</i>
+                        <h5 class="goldman-regular">Dream Journal</h5>
+                        <p class="exo-200text">Record and analyze your dreams with local storage only.</p>
+                    </div>
+                </div>
+                <div class="col s12 m4 animate">
+                    <div class="feature-card">
+                        <i class="material-icons" style="color:#42c9c6;font-size:2.5rem">psychology</i>
+                        <h5 class="goldman-regular">Jungian Analysis</h5>
+                        <p class="exo-200text">Access deep insights through analytical psychology.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section class="contact-section animate" style="margin-top: 4em;">
+            <h4 class="goldman-regular center-align">Get in Touch</h4>
+            <p class="exo-200text center-align">
+                Have questions or feedback? Reach out to us at:
+                <br>
+                <a href="mailto:DREAMANALYTICA8@GMAIL.COM" class="gradient-text" style="font-size: 1.2em;">DREAMANALYTICA8@GMAIL.COM</a>
+            </p>
+        </section>
+
+        <!-- Bottom App Store Links -->
+        <section class="download-section animate" style="margin-top: 4em;">
+            <h4 class="goldman-regular center-align">Download Now</h4>
+            <div class="app-store-links">
+                <a href="https://apps.apple.com/us/app/dreamanalytica/id6473673370" target="_blank" class="store-link">
+                    <img class="hoverable store-badge" 
+                         src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us?size=250x83" 
+                         alt="Download on App Store">
+                </a>
+                
+                <a href="https://play.google.com/store/apps/details?id=com.erebus0013.DreamAnalytica" target="_blank" class="store-link">
+                    <img class="hoverable store-badge" 
+                         src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" 
+                         alt="Get it on Google Play">
+                </a>
+            </div>
+        </section>
     </div>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5864886611650170"
-        crossorigin="anonymous"></script>
-    <!-- Horizontal -->
-    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-5864886611650170" data-ad-slot="7852600863"
-        data-ad-format="auto" data-full-width-responsive="true"></ins>
-    <script>
-        (adsbygoogle = window.adsbygoogle || []).push({});
-    </script>
+</div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const elements = document.querySelectorAll('.animate');
+<style>
+    .app-card {
+        margin-bottom: 4em;
+    }
 
-            elements.forEach((el, index) => {
-                setTimeout(() => {
-                    el.classList.add('flash-text-pop');
-                }, index * 80); // Delay between each element's animation (300ms)
+    .gradient-text {
+        background: linear-gradient(45deg, #42c9c6, #5AFFDD);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        text-shadow: none;
+    }
+
+    .feature-card {
+        padding: 2em;
+        text-align: center;
+        border: 1px solid rgba(66, 201, 198, 0.1);
+        border-radius: 15px;
+        transition: all 0.3s ease;
+        height: 100%;
+        background: rgba(66, 201, 198, 0.05);
+    }
+
+    .feature-card:hover {
+        transform: translateY(-5px);
+        border-color: rgba(66, 201, 198, 0.3);
+        box-shadow: 0 5px 15px rgba(66, 201, 198, 0.1);
+    }
+
+    .app-store-links {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1.5em;
+        width: 100%;
+    }
+
+    .store-link {
+        display: inline-block;
+    }
+
+    .store-badge {
+        height: 40px;
+        width: auto;
+        object-fit: contain;
+    }
+
+    .store-badge[alt="Download on App Store"] {
+        height: 32px;
+    }
+
+    .store-badge[alt="Get it on Google Play"] {
+        height: 44px;
+    }
+
+    .store-link img {
+        transition: all 0.3s ease;
+    }
+
+    .store-link img:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(66, 201, 198, 0.2);
+    }
+
+    @media only screen and (max-width: 600px) {
+        .app-card {
+            padding: 2em 1em;
+        }
+
+        .app-store-links {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .store-link {
+            margin-bottom: 1em;
+        }
+
+        .feature-card {
+            margin-bottom: 1em;
+        }
+
+        .store-badge {
+            height: 35px;
+        }
+
+        .store-badge[alt="Download on App Store"] {
+            height: 28px;
+        }
+
+        .store-badge[alt="Get it on Google Play"] {
+            height: 38.5px;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('fade-in');
+                    observer.unobserve(entry.target);
+                }
             });
+        }, {
+            threshold: 0.1
         });
-    </script>
 
-</body>
+        document.querySelectorAll('.animate').forEach(element => {
+            observer.observe(element);
+        });
+    });
+</script>
 
 {% endblock %}

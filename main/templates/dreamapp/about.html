@@ -11,71 +11,75 @@
 
 <body
     style="margin: 0; padding: 0; height: 100vh; display: flex; align-items: center; justify-content: center;background:#272425;">
-    <div class="container ">
-        <div class="container ">
-            <div class="left" style="padding:0 1em 1em 0em">
-                <img class="hoverable animate" src="{% static 'main/images/rs.jpg' %}" alt="App Logo"
-                    style="width: 250px; height: 250px;border-radius: 15px;border: 2px solid #fff;box-shadow: 0 0 5px #fff;">
+    <div class="container" style="margin: 4em auto;">
+        <div class="about-card animate" style="background: rgba(66, 201, 198, 0.05); border-radius: 20px; border: 1px solid rgba(66, 201, 198, 0.2); padding: 3em 2em;">
+            
+            <!-- Profile Section -->
+            <div class="row">
+                <div class="col s12 m4 animate">
+                    <div class="profile-image-container center-align">
+                        <img src="{% static 'main/images/rs.jpg' %}" alt="Robert She" 
+                             class="responsive-img hoverable" 
+                             style="border-radius: 15px; border: 2px solid rgba(66, 201, 198, 0.2); box-shadow: 0 0 20px rgba(66, 201, 198, 0.1); max-width: 250px;">
+                    </div>
+                </div>
+                
+                <div class="col s12 m8">
+                    <h3 class="goldman-regular gradient-text animate">Robert She</h3>
+                    <h5 class="exo-200t animate" style="color: #42c9c6; margin-bottom: 1em;">
+                        Analyst
+                    </h5>
+                </div>
             </div>
-            <h4 class="goldman-regular mobile-exo200h right-align animate" style="margin-top:3em">// Robert She</br><a
-                    class="exo-200t animate" style="font-size: 15px;color: #42c9c6;text-shadow:0 0 3px #42c9c6;">
-                    Analyst</a></h4>
-                    
-            <p class="exo-200text flow-text left-align animate" style="display: inline-block;">
-                <b class="exo-200t animate">ABOUT ME</b>
-                </br>
-                <span class="animate">
-                I’m a 34-year-old from the United States with a unique background that bridges both technology and
-                psychology. My journey began in the world of design, earning a Bachelor of Fine Arts in Industrial
-                Design, where I specialized in Automotive Design. However, I soon found myself drawn to technology,
-                becoming a full-stack software developer proficient in Python, JavaScript, Solidity, and a range of
-                other technologies. I’ve built mobile apps, web applications, and even dabbled in Web3 and blockchain.
-            </span>
-                </br></br>
-                <span class="animate">
-                But while coding fulfills my technical curiosity, it was a deeper fascination with the human mind that
-                truly shaped my path.
-            </span>
-                </br></br>
-                <span class="animate">
-                My personality type is INTP—naturally curious and analytical—qualities that led me to an unexpected but
-                life-changing interest in psychology. It all started with an elective course in university that
-                introduced me to philosophical and psychological thinkers like Kant, Descartes, Nietzsche, and Freud.
-                However, it was Carl Jung’s work that truly resonated with me. His theories on the unconscious,
-                archetypes, and personality types struck a chord, giving me language for things I had always sensed but
-                couldn’t quite articulate.
-            </span>
-                </br></br>
-                <span class="animate">
-                Over the past eight years, I’ve immersed myself in Jungian psychology, exploring concepts like the Ego,
-                Shadow, Anima/Animus, and the Collective Unconscious. Jung’s work on dream analysis, in particular,
-                became a cornerstone of my own personal development. As I began interpreting my own dreams, I uncovered
-                insights that shifted my perspective on myself and the human psyche in profound ways.
-            </span>
-                </br></br>
-                <span class="animate">
-                My dedication to psychology is deeply personal. At 13, I lost my father to suicide—a traumatic event
-                that spurred existential crises and a determination to understand the complexities of mental health.
-                Through my research, Jung’s work provided not only clarity but also a pathway toward healing and
-                personal growth. This process of self-discovery has empowered me to help others in their own journeys.
-            </span>
-                </br></br>
-                <span class="animate">
-                Today, I use my knowledge of Jungian psychology to help individuals around the world explore their inner
-                selves. Whether through dream analysis or one-on-one counseling, I guide people to uncover the deeper
-                meanings in their lives, providing insights that lead to growth, healing, and greater self-awareness.
-            </span>
-                </br></br>
-                <span class="animate">
-                Though my journey started in the world of design and technology, it has evolved into something far more
-                meaningful. My passion is now centered on helping others navigate their own inner worlds, using the
-                universal language of dreams and the transformative power of psychological insight.
-            </span>
-                </br></br>
 
-            </p>
+            <!-- About Content -->
+            <div class="about-content">
+                <div class="section animate">
+                    <h4 class="goldman-regular">About</h4>
+                    <p class="exo-200text flow-text animate">
+                        Robert is a 34-year-old analyst from the United States, whose unique background bridges both technology and psychology. His journey began in the world of design, earning a Bachelor of Fine Arts in Industrial Design with a specialization in Automotive Design. Later drawn to technology, he became a full-stack software developer proficient in Python, JavaScript, Solidity, and various other technologies. His technical portfolio includes mobile apps, web applications, and Web3/blockchain projects.
+                    </p>
+                </div>
+
+                <div class="section animate">
+                    <p class="exo-200text flow-text">
+                        While coding fulfills his technical curiosity, it was a deeper fascination with the human mind that truly shaped his path.
+                    </p>
+                </div>
+
+                <div class="section animate">
+                    <p class="exo-200text flow-text">
+                        As an INTP personality type—naturally curious and analytical—these qualities led him to an unexpected but life-changing interest in psychology. It began with an elective university course that introduced him to philosophical and psychological thinkers like Kant, Descartes, Nietzsche, and Freud. However, it was Carl Jung's work that truly resonated with him. Jung's theories on the unconscious, archetypes, and personality types struck a chord, giving him language for things he had always sensed but couldn't quite articulate.
+                    </p>
+                </div>
+
+                <div class="section animate">
+                    <p class="exo-200text flow-text">
+                        Over the past eight years, Robert has immersed himself in Jungian psychology, exploring concepts like the Ego, Shadow, Anima/Animus, and the Collective Unconscious. Jung's work on dream analysis, in particular, became a cornerstone of his personal development. Through interpreting his own dreams, he uncovered insights that shifted his perspective on himself and the human psyche in profound ways.
+                    </p>
+                </div>
+
+                <div class="section animate">
+                    <p class="exo-200text flow-text">
+                        His dedication to psychology is deeply personal. At age 13, Robert lost his father to suicide—a traumatic event that spurred existential crises and a determination to understand the complexities of mental health. Through his research, Jung's work provided not only clarity but also a pathway toward healing and personal growth. This process of self-discovery has empowered him to help others in their own journeys.
+                    </p>
+                </div>
+
+                <div class="section animate">
+                    <p class="exo-200text flow-text">
+                        Today, Robert uses his knowledge of Jungian psychology to help individuals around the world explore their inner selves. Through dream analysis and one-on-one counseling, he guides people to uncover the deeper meanings in their lives, providing insights that lead to growth, healing, and greater self-awareness.
+                    </p>
+                </div>
+
+                <div class="section animate">
+                    <p class="exo-200text flow-text">
+                        Though his journey started in the world of design and technology, it has evolved into something far more meaningful. Robert's passion is now centered on helping others navigate their own inner worlds, using the universal language of dreams and the transformative power of psychological insight.
+                    </p>
+                </div>
+            </div>
         </div>
     </div>
+
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5864886611650170"
         crossorigin="anonymous"></script>
     <!-- Horizontal -->
@@ -85,14 +89,90 @@
         (adsbygoogle = window.adsbygoogle || []).push({});
     </script>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const elements = document.querySelectorAll('.animate');
+    <style>
+        .about-card {
+            margin-bottom: 4em;
+        }
 
-            elements.forEach((el, index) => {
-                setTimeout(() => {
-                    el.classList.add('flash-text-pop');
-                }, index * 80); // Delay between each element's animation (300ms)
+        .section {
+            margin: 0;
+        }
+
+        .section p {
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        .section h4 {
+            margin-bottom: 0.25em;
+        }
+
+        .profile-image-container {
+            margin-bottom: 0.5em;
+        }
+
+        .profile-image-container img {
+            transition: all 0.3s ease;
+        }
+
+        .profile-image-container img:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 30px rgba(66, 201, 198, 0.2);
+        }
+
+        .gradient-text {
+            background: linear-gradient(45deg, #42c9c6, #5AFFDD);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: none;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.6s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h5.exo-200t {
+            margin-bottom: 0.5em !important;
+        }
+
+        @media only screen and (max-width: 600px) {
+            .about-card {
+                padding: 2em 1em;
+            }
+            
+            .profile-image-container {
+                margin-bottom: 2em;
+            }
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('fade-in');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, {
+                threshold: 0.1
+            });
+
+            document.querySelectorAll('.animate').forEach(element => {
+                observer.observe(element);
             });
         });
     </script>

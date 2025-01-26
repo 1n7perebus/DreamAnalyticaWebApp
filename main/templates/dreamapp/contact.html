@@ -1,95 +1,116 @@
 {% extends 'dreamapp/header.html' %}
 {% block content %}
-<head>
-    {% load static %}
-    {{ form.media }}
-    <style>
-        /* Responsive Typography */
-        @media only screen and (min-width: 600px) and (max-width: 992px) {
-            .helper-text {
-                font-size: 18px !important;
-            }
 
-            label.exo-200 {
-                font-size: 20px !important;
-            }
-
-            input.exo-200,
-            textarea.exo-200,
-            span.exo-200 {
-                font-size: 24px !important;
-            }
-        }
-        /* Ensure input fields and labels scale nicely on mobile */
-        .input-field {
-            margin-bottom: 1.5em;
-        }
-
-
-    </style>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
-
-<body>
-    <div class="centered-container">
-        <div class="form-wrapper animate" >
-            {% if messages %}
-                <ul class="messages">
-                    {% for message in messages %}
-                        <li class="{{ message.tags }} exo-200 center" style="color: #c00000;">{{ message }}</li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
-            <form class="container flow-text" method="POST">
-                <h4 class="exo-200h left-align flow-text animate" style="padding-bottom:1em">CONTACT FORM</h4>
-                {% csrf_token %}
-                <div class="row">
-                    <div class="input-field col s12 exo-200 animate">
-                        <input id="email" name="email" type="email" class="mobile-exo200 validate exo-200 animate" required>
-                        <label class="exo-200 animate" for="email">Email*</label>
-                    </div>
-                    <div class="input-field col s12 exo-200 animate">
-                        <input id="name" name="name" type="text" class="mobile-exo200 validate exo-200 animate" required>
-                        <label class="exo-200 animate" for="name">Name*</label>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="input-field col s12 exo-200 animate">
-                        <input id="phone" name="phone" type="tel" class="validate exo-200 animate" placeholder="+00000000000"
-                            inputmode="numeric" pattern="^\+[0-9]{1,4}[0-9]+$"
-                            onkeypress="return event.charCode >= 43 && event.charCode <= 57">
-                        <label for="phone">WhatsApp# +00000000000</label>
-                        <span class="helper-text"
-                            data-error="Invalid phone number format. Please enter a valid phone number in WhatsApp format starting with the '+' symbol followed by the area code."></span>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="input-field col s12 exo-200 animate">
-                        <textarea id="textarea1" name="desc" class="validate materialize-textarea exo-200 flow-text"
-                            style="height:200px" required></textarea>
-                        <label class="exo-200" for="textarea1">Brief description (optional)</label>
-                    </div>
-                </div>
-                <button class="btn btn-small center hoverable exo-200 animate" type="submit"
-                    style="width:100%;margin-top:0.5rem;z-index: 10;">
-                    <b class="center mobile-exo200 animate">[ SUBMIT ]</b>
-                </button>
-            </form>
-        </div>
-    </div>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-          const elements = document.querySelectorAll('.animate');
+<div class="container" style="margin: 4em auto;">
+  <div class="contact-card animate" style="background: rgba(66, 201, 198, 0.05); border-radius: 20px; border: 1px solid rgba(66, 201, 198, 0.2); padding: 3em 2em;">
+    <h3 class="goldman-regular center-align gradient-text">Contact Us</h3>
     
-          elements.forEach((el, index) => {
-            setTimeout(() => {
-              el.classList.add('flash-text-pop');
-            }, index * 80); // Delay between each element's animation (300ms)
-          });
+    <!-- Form Messages -->
+    {% if messages %}
+    <div class="messages-container" style="margin: 2em 0;">
+      {% for message in messages %}
+      <div class="message {{ message.tags }} center-align" style="padding: 1em; border-radius: 10px; background: rgba(192, 0, 0, 0.1);">
+        <span class="exo-200">{{ message }}</span>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
 
+    <!-- Contact Form -->
+    <form method="POST" class="contact-form">
+      {% csrf_token %}
+      
+      <div class="row">
+        <div class="col s12 m6">
+          <div class="input-field animate">
+            <input id="name" name="name" type="text" class="validate" required>
+            <label for="name">Name</label>
+          </div>
+        </div>
+        <div class="col s12 m6">
+          <div class="input-field animate">
+            <input id="email" name="email" type="email" class="validate" required>
+            <label for="email">Email</label>
+          </div>
+        </div>
+      </div>
 
-        });
-      </script>
-</body>
+      <div class="input-field animate">
+        <input id="phone" name="phone" type="tel" class="validate" 
+               pattern="^\+[0-9]{1,4}[0-9]+$"
+               placeholder="+00000000000">
+        <label for="phone">WhatsApp Number (Optional)</label>
+        <span class="helper-text" style="color: #a0a0a0;">Include country code (e.g., +1234567890)</span>
+      </div>
+
+      <div class="input-field animate">
+        <textarea id="message" name="desc" class="materialize-textarea" required></textarea>
+        <label for="message">Your Message</label>
+      </div>
+
+      <button class="btn-large waves-effect waves-light hoverable animate" type="submit" 
+              style="width:100%;background:transparent;border:2px solid #42c9c6;border-radius:30px">
+        <span class="exo-200t">Send Message</span>
+      </button>
+    </form>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('fade-in');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, {
+      threshold: 0.1
+    });
+
+    document.querySelectorAll('.animate').forEach(element => {
+      observer.observe(element);
+    });
+  });
+</script>
+
+<style>
+  .fade-in {
+    animation: fadeIn 0.6s ease forwards;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .input-field input:focus,
+  .input-field textarea:focus {
+    border-bottom: 1px solid #42c9c6 !important;
+    box-shadow: 0 1px 0 0 #42c9c6 !important;
+  }
+
+  .input-field input:focus + label,
+  .input-field textarea:focus + label {
+    color: #42c9c6 !important;
+  }
+
+  .helper-text {
+    color: #a0a0a0 !important;
+  }
+
+  @media only screen and (max-width: 600px) {
+    .contact-card {
+      padding: 2em 1em;
+    }
+  }
+</style>
 
 {% endblock %}

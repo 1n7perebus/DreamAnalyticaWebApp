@@ -9219,6 +9219,7 @@ input[type=range]::-ms-thumb {
 	align-items: center;
 	height: 100vh; /* Full viewport height */
 	padding:1em;
+	margin-top:2em;
 	}	
   
   .form-wrapper {
@@ -9266,7 +9267,7 @@ input[type=range]::-ms-thumb {
 	  }
   
 	  .animate.fade-in-up {
-		animation: fadeInUp 5s ease forwards;
+		animation: fadeInUp 1s ease forwards;
 	  }
   
 	  .animate.scale-up {
@@ -9275,16 +9276,16 @@ input[type=range]::-ms-thumb {
 
 	  @keyframes flashTextPop {
 		0% {
-		  opacity: 1;
-		  transform: scale(1.2);
+		  opacity: 0;
+		  transform: scale(0.1);
 		  
-		  color: rgba(255, 255, 255, 0.5); /* Start with dimmed color */
+		  color: #42c9c6; /* Start with dimmed color */
 		}
 		50% {
 		  opacity: 1;
 		  transform: scale(1);
-		  color: rgba(255, 255, 255, 1); /* Full brightness */
-		  text-shadow: 0 0 20px rgba(255, 255, 255, 1); /* Flash effect using text-shadow */
+		  color: #42c9c6; /* Full brightness */
+		  text-shadow: 0 0 20px #42c9c6; /* Flash effect using text-shadow */
 		}
 		100% {
 		  opacity: 1;
@@ -9295,6 +9296,76 @@ input[type=range]::-ms-thumb {
 	  }
 	  	  
 	  .animate.flash-text-pop {
-		animation: flashTextPop .1s ease forwards;
+		animation: flashTextPop .3s ease forwards;
 	  }
+
+/* Add these new styles */
+
+.gradient-text {
+    background: linear-gradient(45deg, #42c9c6, #5AFFDD);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: none;
+}
+
+.feature-card {
+    padding: 2em;
+    text-align: center;
+    border: 1px solid rgba(66, 201, 198, 0.1);
+    border-radius: 15px;
+    transition: all 0.3s ease;
+    height: 100%;
+    background: rgba(66, 201, 198, 0.05);
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(66, 201, 198, 0.3);
+    box-shadow: 0 5px 15px rgba(66, 201, 198, 0.1);
+}
+
+.btn-large {
+    transition: all 0.3s ease;
+}
+
+.btn-large:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(66, 201, 198, 0.2);
+}
+
+/* Update existing animations */
+@keyframes flashTextPop {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    50% {
+        opacity: 0.8;
+        transform: translateY(10px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate {
+    opacity: 0;
+}
+
+.animate.flash-text-pop {
+    animation: flashTextPop 0.8s ease forwards;
+}
+
+/* Responsive improvements */
+@media only screen and (max-width: 600px) {
+    .hero-section h1 {
+        font-size: 2.5rem !important;
+    }
+    
+    .feature-card {
+        margin-bottom: 1em;
+    }
+}
 
