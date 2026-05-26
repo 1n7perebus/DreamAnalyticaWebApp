@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 import os
+import sys
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -42,7 +43,10 @@ GOOGLE_REDIRECT_URI = os.environ.get('GOOGLE_REDIRECT_URI')
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+# Local: `runserver` enables DEBUG automatically; production: set DJANGO_DEBUG=False (default)
+DEBUG = os.environ.get('DJANGO_DEBUG', '').lower() in ('true', '1', 'yes')
+if not DEBUG and 'runserver' in sys.argv:
+    DEBUG = True
 
 ALLOWED_HOSTS = ["erebus0013.pythonanywhere.com", "www.dreamanalytica.com", "dreamanalytica.com", "http://www.dreamanalytica.com/", "dreamanalytica.com/", "localhost", "127.0.0.1","http://localhost:8000", "7674-103-6-150-37.ngrok-free.app"]
 

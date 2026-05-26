@@ -1,24 +1,15 @@
 {% extends 'dreamapp/header.html' %}
+{% block title %}404 — Dream Analytica{% endblock %}
 {% block content %}
 
-<head>
-    {% load static %}
-    {{ form.media }}
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5864886611650170"
-        crossorigin="anonymous"></script>
-</head>
+<div class="error-shell">
+  <span class="section-eyebrow reveal">Signal Lost</span>
+  <h1 class="error-code goldman-regular glitch-text gradient-text reveal reveal--delay-1" data-text="404">404</h1>
+  <p class="error-text reveal reveal--delay-2">The page you requested drifted into the unconscious.</p>
+  <div class="hero-cta-row reveal reveal--delay-3" style="margin-top: 1em;">
+    <a href="/" class="neon-btn neon-btn--primary neon-btn--lg">Return Home</a>
+    <a href="/dreams/" class="neon-btn neon-btn--mag neon-btn--lg">Wall of Dreams</a>
+  </div>
+</div>
 
-<body>
-    <div class="container center" style="margin-top:5em">
-        <div class="container center">
-            <a class="material-symbols-outlined center"
-                style="font-size: 300px;animation: prism-animation 43s cubic-bezier(0.19, 1, 0.22, 1) infinite;">error</a>
-            <h5 class="goldman-regular center mobile-exo200h">404 Not Found</h5>
-            <div class="">
-                <h1 class="exo-200 flow-text">404 - Page Not Found</h1>
-                <p class="exo-200 flow-text">The requested page could not be found on this server.</p>
-            </div>
-        </div>
-    </div>
-</body>
 {% endblock %}

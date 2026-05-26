@@ -1,191 +1,153 @@
 {% extends 'dreamapp/header.html' %}
+{% load static %}
+{% block title %}Dream Analytica — Unlock the Wisdom of Your Dreams{% endblock %}
 {% block content %}
 
-<head>
-    {% load static %}
-    {{ form.media }}
-    <meta name="google-adsense-account" content="ca-pub-5864886611650170">
-</head>
+<section class="hero-stage">
+  <canvas class="hero-canvas" aria-hidden="true"></canvas>
+  <div class="hero-orb-anchor" aria-hidden="true">
+    <div class="hero-orb-sweep"></div>
+    <div class="hero-orb"></div>
+    <span class="hero-orb-ring hero-orb-ring--outer" aria-hidden="true"></span>
+    <span class="hero-orb-ring hero-orb-ring--inner" aria-hidden="true"></span>
+    <div class="hero-orb-orbit">
+      <span class="hero-orb-dot"></span>
+      <span class="hero-orb-dot"></span>
+      <span class="hero-orb-dot"></span>
+    </div>
+  </div>
 
-<body style="margin: 0; padding: 0; min-height: 100vh; background:#272425;">
-    <div class="container">
-        <!-- Hero Section -->
-        <section class="hero-section animate">
-            <h1 class="goldman-regular gradient-text center-align" style="margin-top:4em;font-size:3.2rem">
-                Dream Analytica
-            </h1>
-            <h4 class="exo-200t center-align animate" style="color: #42c9c6;margin-top:1em">
-                UNLOCK THE WISDOM OF YOUR DREAMS
-            </h4>
-            
-            <!-- Call to Action Buttons -->
-            <div class="row" style="margin-top:3em">
-                <div class="col s12 m6 offset-m3">
-                    <button class="btn-large waves-effect waves-light hoverable animate" 
-                            onclick="window.location.href='/consult/'"
-                            style="width:100%;background:transparent;border:2px solid #42c9c6;border-radius:30px">
-                        <span class="exo-200t">START YOUR JOURNEY</span>
-                    </button>
-                </div>
-            </div>
-        </section>
+  <div class="hero-content">
+    <span class="hero-eyebrow reveal">Jungian Dream Analysis · v2.0</span>
 
-        <!-- About Section -->
-        <section class="about-section animate" style="margin-top:5em">
-            <h4 class="goldman-regular left-align animate">Our Approach</h4>
-            <p class="exo-200text flow-text animate" style="margin-top:2em">
-                Using the transformative insights of Carl Jung's Analytical Psychology, we help unlock the hidden messages in your dreams. Our modern approach combines traditional dream analysis with contemporary psychological understanding to guide you toward self-discovery and personal growth.
-            </p>
-        </section>
+    <h1 class="hero-title glitch-text gradient-text reveal reveal--delay-1" data-text="DREAM ANALYTICA">
+      DREAM ANALYTICA
+    </h1>
 
-        <!-- Features Grid -->
-        <section class="features-grid animate" style="margin-top:4em">
-            <div class="row">
-                <div class="col s12 m4 animate">
-                    <div class="feature-card">
-                        <i class="material-icons" style="color:#42c9c6;font-size:2.5rem">psychology</i>
-                        <h5 class="goldman-regular">Expert Analysis</h5>
-                        <p class="exo-200text">Professional interpretation based on Jungian psychology</p>
-                    </div>
-                </div>
-                <div class="col s12 m4 animate">
-                    <div class="feature-card">
-                        <i class="material-icons" style="color:#42c9c6;font-size:2.5rem">insights</i>
-                        <h5 class="goldman-regular">Personal Growth</h5>
-                        <p class="exo-200text">Gain deeper insights into your subconscious mind</p>
-                    </div>
-                </div>
-                <div class="col s12 m4 animate">
-                    <div class="feature-card">
-                        <i class="material-icons" style="color:#42c9c6;font-size:2.5rem">auto_awesome</i>
-                        <h5 class="goldman-regular">Modern Approach</h5>
-                        <p class="exo-200text">Contemporary analysis meets traditional wisdom</p>
-                    </div>
-                </div>
-            </div>
-        </section>
+    <p class="hero-sub reveal reveal--delay-2">Unlock the wisdom of your dreams</p>
 
-        <!-- Testimonial Section -->
-        <section class="testimonial-section animate" style="margin-top:5em">
-            <h4 class="goldman-regular center-align animate">Client Testimonials</h4>
-            
-            <div class="row">
-                <!-- Original Testimonial -->
-                <div class="col s12 m6 animate">
-                    <div class="testimonial-card" style="margin-top:2em;padding:2em;border:1px solid rgba(66, 201, 198, 0.2);border-radius:15px">
-                        <div class="testimonial-content center-align">
-                            <img src="{% static 'main/images/avatar.png' %}" alt="Client" class="circle responsive-img" style="width:80px;height:80px;margin-bottom:1em">
-                            <h5 class="goldman-regular">Leif U.</h5>
-                            <p class="exo-200text flow-text">
-                                "Dream Analytica has transformed my understanding of my inner world. The insights I've gained have been truly life-changing."
-                            </p>
-                        </div>
-                    </div>
-                </div>
+    <div class="hero-cta-row reveal reveal--delay-3">
+      <a href="/consult/" class="neon-btn neon-btn--primary neon-btn--lg">Start Your Journey</a>
+      <a href="/dreams/" class="neon-btn neon-btn--mag neon-btn--lg">Explore the Wall</a>
+    </div>
+  </div>
 
-                <!-- Additional Testimonials -->
-                <div class="col s12 m6 animate">
-                    <div class="testimonial-card" style="margin-top:2em;padding:2em;border:1px solid rgba(66, 201, 198, 0.2);border-radius:15px">
-                        <div class="testimonial-content center-align">
-                            <img src="{% static 'main/images/avatar.png' %}" alt="Client" class="circle responsive-img" style="width:80px;height:80px;margin-bottom:1em">
-                            <h5 class="goldman-regular">Sarah M.</h5>
-                            <p class="exo-200text flow-text">
-                                "Robert's deep understanding of Jungian psychology helped me uncover patterns in my dreams I never noticed before. His insights have been invaluable to my personal growth."
-                            </p>
-                        </div>
-                    </div>
-                </div>
+  <div class="hero-scroll-hint" aria-hidden="true">Scroll</div>
+</section>
 
-                <div class="col s12 m6 animate">
-                    <div class="testimonial-card" style="margin-top:2em;padding:2em;border:1px solid rgba(66, 201, 198, 0.2);border-radius:15px">
-                        <div class="testimonial-content center-align">
-                            <img src="{% static 'main/images/avatar.png' %}" alt="Client" class="circle responsive-img" style="width:80px;height:80px;margin-bottom:1em">
-                            <h5 class="goldman-regular">Michael K.</h5>
-                            <p class="exo-200text flow-text">
-                                "Working with Robert has been transformative. His ability to connect dream symbols with deeper psychological meanings has helped me understand myself in profound ways."
-                            </p>
-                        </div>
-                    </div>
-                </div>
+<section class="container">
+  <div class="trust-strip reveal">
+    <div class="trust-stat">
+      <div class="trust-stat__value"><span data-count="1240" data-suffix="+">0</span></div>
+      <div class="trust-stat__label">Dreams Analyzed</div>
+    </div>
+    <div class="trust-stat">
+      <div class="trust-stat__value"><span data-count="98" data-suffix="%">0</span></div>
+      <div class="trust-stat__label">Insight Rate</div>
+    </div>
+    <div class="trust-stat">
+      <div class="trust-stat__value"><span data-count="42">0</span></div>
+      <div class="trust-stat__label">Countries Reached</div>
+    </div>
+    <div class="trust-stat">
+      <div class="trust-stat__value"><span data-count="8">0</span></div>
+      <div class="trust-stat__label">Years of Practice</div>
+    </div>
+  </div>
 
-                <div class="col s12 m6 animate">
-                    <div class="testimonial-card" style="margin-top:2em;padding:2em;border:1px solid rgba(66, 201, 198, 0.2);border-radius:15px">
-                        <div class="testimonial-content center-align">
-                            <img src="{% static 'main/images/avatar.png' %}" alt="Client" class="circle responsive-img" style="width:80px;height:80px;margin-bottom:1em">
-                            <h5 class="goldman-regular">Emma R.</h5>
-                            <p class="exo-200text flow-text">
-                                "Through our sessions, I've gained a deeper appreciation for the wisdom contained in my dreams. Robert's guidance has been instrumental in my journey of self-discovery."
-                            </p>
-                        </div>
-                    </div>
-                </div>
+  <section class="about-section reveal" style="margin-top:4em;max-width:840px;margin-left:auto;margin-right:auto;text-align:center;">
+    <span class="section-eyebrow">Our Approach</span>
+    <h2 class="section-title">Where Ancient Wisdom Meets Modern Code</h2>
+    <p class="flow-text">
+      Using Carl Jung's analytical psychology, we decode the symbols, archetypes, and patterns hidden inside your dreams.
+      Real interpretation. Real growth. Designed for the digital age.
+    </p>
+  </section>
 
-                <div class="col s12 m6 animate">
-                    <div class="testimonial-card" style="margin-top:2em;padding:2em;border:1px solid rgba(66, 201, 198, 0.2);border-radius:15px">
-                        <div class="testimonial-content center-align">
-                            <img src="{% static 'main/images/avatar.png' %}" alt="Client" class="circle responsive-img" style="width:80px;height:80px;margin-bottom:1em">
-                            <h5 class="goldman-regular">David L.</h5>
-                            <p class="exo-200text flow-text">
-                                "Robert's approach to dream analysis is both profound and practical. He has helped me understand the messages my unconscious was trying to communicate."
-                            </p>
-                        </div>
-                    </div>
-                </div>
+  <hr class="divider-neon">
 
-                <div class="col s12 m6 animate">
-                    <div class="testimonial-card" style="margin-top:2em;padding:2em;border:1px solid rgba(66, 201, 198, 0.2);border-radius:15px">
-                        <div class="testimonial-content center-align">
-                            <img src="{% static 'main/images/avatar.png' %}" alt="Client" class="circle responsive-img" style="width:80px;height:80px;margin-bottom:1em">
-                            <h5 class="goldman-regular">Nina T.</h5>
-                            <p class="exo-200text flow-text">
-                                "The depth of insight Robert brings to dream interpretation is remarkable. His guidance has helped me navigate my personal transformation journey."
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Call to Action Section -->
-        <section class="cta-section animate" style="margin:5em 0">
-            <div class="row">
-                <div class="col s12 m6 animate">
-                    <button class="btn-large waves-effect waves-light hoverable" 
-                            onclick="window.location.href='/contact/'"
-                            style="width:100%;background:transparent;border:2px solid #42c9c6;border-radius:30px">
-                        <span class="exo-200t">Contact Us</span>
-                    </button>
-                </div>
-                <div class="col s12 m6 animate">
-                    <button class="btn-large waves-effect waves-light hoverable" 
-                            onclick="window.location.href='/dreams/'"
-                            style="width:100%;background:transparent;border:2px solid #42c9c6;border-radius:30px">
-                        <span class="exo-200t">Explore Dreams</span>
-                    </button>
-                </div>
-            </div>
-        </section>
+  <section style="margin: 4em 0;">
+    <div class="reveal" style="text-align:center;margin-bottom:1em;">
+      <span class="section-eyebrow">Why Dream Analytica</span>
+      <h2 class="section-title">Built for Insight</h2>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const elements = document.querySelectorAll('.animate');
-            
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('flash-text-pop');
-                        observer.unobserve(entry.target);
-                    }
-                });
-            }, {
-                threshold: 0.1
-            });
+    <div class="feature-grid">
+      <div class="feature-card reveal reveal--delay-1" data-tilt>
+        <div class="feature-card__icon"><i class="material-icons">psychology</i></div>
+        <h5 class="goldman-regular">Expert Analysis</h5>
+        <p>Professional interpretation rooted in Jungian psychology — not AI guesswork.</p>
+      </div>
+      <div class="feature-card reveal reveal--delay-2" data-tilt>
+        <div class="feature-card__icon"><i class="material-icons">insights</i></div>
+        <h5 class="goldman-regular">Personal Growth</h5>
+        <p>Decode the subconscious patterns shaping your waking life and relationships.</p>
+      </div>
+      <div class="feature-card reveal reveal--delay-3" data-tilt>
+        <div class="feature-card__icon"><i class="material-icons">auto_awesome</i></div>
+        <h5 class="goldman-regular">Modern Approach</h5>
+        <p>Contemporary tools, archetypal depth — accessible from any device, anywhere.</p>
+      </div>
+    </div>
+  </section>
 
-            elements.forEach(element => {
-                observer.observe(element);
-            });
-        });
-    </script>
-</body>
+  <hr class="divider-neon">
+
+  <section style="margin: 4em 0;">
+    <div class="reveal" style="text-align:center;margin-bottom:2em;">
+      <span class="section-eyebrow">Signal From the Network</span>
+      <h2 class="section-title">Client Transmissions</h2>
+    </div>
+
+    <div class="marquee reveal">
+      <div class="marquee__track">
+        <div class="testimonial-card">
+          <h5 class="testimonial-card__name">Leif U.</h5>
+          <p class="testimonial-card__text">Dream Analytica has transformed my understanding of my inner world. The insights I've gained have been truly life-changing.</p>
+        </div>
+        <div class="testimonial-card">
+          <h5 class="testimonial-card__name">Sarah M.</h5>
+          <p class="testimonial-card__text">Robert's deep understanding of Jungian psychology helped me uncover patterns in my dreams I never noticed before. His insights have been invaluable to my personal growth.</p>
+        </div>
+        <div class="testimonial-card">
+          <h5 class="testimonial-card__name">Michael K.</h5>
+          <p class="testimonial-card__text">Working with Robert has been transformative. His ability to connect dream symbols with deeper psychological meanings has helped me understand myself in profound ways.</p>
+        </div>
+        <div class="testimonial-card">
+          <h5 class="testimonial-card__name">Emma R.</h5>
+          <p class="testimonial-card__text">Through our sessions, I've gained a deeper appreciation for the wisdom contained in my dreams. Robert's guidance has been instrumental in my journey of self-discovery.</p>
+        </div>
+        <div class="testimonial-card">
+          <h5 class="testimonial-card__name">David L.</h5>
+          <p class="testimonial-card__text">Robert's approach to dream analysis is both profound and practical. He has helped me understand the messages my unconscious was trying to communicate.</p>
+        </div>
+        <div class="testimonial-card">
+          <h5 class="testimonial-card__name">Nina T.</h5>
+          <p class="testimonial-card__text">The depth of insight Robert brings to dream interpretation is remarkable. His guidance has helped me navigate my personal transformation journey.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider-neon">
+
+  <section class="reveal" style="margin: 4em 0; text-align:center;">
+    <span class="section-eyebrow">Ready</span>
+    <h2 class="section-title gradient-text">Decode Your Dreams Tonight</h2>
+    <p class="flow-text" style="max-width:600px;margin:0 auto 2em;">
+      Submit your dream, get expert Jungian analysis, and join a community uncovering the language of the unconscious.
+    </p>
+    <div class="hero-cta-row">
+      <a href="/consult/" class="neon-btn neon-btn--primary neon-btn--lg">Submit a Dream</a>
+      <a href="/contact/" class="neon-btn neon-btn--lg">Contact Us</a>
+    </div>
+  </section>
+</section>
+
+<div class="sticky-cta" role="region" aria-label="Quick action">
+  <span class="sticky-cta__text">Ready to decode your dream?</span>
+  <a href="/consult/" class="neon-btn neon-btn--primary">Post Dream</a>
+  <button class="sticky-cta__close" aria-label="Dismiss">×</button>
+</div>
+
 {% endblock %}

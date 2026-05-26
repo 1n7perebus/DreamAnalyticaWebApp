@@ -1,114 +1,126 @@
 {% extends 'dreamapp/header.html' %}
+{% block title %}Share Your Dream — Dream Analytica{% endblock %}
 {% block content %}
 
-<div class="container" style="margin: 4em auto;">
-  <div class="form-card animate" style="background: rgba(66, 201, 198, 0.05); border-radius: 20px; border: 1px solid rgba(66, 201, 198, 0.2); padding: 3em 2em;">
-    <h3 class="goldman-regular center-align gradient-text">Share Your Dream</h3>
-    
-    <!-- Form Messages -->
+<div class="container" style="margin: 3em auto; max-width: 780px;">
+  <div class="reveal" style="text-align:center; margin-bottom: 2em;">
+    <span class="section-eyebrow">Transmit</span>
+    <h1 class="section-title gradient-text glitch-text" data-text="SHARE YOUR DREAM">SHARE YOUR DREAM</h1>
+    <p class="section-sub">Submit your dream and receive Jungian analysis. The more detail you share, the deeper the signal.</p>
+  </div>
+
+  <div class="neon-card form-card reveal" data-tilt-disabled>
+    <span class="neon-card__corner neon-card__corner--tl"></span>
+    <span class="neon-card__corner neon-card__corner--tr"></span>
+    <span class="neon-card__corner neon-card__corner--bl"></span>
+    <span class="neon-card__corner neon-card__corner--br"></span>
+
     {% if messages %}
-    <div class="messages-container" style="margin: 2em 0;">
+    <div class="messages-container" style="margin-bottom: 1.5em;">
       {% for message in messages %}
-      <div class="message {{ message.tags }} center-align" style="padding: 1em; border-radius: 10px; background: rgba(192, 0, 0, 0.1);">
+      <div class="auth-error-list">
         <span class="exo-200">{{ message }}</span>
       </div>
       {% endfor %}
     </div>
     {% endif %}
 
-    <!-- Dream Form -->
+    <div class="form-progress" aria-hidden="true">
+      <div class="form-progress__step is-active"></div>
+      <div class="form-progress__step"></div>
+      <div class="form-progress__step"></div>
+    </div>
+
     <form method="POST" class="dream-form">
       {% csrf_token %}
-      
-      <!-- Personal Info -->
-      <div class="row">
+
+      <div class="form-section-label">01 · Identity</div>
+      <div class="row" style="margin-bottom: 0;">
         <div class="col s12 m6">
-          <div class="input-field animate">
-            <input id="email" name="email" type="email" class="validate" required>
-            <label for="email">Email</label>
-          </div>
-        </div>
-        <div class="col s12 m6">
-          <div class="input-field animate">
-            <input id="name" name="name" type="text" class="validate" required>
+          <div class="input-field reveal">
+            <input id="name" name="name" type="text" class="validate" required placeholder=" ">
             <label for="name">Name</label>
           </div>
         </div>
+        <div class="col s12 m6">
+          <div class="input-field reveal">
+            <input id="email" name="email" type="email" class="validate" required placeholder=" ">
+            <label for="email">Email</label>
+          </div>
+        </div>
       </div>
 
-      <!-- Dream Details -->
-      <div class="input-field animate">
-        <input id="title" name="title" type="text" class="validate" maxlength="40" required>
+      <div class="form-section-label">02 · The Dream</div>
+      <div class="input-field reveal">
+        <input id="title" name="title" type="text" class="validate" maxlength="40" required placeholder=" ">
         <label for="title">Dream Title</label>
-        <span class="character-counter helper-text" style="color: #a0a0a0;">40 characters remaining</span>
+        <span class="character-counter helper-text">40 characters remaining</span>
       </div>
 
-      <div class="input-field animate">
-        <textarea id="dream" name="dream" class="materialize-textarea" required></textarea>
+      <div class="input-field reveal dream-field">
+        <textarea id="dream" name="dream" class="dream-textarea" required placeholder=" "></textarea>
         <label for="dream">Your Dream</label>
       </div>
 
-      <!-- Classifications -->
-      <div class="row">
+      <div class="form-section-label">03 · Profile</div>
+      <div class="row" style="margin-bottom: 0;">
         <div class="col s12 m6">
-          <div class="input-field animate">
-            <select name="gender" required>
+          <div class="input-field reveal select-field">
+            <select id="gender" name="gender" required>
+              <option value="" disabled selected>Select gender</option>
               {% for gender_choice in gender_choices %}
+              {% if gender_choice.0 %}
               <option value="{{ gender_choice.0 }}">{{ gender_choice.1 }}</option>
+              {% endif %}
               {% endfor %}
             </select>
-            <label>Gender</label>
+            <label for="gender">Gender</label>
           </div>
         </div>
         <div class="col s12 m6">
-          <div class="input-field animate">
-            <select name="mbti_type" required>
+          <div class="input-field reveal select-field">
+            <select id="mbti_type" name="mbti_type" required>
               <option value="" disabled selected>Choose your type</option>
               {% for mbti_choice in mbti_choices %}
+              {% if mbti_choice.0 %}
               <option value="{{ mbti_choice.0 }}">{{ mbti_choice.1 }}</option>
+              {% endif %}
               {% endfor %}
             </select>
-            <label>Personality Type</label>
+            <label for="mbti_type">Personality Type</label>
           </div>
         </div>
       </div>
 
-      <!-- Dream Scale -->
-      <div class="dream-scale animate" style="margin: 3em 0;">
-        <h6 class="center-align exo-200t">How would you rate this dream?</h6>
-        <div class="scale-container center-align" style="margin: 2em 0;">
+      <div class="dream-scale form-lower-section reveal">
+        <h6 class="form-section-label">04 · Dream Resonance</h6>
+        <p class="helper-text" style="margin: 0 0 1em;">How did this dream feel? 1 = unsettling, 5 = profound.</p>
+        <div class="scale-meter">
           {% for choice in dream_form.fields.scale.choices %}
-          <label class="scale-option" style="margin: 0 1em;">
-            <input type="radio" name="scale" value="{{ choice.0 }}" required>
-            <span class="exo-200t">{{ choice.1 }}</span>
-          </label>
+          <input type="radio" name="scale" id="scale-{{ choice.0 }}" value="{{ choice.0 }}" required>
+          <label for="scale-{{ choice.0 }}" data-val="{{ choice.0 }}">{{ choice.1 }}</label>
           {% endfor %}
         </div>
-        <div class="scale-labels" style="display: flex; justify-content: space-between;">
-          <span class="exo-200">Negative</span>
-          <span class="exo-200">Positive</span>
+        <div class="scale-labels">
+          <span>Negative</span>
+          <span>Positive</span>
         </div>
       </div>
 
-      <!-- Privacy Option -->
-      <div class="privacy-option animate" style="margin: 2em 0;">
+      <div class="privacy-option reveal" style="margin: 2em 0;">
         <label>
           <input type="checkbox" name="active" />
-          <span class="exo-200t">Share my dream on the Wall of Dreams</span>
+          <span>Share my dream on the Wall of Dreams</span>
         </label>
       </div>
 
-      <!-- MBTI Info -->
-      <p class="exo-200t animate" style="margin: 2em 0; color: #a0a0a0;">
-        Don't know your personality type? Take the free test at 
-        <a href="https://www.16personalities.com/free-personality-test" target="_blank" 
-           class="highlight-blue">16personalities.com</a>
+      <p class="reveal" style="color: var(--muted); font-size: 0.9rem; margin: 1.5em 0;">
+        Don't know your personality type? Take the free test at
+        <a href="https://www.16personalities.com/free-personality-test" target="_blank" rel="noopener">16personalities.com</a>
       </p>
 
-      <!-- Submit Button -->
-      <button class="btn-large waves-effect waves-light hoverable animate" type="submit" 
-              style="width:100%;background:transparent;border:2px solid #42c9c6;border-radius:30px">
-        <span class="exo-200t">Submit Dream</span>
+      <button class="neon-btn neon-btn--primary neon-btn--block neon-btn--lg reveal" type="submit">
+        <span>Submit Dream</span>
       </button>
     </form>
   </div>
@@ -116,171 +128,59 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    // Initialize select fields with custom options
-    var elems = document.querySelectorAll('select');
-    var instances = M.FormSelect.init(elems, {
-      dropdownOptions: {
-        container: document.body,
-        coverTrigger: false,
-        constrainWidth: false
-      }
-    });
+    var dreamTa = document.getElementById('dream');
+    if (dreamTa) {
+      dreamTa.style.removeProperty('height');
+      dreamTa.style.overflow = 'auto';
+    }
 
-    // Handle dropdown positioning
-    elems.forEach(elem => {
-      const wrapper = elem.closest('.select-wrapper');
-      const input = wrapper.querySelector('input.select-dropdown');
-      
-      input.addEventListener('click', function(e) {
-        const dropdown = wrapper.querySelector('.dropdown-content');
-        if (dropdown) {
-          const rect = input.getBoundingClientRect();
-          dropdown.style.top = `${rect.bottom}px !important`;
-          dropdown.style.left = `${rect.left}px !important`;
-          dropdown.style.width = `${rect.width}px !important`;
+    var selects = document.querySelectorAll('.dream-form select');
+    if (typeof M !== 'undefined' && selects.length) {
+      M.FormSelect.init(selects, {
+        dropdownOptions: {
+          container: document.body,
+          coverTrigger: false,
+          constrainWidth: true,
+          closeOnClick: true
         }
       });
-    });
 
-    // Character counter
-    const titleInput = document.getElementById('title');
-    const counter = document.querySelector('.character-counter');
-    
-    titleInput.addEventListener('input', function() {
-      const remaining = 40 - this.value.length;
-      counter.textContent = `${remaining} characters remaining`;
-    });
+    }
 
-    // Animation
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('fade-in');
-          observer.unobserve(entry.target);
-        }
+    var titleInput = document.getElementById('title');
+    var counter = document.querySelector('.character-counter');
+    if (titleInput && counter) {
+      titleInput.addEventListener('input', function() {
+        var remaining = 40 - this.value.length;
+        counter.textContent = remaining + ' characters remaining';
       });
-    }, {
-      threshold: 0.1
-    });
+    }
 
-    document.querySelectorAll('.animate').forEach(element => {
-      observer.observe(element);
-    });
+    // Progress bar follows section completion
+    var form = document.querySelector('.dream-form');
+    var steps = document.querySelectorAll('.form-progress__step');
+    function updateProgress() {
+      if (!form) return;
+      var name = form.querySelector('#name').value.trim();
+      var email = form.querySelector('#email').value.trim();
+      var title = form.querySelector('#title').value.trim();
+      var dream = form.querySelector('#dream').value.trim();
+      var gender = form.querySelector('[name="gender"]').value;
+      var mbti = form.querySelector('[name="mbti_type"]').value;
+
+      steps[0].classList.toggle('is-complete', !!(name && email));
+      steps[1].classList.toggle('is-complete', !!(title && dream));
+      steps[2].classList.toggle('is-complete', !!(gender && mbti));
+      steps[0].classList.toggle('is-active', !(name && email));
+      steps[1].classList.toggle('is-active', !!(name && email) && !(title && dream));
+      steps[2].classList.toggle('is-active', !!(title && dream) && !(gender && mbti));
+    }
+    if (form) {
+      form.addEventListener('input', updateProgress);
+      form.addEventListener('change', updateProgress);
+      updateProgress();
+    }
   });
 </script>
-
-<style>
-  .fade-in {
-    animation: fadeIn 0.6s ease forwards;
-  }
-
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  .helper-text {
-    color: #a0a0a0 !important;
-  }
-
-  .character-counter {
-    color: #a0a0a0 !important;
-  }
-
-  .input-field input:focus,
-  .input-field textarea:focus {
-    border-bottom: 1px solid #42c9c6 !important;
-    box-shadow: 0 1px 0 0 #42c9c6 !important;
-  }
-
-  .input-field input:focus + label,
-  .input-field textarea:focus + label {
-    color: #42c9c6 !important;
-  }
-
-  .scale-option {
-    display: inline-block;
-    margin: 0 1em;
-  }
-
-  .scale-option input[type="radio"]:checked + span {
-    color: #42c9c6;
-  }
-
-  /* Create stacking context for the form container */
-  .form-card {
-    position: relative;
-    z-index: 1;
-  }
-
-  /* Ensure form sections have proper stacking */
-  .dream-form {
-    position: relative;
-    z-index: 1;
-  }
-
-  /* Reset z-index for all form sections */
-  .input-field {
-    position: relative;
-    z-index: 1;
-  }
-
-  /* Push dream scale back */
-  .dream-scale {
-    position: relative;
-    z-index: 0 !important;
-  }
-
-  .privacy-option {
-    position: relative;
-    z-index: 1;
-  }
-
-  /* Ensure dropdowns stay on top */
-  .select-wrapper {
-    position: relative !important;
-    z-index: 1100 !important;
-  }
-
-  .dropdown-content {
-    background-color: #272425 !important;
-    border: 1px solid rgba(66, 201, 198, 0.2);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5) !important;
-    z-index: 1200 !important;
-  }
-
-  /* Ensure the select input stays above dream scale */
-  .select-wrapper input.select-dropdown {
-    position: relative;
-    z-index: 1100 !important;
-    color: #c5c5c5 !important;
-    border-bottom: 1px solid rgba(66, 201, 198, 0.2) !important;
-  }
-
-  /* Ensure classifications section stays above dream scale */
-  .row .input-field {
-    position: relative;
-    z-index: 1100 !important;
-  }
-
-  /* Style dropdown options */
-  .dropdown-content li > span {
-    color: #c5c5c5 !important;
-  }
-
-  .dropdown-content li:hover {
-    background-color: rgba(66, 201, 198, 0.1) !important;
-  }
-
-  .dropdown-content li.selected {
-    background-color: rgba(66, 201, 198, 0.2) !important;
-  }
-</style>
 
 {% endblock %}

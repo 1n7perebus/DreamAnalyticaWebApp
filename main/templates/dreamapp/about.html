@@ -1,182 +1,107 @@
 {% extends 'dreamapp/header.html' %}
+{% load static %}
+{% block title %}About — Dream Analytica{% endblock %}
 {% block content %}
 
-<head>
-    {% load static %}
-    {{ form.media }}
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5864886611650170"
-        crossorigin="anonymous"></script>
-    <meta name="google-adsense-account" content="ca-pub-5864886611650170">
-</head>
+<div class="container" style="margin: 3em auto; max-width: 920px;">
 
-<body
-    style="margin: 0; padding: 0; height: 100vh; display: flex; align-items: center; justify-content: center;background:#272425;">
-    <div class="container" style="margin: 4em auto;">
-        <div class="about-card animate" style="background: rgba(66, 201, 198, 0.05); border-radius: 20px; border: 1px solid rgba(66, 201, 198, 0.2); padding: 3em 2em;">
-            
-            <!-- Profile Section -->
-            <div class="row">
-                <div class="col s12 m4 animate">
-                    <div class="profile-image-container center-align">
-                        <img src="{% static 'main/images/rs.jpg' %}" alt="Robert She" 
-                             class="responsive-img hoverable" 
-                             style="border-radius: 15px; border: 2px solid rgba(66, 201, 198, 0.2); box-shadow: 0 0 20px rgba(66, 201, 198, 0.1); max-width: 250px;">
-                    </div>
-                </div>
-                
-                <div class="col s12 m8">
-                    <h3 class="goldman-regular gradient-text animate">Robert She</h3>
-                    <h5 class="exo-200t animate" style="color: #42c9c6; margin-bottom: 1em;">
-                        Analyst
-                    </h5>
-                </div>
-            </div>
+  <div class="reveal" style="text-align:center; margin-bottom: 2em;">
+    <span class="section-eyebrow">The Analyst</span>
+    <h1 class="section-title gradient-text glitch-text" data-text="ROBERT SHE">ROBERT SHE</h1>
+    <p class="section-sub">Designer · Software developer · Jungian analyst</p>
+  </div>
 
-            <!-- About Content -->
-            <div class="about-content">
-                <div class="section animate">
-                    <h4 class="goldman-regular">About</h4>
-                    <p class="exo-200text flow-text animate">
-                        Robert is a 34-year-old analyst from the United States, whose unique background bridges both technology and psychology. His journey began in the world of design, earning a Bachelor of Fine Arts in Industrial Design with a specialization in Automotive Design. Later drawn to technology, he became a full-stack software developer proficient in Python, JavaScript, Solidity, and various other technologies. His technical portfolio includes mobile apps, web applications, and Web3/blockchain projects.
-                    </p>
-                </div>
-
-                <div class="section animate">
-                    <p class="exo-200text flow-text">
-                        While coding fulfills his technical curiosity, it was a deeper fascination with the human mind that truly shaped his path.
-                    </p>
-                </div>
-
-                <div class="section animate">
-                    <p class="exo-200text flow-text">
-                        As an INTP personality type—naturally curious and analytical—these qualities led him to an unexpected but life-changing interest in psychology. It began with an elective university course that introduced him to philosophical and psychological thinkers like Kant, Descartes, Nietzsche, and Freud. However, it was Carl Jung's work that truly resonated with him. Jung's theories on the unconscious, archetypes, and personality types struck a chord, giving him language for things he had always sensed but couldn't quite articulate.
-                    </p>
-                </div>
-
-                <div class="section animate">
-                    <p class="exo-200text flow-text">
-                        Over the past eight years, Robert has immersed himself in Jungian psychology, exploring concepts like the Ego, Shadow, Anima/Animus, and the Collective Unconscious. Jung's work on dream analysis, in particular, became a cornerstone of his personal development. Through interpreting his own dreams, he uncovered insights that shifted his perspective on himself and the human psyche in profound ways.
-                    </p>
-                </div>
-
-                <div class="section animate">
-                    <p class="exo-200text flow-text">
-                        His dedication to psychology is deeply personal. At age 13, Robert lost his father to suicide—a traumatic event that spurred existential crises and a determination to understand the complexities of mental health. Through his research, Jung's work provided not only clarity but also a pathway toward healing and personal growth. This process of self-discovery has empowered him to help others in their own journeys.
-                    </p>
-                </div>
-
-                <div class="section animate">
-                    <p class="exo-200text flow-text">
-                        Today, Robert uses his knowledge of Jungian psychology to help individuals around the world explore their inner selves. Through dream analysis and one-on-one counseling, he guides people to uncover the deeper meanings in their lives, providing insights that lead to growth, healing, and greater self-awareness.
-                    </p>
-                </div>
-
-                <div class="section animate">
-                    <p class="exo-200text flow-text">
-                        Though his journey started in the world of design and technology, it has evolved into something far more meaningful. Robert's passion is now centered on helping others navigate their own inner worlds, using the universal language of dreams and the transformative power of psychological insight.
-                    </p>
-                </div>
-            </div>
-        </div>
+  <section class="about-hero reveal">
+    <div class="portrait-frame">
+      <img src="{% static 'main/images/rs.jpg' %}" alt="Robert She"
+           onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+      <div style="display:none; position:absolute; inset:4px; border-radius:50%; background:linear-gradient(135deg, rgba(0,240,255,0.15), rgba(255,43,214,0.15)); align-items:center; justify-content:center; z-index:2;">
+        <i class="material-icons" style="font-size:5rem; color: var(--cyan); text-shadow: 0 0 18px rgba(0,240,255,0.6);">psychology</i>
+      </div>
     </div>
 
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5864886611650170"
-        crossorigin="anonymous"></script>
-    <!-- Horizontal -->
-    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-5864886611650170" data-ad-slot="7852600863"
-        data-ad-format="auto" data-full-width-responsive="true"></ins>
-    <script>
-        (adsbygoogle = window.adsbygoogle || []).push({});
-    </script>
+    <div class="about-intro">
+      <h3 class="goldman-regular">Bridging Code &amp; Consciousness</h3>
+      <div class="role">Analyst · 34 · United States</div>
+      <p>
+        A unique background bridging technology and psychology. Bachelor of Fine Arts in Industrial Design, full-stack developer in Python, JavaScript, and Solidity — and for the past eight years, a dedicated student of Carl Jung's analytical psychology.
+      </p>
+    </div>
+  </section>
 
-    <style>
-        .about-card {
-            margin-bottom: 4em;
-        }
+  <div class="neon-card reveal" style="margin-top: 3em;">
+    <span class="neon-card__corner neon-card__corner--tl"></span>
+    <span class="neon-card__corner neon-card__corner--tr"></span>
+    <span class="neon-card__corner neon-card__corner--bl"></span>
+    <span class="neon-card__corner neon-card__corner--br"></span>
 
-        .section {
-            margin: 0;
-        }
+    <div class="timeline">
 
-        .section p {
-            margin: 0;
-            line-height: 1.6;
-        }
+      <div class="timeline-item reveal">
+        <h4 class="timeline-item__title">01 · Design</h4>
+        <p class="timeline-item__text">
+          Robert's journey began in the world of design, earning a Bachelor of Fine Arts in Industrial Design with a specialization in Automotive Design.
+        </p>
+      </div>
 
-        .section h4 {
-            margin-bottom: 0.25em;
-        }
+      <div class="timeline-item reveal">
+        <h4 class="timeline-item__title">02 · Code</h4>
+        <p class="timeline-item__text">
+          Drawn to technology, he became a full-stack software developer proficient in Python, JavaScript, Solidity, and various other technologies — building mobile apps, web applications, and Web3/blockchain projects.
+        </p>
+      </div>
 
-        .profile-image-container {
-            margin-bottom: 0.5em;
-        }
+      <div class="pull-quote reveal">
+        <p>"While coding fulfills the technical curiosity, it was a deeper fascination with the human mind that truly shaped the path."</p>
+      </div>
 
-        .profile-image-container img {
-            transition: all 0.3s ease;
-        }
+      <div class="timeline-item reveal">
+        <h4 class="timeline-item__title">03 · Psychology Awakens</h4>
+        <p class="timeline-item__text">
+          As an INTP — naturally curious and analytical — an unexpected elective university course introduced him to Kant, Descartes, Nietzsche, and Freud. Carl Jung's work, however, was what truly resonated. Jung's theories on the unconscious, archetypes, and personality types gave language to things he had always sensed but couldn't articulate.
+        </p>
+      </div>
 
-        .profile-image-container img:hover {
-            transform: scale(1.02);
-            box-shadow: 0 0 30px rgba(66, 201, 198, 0.2);
-        }
+      <div class="timeline-item reveal">
+        <h4 class="timeline-item__title">04 · Eight Years In</h4>
+        <p class="timeline-item__text">
+          Over the past eight years, Robert has immersed himself in Jungian psychology — exploring the Ego, Shadow, Anima/Animus, and the Collective Unconscious. Dream analysis became a cornerstone of his personal development.
+        </p>
+      </div>
 
-        .gradient-text {
-            background: linear-gradient(45deg, #42c9c6, #5AFFDD);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            text-shadow: none;
-        }
+      <div class="timeline-item reveal">
+        <h4 class="timeline-item__title">05 · The Personal Reason</h4>
+        <p class="timeline-item__text">
+          His dedication is deeply personal. At age 13, Robert lost his father to suicide — a traumatic event that spurred existential crises and a determination to understand mental health. Jung's work provided not only clarity but also a pathway toward healing and personal growth.
+        </p>
+      </div>
 
-        .fade-in {
-            animation: fadeIn 0.6s ease forwards;
-        }
+      <div class="pull-quote reveal">
+        <p>"Through this process of self-discovery, the path became clear: help others on their own journeys."</p>
+      </div>
 
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+      <div class="timeline-item reveal">
+        <h4 class="timeline-item__title">06 · Today</h4>
+        <p class="timeline-item__text">
+          Robert uses his knowledge of Jungian psychology to help individuals around the world explore their inner selves. Through dream analysis and one-on-one counseling, he guides people to uncover the deeper meanings in their lives — providing insights that lead to growth, healing, and greater self-awareness.
+        </p>
+      </div>
 
-        h5.exo-200t {
-            margin-bottom: 0.5em !important;
-        }
+    </div>
+  </div>
 
-        @media only screen and (max-width: 600px) {
-            .about-card {
-                padding: 2em 1em;
-            }
-            
-            .profile-image-container {
-                margin-bottom: 2em;
-            }
-        }
-    </style>
+  <section class="reveal" style="margin: 4em 0; text-align: center;">
+    <span class="section-eyebrow">Ready</span>
+    <h2 class="section-title gradient-text">Begin Your Analysis</h2>
+    <p class="flow-text" style="max-width: 580px; margin: 0 auto 2em;">
+      Submit a dream and receive expert Jungian interpretation.
+    </p>
+    <div class="hero-cta-row">
+      <a href="/consult/" class="neon-btn neon-btn--primary neon-btn--lg">Post a Dream</a>
+      <a href="/contact/" class="neon-btn neon-btn--mag neon-btn--lg">Get in Touch</a>
+    </div>
+  </section>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('fade-in');
-                        observer.unobserve(entry.target);
-                    }
-                });
-            }, {
-                threshold: 0.1
-            });
-
-            document.querySelectorAll('.animate').forEach(element => {
-                observer.observe(element);
-            });
-        });
-    </script>
-
-</body>
+</div>
 
 {% endblock %}

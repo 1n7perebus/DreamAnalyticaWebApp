@@ -137,11 +137,11 @@ def consult(request):
 
 
 def dreams(request):
-    dreams_with_replies = []
-    dreams = Dreams.objects.all()
     reply_form = ReplyForm()
+    dreams = Dreams.objects.all()
 
-    average_scale = round(dreams.aggregate(Avg('scale'))['scale__avg'], 2)
+    avg_result = dreams.filter(active=True).aggregate(Avg('scale'))['scale__avg']
+    average_scale = round(avg_result, 2) if avg_result is not None else None
 
     duplicates = Dreams.objects.values('title', 'dream').annotate(count=Count('id')).filter(count__gt=1)
     for duplicate in duplicates:
@@ -188,9 +188,13 @@ def dreams(request):
             return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
         elif reply_form.is_valid():
+            dream_id = request.POST.get('dream_id')
             dream_email = request.POST.get('dream_email')
             try:
-                dream_instance = get_object_or_404(Dreams, email=dream_email)
+                if dream_id:
+                    dream_instance = get_object_or_404(Dreams, id=dream_id)
+                else:
+                    dream_instance = get_object_or_404(Dreams, email=dream_email)
                 reply = reply_form.save(commit=False)
                 reply.dream = dream_instance
                 reply.reply = request.POST.get('reply')
@@ -212,14 +216,20 @@ def dreams(request):
             messages.error(request, "Invalid form data. Please check the entered information.")
             return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
-    for dream in dreams:
-        replies = Reply.objects.filter(dream=dream)
-        dreams_with_replies.append({'dream': dream, 'replies': replies})
+    active_dreams = Dreams.objects.filter(active=True).prefetch_related('reply_set').order_by('-pub')
+    dreams_with_replies = [
+        {'dream': dream, 'replies': dream.reply_set.all()}
+        for dream in active_dreams
+    ]
 
-    # Calculate gender distribution
+    dream_count = active_dreams.count()
+
     gender_counts = Counter(dream.gender for dream in dreams)
     total_dreams = len(dreams)
-    gender_percentages = {gender: (count / total_dreams) * 100 for gender, count in gender_counts.items()}
+    gender_percentages = {
+        gender: (count / total_dreams) * 100
+        for gender, count in gender_counts.items()
+    }
     sorted_gender_percentages = sorted(gender_percentages.items())
 
     return render(request, "dreamapp/dreams.html", {
@@ -230,6 +240,7 @@ def dreams(request):
         "health_status": health_status,
         "health_color": health_color,
         "sorted_gender_percentages": sorted_gender_percentages,
+        "dream_count": dream_count,
     })
 
 

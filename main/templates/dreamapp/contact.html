@@ -1,116 +1,93 @@
 {% extends 'dreamapp/header.html' %}
+{% block title %}Contact — Dream Analytica{% endblock %}
 {% block content %}
 
-<div class="container" style="margin: 4em auto;">
-  <div class="contact-card animate" style="background: rgba(66, 201, 198, 0.05); border-radius: 20px; border: 1px solid rgba(66, 201, 198, 0.2); padding: 3em 2em;">
-    <h3 class="goldman-regular center-align gradient-text">Contact Us</h3>
-    
-    <!-- Form Messages -->
-    {% if messages %}
-    <div class="messages-container" style="margin: 2em 0;">
-      {% for message in messages %}
-      <div class="message {{ message.tags }} center-align" style="padding: 1em; border-radius: 10px; background: rgba(192, 0, 0, 0.1);">
-        <span class="exo-200">{{ message }}</span>
+<div class="container" style="margin: 3em auto; max-width: 1080px;">
+  <div class="reveal" style="text-align:center; margin-bottom: 2em;">
+    <span class="section-eyebrow">Open Channel</span>
+    <h1 class="section-title gradient-text glitch-text" data-text="CONTACT US">CONTACT US</h1>
+    <p class="section-sub">Questions, collaborations, or just want to say hello — we listen on every frequency.</p>
+  </div>
+
+  <div class="contact-grid">
+    <aside class="contact-aside reveal">
+      <h6>Direct Channels</h6>
+      <ul>
+        <li>
+          <i class="material-icons">email</i>
+          <a href="mailto:dreamanalytica08@gmail.com">dreamanalytica08@gmail.com</a>
+        </li>
+        <li>
+          <i class="material-icons">phone_iphone</i>
+          <span>iOS &amp; Android app</span>
+        </li>
+        <li>
+          <i class="material-icons">psychology</i>
+          <span>Jungian dream analysis</span>
+        </li>
+        <li>
+          <i class="material-icons">public</i>
+          <span>Worldwide consultations</span>
+        </li>
+      </ul>
+
+      <h6 style="margin-top: 1.6em;">Response Time</h6>
+      <p style="color: var(--muted); font-size: 0.92rem; line-height: 1.6; margin: 0;">
+        Most messages receive a reply within 24–48 hours. For urgent matters, mention "urgent" in your message.
+      </p>
+    </aside>
+
+    <div class="neon-card reveal">
+      <span class="neon-card__corner neon-card__corner--tl"></span>
+      <span class="neon-card__corner neon-card__corner--tr"></span>
+      <span class="neon-card__corner neon-card__corner--bl"></span>
+      <span class="neon-card__corner neon-card__corner--br"></span>
+
+      {% if messages %}
+      <div class="messages-container" style="margin-bottom: 1.5em;">
+        {% for message in messages %}
+        <div class="auth-error-list"><span>{{ message }}</span></div>
+        {% endfor %}
       </div>
-      {% endfor %}
+      {% endif %}
+
+      <form method="POST" class="contact-form">
+        {% csrf_token %}
+
+        <div class="row" style="margin-bottom: 0;">
+          <div class="col s12 m6">
+            <div class="input-field">
+              <input id="name" name="name" type="text" class="validate" required placeholder=" ">
+              <label for="name">Name</label>
+            </div>
+          </div>
+          <div class="col s12 m6">
+            <div class="input-field">
+              <input id="email" name="email" type="email" class="validate" required placeholder=" ">
+              <label for="email">Email</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="input-field">
+          <input id="phone" name="phone" type="tel" class="validate"
+                 pattern="^\+[0-9]{1,4}[0-9]+$"
+                 placeholder=" ">
+          <label for="phone">WhatsApp Number (Optional)</label>
+          <span class="helper-text">Include country code (e.g., +1234567890)</span>
+        </div>
+
+        <div class="input-field">
+          <textarea id="message" name="desc" class="materialize-textarea" required placeholder=" "></textarea>
+          <label for="message">Your Message</label>
+        </div>
+
+        <button class="neon-btn neon-btn--primary neon-btn--block neon-btn--lg" type="submit">
+          <span>Send Message</span>
+        </button>
+      </form>
     </div>
-    {% endif %}
-
-    <!-- Contact Form -->
-    <form method="POST" class="contact-form">
-      {% csrf_token %}
-      
-      <div class="row">
-        <div class="col s12 m6">
-          <div class="input-field animate">
-            <input id="name" name="name" type="text" class="validate" required>
-            <label for="name">Name</label>
-          </div>
-        </div>
-        <div class="col s12 m6">
-          <div class="input-field animate">
-            <input id="email" name="email" type="email" class="validate" required>
-            <label for="email">Email</label>
-          </div>
-        </div>
-      </div>
-
-      <div class="input-field animate">
-        <input id="phone" name="phone" type="tel" class="validate" 
-               pattern="^\+[0-9]{1,4}[0-9]+$"
-               placeholder="+00000000000">
-        <label for="phone">WhatsApp Number (Optional)</label>
-        <span class="helper-text" style="color: #a0a0a0;">Include country code (e.g., +1234567890)</span>
-      </div>
-
-      <div class="input-field animate">
-        <textarea id="message" name="desc" class="materialize-textarea" required></textarea>
-        <label for="message">Your Message</label>
-      </div>
-
-      <button class="btn-large waves-effect waves-light hoverable animate" type="submit" 
-              style="width:100%;background:transparent;border:2px solid #42c9c6;border-radius:30px">
-        <span class="exo-200t">Send Message</span>
-      </button>
-    </form>
   </div>
 </div>
-
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('fade-in');
-          observer.unobserve(entry.target);
-        }
-      });
-    }, {
-      threshold: 0.1
-    });
-
-    document.querySelectorAll('.animate').forEach(element => {
-      observer.observe(element);
-    });
-  });
-</script>
-
-<style>
-  .fade-in {
-    animation: fadeIn 0.6s ease forwards;
-  }
-
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  .input-field input:focus,
-  .input-field textarea:focus {
-    border-bottom: 1px solid #42c9c6 !important;
-    box-shadow: 0 1px 0 0 #42c9c6 !important;
-  }
-
-  .input-field input:focus + label,
-  .input-field textarea:focus + label {
-    color: #42c9c6 !important;
-  }
-
-  .helper-text {
-    color: #a0a0a0 !important;
-  }
-
-  @media only screen and (max-width: 600px) {
-    .contact-card {
-      padding: 2em 1em;
-    }
-  }
-</style>
 
 {% endblock %}
