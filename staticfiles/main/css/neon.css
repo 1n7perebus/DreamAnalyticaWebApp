@@ -2117,29 +2117,18 @@ nav .nav-wrapper .brand-logo {
   box-shadow: inset 0 0 30px rgba(0, 240, 255, 0.05);
 }
 
-.geo-map {
+.geo-map,
+.geo-map-object {
   display: block;
   width: 100%;
   height: auto;
+  min-height: 12rem;
+  pointer-events: none;
 }
 
-.geo-map__core {
-  fill: var(--cyan);
-  fill-opacity: 0.85;
-  stroke: #fff;
-  stroke-width: 0.6;
-  stroke-opacity: 0.5;
-}
-
-.geo-map__pulse {
-  fill: var(--cyan);
-  fill-opacity: 0.15;
-  animation: geoPulse 2.8s ease-out infinite;
-}
-
-@keyframes geoPulse {
-  0% { transform: scale(0.6); opacity: 0.7; }
-  100% { transform: scale(1.4); opacity: 0; }
+.geo-map-object {
+  border: 0;
+  background: transparent;
 }
 
 .geo-country-list {
@@ -2198,13 +2187,67 @@ nav .nav-wrapper .brand-logo {
   }
 }
 
+.dream-wall-controls {
+  margin: 2em auto 2em;
+  max-width: 760px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25em;
+}
+
+.dream-wall-controls__group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55em;
+  align-items: center;
+}
+
+.dream-wall-controls__label {
+  font-family: 'Exo 2', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-align: center;
+  width: 100%;
+  display: block;
+}
+
 .dream-filters {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5em;
   justify-content: center;
-  margin: 2em auto 2em;
-  max-width: 760px;
+}
+
+.dream-wall-controls .dream-sort-tabs {
+  margin-bottom: 0;
+}
+
+.dream-sort-tabs {
+  width: fit-content;
+  max-width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.dream-sort-tabs .wall-analytics__tab {
+  flex: 0 0 auto;
+  min-width: auto;
+  padding-left: 0.9em;
+  padding-right: 0.9em;
+}
+
+.chip-age {
+  border-color: rgba(0, 240, 255, 0.35);
+  background: rgba(0, 240, 255, 0.06);
+  color: var(--cyan);
+}
+
+.chip-geo {
+  border-color: rgba(255, 43, 214, 0.35);
+  background: rgba(255, 43, 214, 0.06);
+  color: var(--magenta);
 }
 
 .dreams-list-row { margin-bottom: 0; }

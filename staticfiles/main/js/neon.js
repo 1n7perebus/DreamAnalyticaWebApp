@@ -464,29 +464,129 @@
   }
 
   // ------------------------------------------------------------------
-  // Dream filters (chip toggles)
+  // Wall of Dreams — mood filters + demographic sort
   // ------------------------------------------------------------------
-  function initDreamFilters() {
-    const filterRow = document.querySelector('.dream-filters');
-    if (!filterRow) return;
-    const chips = filterRow.querySelectorAll('.chip-filter');
-    const cards = document.querySelectorAll('.dream-card[data-score]');
+  function initDreamWallControls() {
+    const root = document.querySelector('[data-dream-wall-controls]');
+    const list = document.querySelector('.dreams-list');
+    if (!root || !list) return;
 
-    chips.forEach((chip) => {
-      chip.addEventListener('click', () => {
-        chips.forEach((c) => c.classList.remove('is-active'));
+    const filterRow = root.querySelector('.dream-filters');
+    const sortTabs = root.querySelectorAll('.dream-sort-tabs [data-sort]');
+    const filterChips = filterRow ? filterRow.querySelectorAll('.chip-filter') : [];
+    let cards = Array.from(list.querySelectorAll('.dream-card[data-score]'));
+    let activeFilter = 'all';
+    let activeSort = 'newest';
+
+    const genderRank = { FEMALE: 0, MALE: 1 };
+
+    function pubTs(card) {
+      return parseInt(card.getAttribute('data-pub'), 10) || 0;
+    }
+
+    function cardMatchesFilter(card) {
+      const score = parseInt(card.getAttribute('data-score'), 10) || 0;
+      const mbti = (card.getAttribute('data-mbti') || '').toUpperCase();
+      if (activeFilter === 'positive') return score >= 4;
+      if (activeFilter === 'neutral') return score === 3;
+      if (activeFilter === 'negative') return score <= 2;
+      if (activeFilter.startsWith('mbti:')) {
+        return mbti === activeFilter.slice(5).toUpperCase();
+      }
+      return true;
+    }
+
+    function compareCards(a, b) {
+      const aPub = pubTs(a);
+      const bPub = pubTs(b);
+
+      if (activeSort === 'newest') {
+        return bPub - aPub;
+      }
+
+      if (activeSort === 'personality') {
+        const aM = (a.getAttribute('data-mbti') || '').toUpperCase();
+        const bM = (b.getAttribute('data-mbti') || '').toUpperCase();
+        if (!aM && bM) return 1;
+        if (aM && !bM) return -1;
+        if (aM !== bM) return aM.localeCompare(bM);
+        return bPub - aPub;
+      }
+
+      if (activeSort === 'age') {
+        const aAge = parseInt(a.getAttribute('data-age'), 10);
+        const bAge = parseInt(b.getAttribute('data-age'), 10);
+        const aHas = !Number.isNaN(aAge);
+        const bHas = !Number.isNaN(bAge);
+        if (!aHas && bHas) return 1;
+        if (aHas && !bHas) return -1;
+        if (aHas && bHas && aAge !== bAge) return aAge - bAge;
+        return bPub - aPub;
+      }
+
+      if (activeSort === 'gender') {
+        const aG = (a.getAttribute('data-gender') || '').toUpperCase();
+        const bG = (b.getAttribute('data-gender') || '').toUpperCase();
+        const aR = genderRank[aG] !== undefined ? genderRank[aG] : 2;
+        const bR = genderRank[bG] !== undefined ? genderRank[bG] : 2;
+        if (aR !== bR) return aR - bR;
+        if (aG !== bG) return aG.localeCompare(bG);
+        return bPub - aPub;
+      }
+
+      if (activeSort === 'geo') {
+        const aGeo = (
+          a.getAttribute('data-country-name') ||
+          a.getAttribute('data-country-code') ||
+          ''
+        ).toUpperCase();
+        const bGeo = (
+          b.getAttribute('data-country-name') ||
+          b.getAttribute('data-country-code') ||
+          ''
+        ).toUpperCase();
+        if (!aGeo && bGeo) return 1;
+        if (aGeo && !bGeo) return -1;
+        if (aGeo !== bGeo) return aGeo.localeCompare(bGeo);
+        return bPub - aPub;
+      }
+
+      return bPub - aPub;
+    }
+
+    function applyWallState() {
+      cards.sort(compareCards);
+      cards.forEach((card) => list.appendChild(card));
+      cards.forEach((card) => {
+        card.classList.toggle('is-hidden', !cardMatchesFilter(card));
+      });
+    }
+
+    filterChips.forEach((chip) => {
+      const activate = () => {
+        filterChips.forEach((c) => c.classList.remove('is-active'));
         chip.classList.add('is-active');
-        const filter = chip.getAttribute('data-filter') || 'all';
-        cards.forEach((card) => {
-          const score = parseInt(card.getAttribute('data-score'), 10) || 0;
-          const mbti = (card.getAttribute('data-mbti') || '').toUpperCase();
-          let visible = true;
-          if (filter === 'positive') visible = score >= 4;
-          else if (filter === 'neutral') visible = score === 3;
-          else if (filter === 'negative') visible = score <= 2;
-          else if (filter.startsWith('mbti:')) visible = mbti === filter.slice(5).toUpperCase();
-          card.classList.toggle('is-hidden', !visible);
+        activeFilter = chip.getAttribute('data-filter') || 'all';
+        applyWallState();
+      };
+      chip.addEventListener('click', activate);
+      chip.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          activate();
+        }
+      });
+    });
+
+    sortTabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        sortTabs.forEach((t) => {
+          const on = t === tab;
+          t.classList.toggle('is-active', on);
+          t.setAttribute('aria-selected', on ? 'true' : 'false');
         });
+        activeSort = tab.getAttribute('data-sort') || 'newest';
+        applyWallState();
       });
     });
   }
@@ -593,7 +693,7 @@
       initMarquee();
       initStickyCta();
       initRingMeter();
-      initDreamFilters();
+      initDreamWallControls();
       initScaleMeter();
       initFormSubmit();
     } catch (err) {

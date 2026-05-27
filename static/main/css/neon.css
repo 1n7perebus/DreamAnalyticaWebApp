@@ -2199,6 +2199,7 @@ nav .nav-wrapper .brand-logo {
   display: flex;
   flex-direction: column;
   gap: 0.55em;
+  align-items: center;
 }
 
 .dream-wall-controls__label {
@@ -2208,6 +2209,8 @@ nav .nav-wrapper .brand-logo {
   text-transform: uppercase;
   color: var(--muted);
   text-align: center;
+  width: 100%;
+  display: block;
 }
 
 .dream-filters {
@@ -2219,6 +2222,20 @@ nav .nav-wrapper .brand-logo {
 
 .dream-wall-controls .dream-sort-tabs {
   margin-bottom: 0;
+}
+
+.dream-sort-tabs {
+  width: fit-content;
+  max-width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.dream-sort-tabs .wall-analytics__tab {
+  flex: 0 0 auto;
+  min-width: auto;
+  padding-left: 0.9em;
+  padding-right: 0.9em;
 }
 
 .chip-age {

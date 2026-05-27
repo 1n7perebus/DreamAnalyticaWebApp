@@ -98,48 +98,57 @@
 
     window.addEventListener('resize', () => setActive(activeIndex, false));
     setActive(activeIndex, false);
-    renderGeoMarkers(root);
+    highlightGeoCountries(root);
   }
 
-  function renderGeoMarkers(root) {
-    const layer = root.querySelector('.geo-map__markers');
+  function highlightGeoCountries(root) {
+    const mapObj = root.querySelector('.geo-map-object');
     const dataEl = document.getElementById('wall-country-data');
-    if (!layer || !dataEl) return;
+    if (!mapObj || !dataEl) return;
 
-    let markers = [];
+    let countries = [];
     try {
-      markers = JSON.parse(dataEl.textContent);
+      countries = JSON.parse(dataEl.textContent);
     } catch (e) {
       return;
     }
 
-    layer.innerHTML = '';
-    markers.forEach((m) => {
-      if (m.x == null || m.y == null) return;
-      const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-      g.setAttribute('class', 'geo-map__marker');
-      g.setAttribute('transform', `translate(${m.x}, ${m.y})`);
+    function apply() {
+      const doc = mapObj.contentDocument;
+      if (!doc) return;
 
-      const pulse = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-      pulse.setAttribute('class', 'geo-map__pulse');
-      pulse.setAttribute('r', String(m.size + 6));
-      pulse.setAttribute('cx', '0');
-      pulse.setAttribute('cy', '0');
+      const paths = doc.querySelectorAll('.geo-country');
+      paths.forEach((p) => {
+        p.classList.remove('geo-country--active');
+        p.removeAttribute('data-count');
+        p.removeAttribute('title');
+      });
 
-      const core = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-      core.setAttribute('class', 'geo-map__core');
-      core.setAttribute('r', String(m.size));
-      core.setAttribute('cx', '0');
-      core.setAttribute('cy', '0');
+      if (!countries.length) return;
 
-      const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
-      title.textContent = `${m.name}: ${m.count} dream${m.count === 1 ? '' : 's'} (${m.pct}%)`;
+      const maxCount = Math.max(...countries.map((c) => c.count), 1);
 
-      g.appendChild(pulse);
-      g.appendChild(core);
-      g.appendChild(title);
-      layer.appendChild(g);
-    });
+      countries.forEach((c) => {
+        const code = (c.code || '').toUpperCase();
+        const matched = doc.querySelectorAll(
+          `.geo-country[data-iso2="${code}"], .geo-country[data-iso3="${code}"]`
+        );
+        const intensity = 0.35 + (c.count / maxCount) * 0.65;
+        const label = `${c.name}: ${c.count} dream${c.count === 1 ? '' : 's'} (${c.pct}% of geolocated)`;
+        matched.forEach((path) => {
+          path.classList.add('geo-country--active');
+          path.style.setProperty('--geo-intensity', String(intensity));
+          path.setAttribute('data-count', String(c.count));
+          path.setAttribute('title', label);
+        });
+      });
+    }
+
+    if (mapObj.contentDocument && mapObj.contentDocument.querySelector('svg')) {
+      apply();
+    } else {
+      mapObj.addEventListener('load', apply, { once: true });
+    }
   }
 
   if (document.readyState === 'loading') {
