@@ -4,7 +4,7 @@ from .models import *
 
 class DreamsAdmin(admin.ModelAdmin):
     search_fields = ['email', 'pub', 'country_name', 'city']
-    list_display = ('email', 'id', 'name', 'age', 'country_code', 'pub')
+    list_display = ('active','email', 'id', 'name', 'age', 'country_code', 'pub')
     list_filter = ('country_code', 'gender', 'mbti_type', 'active')
     ordering = ['-pub', 'email']
 

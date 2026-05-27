@@ -5,7 +5,7 @@
     <p class="wall-analytics__sub">Patterns across dreams on the wall</p>
   </div>
 
-  <div class="wall-analytics__tabs" role="tablist" aria-label="Dream analytics">
+  <div class="wall-analytics__tabs wall-analytics__tabs--segmented" role="tablist" aria-label="Dream analytics">
     <button type="button" class="wall-analytics__tab is-active" role="tab" data-tab="personality" aria-selected="true">
       Personality
     </button>
@@ -89,20 +89,31 @@
         <p class="wall-panel__hint">Gender split among wall dreams with a known response</p>
         <div class="gender-pie-wrap">
           <div class="gender-pie"
-               style="--male-end: {{ gender_pie.male_end }}%; --female-end: {{ gender_pie.female_end }}%;">
+               style="--male-end: {{ gender_pie.male_end }}; --female-end: {{ gender_pie.female_end }};"
+               aria-label="Gender split: {{ gender_pie.male_pct }}% male, {{ gender_pie.female_pct }}% female">
             <div class="gender-pie__hole">
               <span class="gender-pie__total">{{ gender_pie.known_total }}</span>
               <span class="gender-pie__label">dreamers</span>
+              <span class="gender-pie__meta">known responses</span>
             </div>
           </div>
           <ul class="gender-pie-legend">
-            <li><span class="gender-pie-legend__swatch gender-pie-legend__swatch--male"></span>
-              Male <strong>{{ gender_pie.male_pct }}%</strong> <em>({{ gender_pie.male_count }})</em></li>
-            <li><span class="gender-pie-legend__swatch gender-pie-legend__swatch--female"></span>
-              Female <strong>{{ gender_pie.female_pct }}%</strong> <em>({{ gender_pie.female_count }})</em></li>
+            <li class="gender-pie-legend__row">
+              <span class="gender-pie-legend__swatch gender-pie-legend__swatch--male"></span>
+              <span class="gender-pie-legend__name">Male</span>
+              <span class="gender-pie-legend__stats"><strong>{{ gender_pie.male_pct }}%</strong> <em>{{ gender_pie.male_count }}</em></span>
+            </li>
+            <li class="gender-pie-legend__row">
+              <span class="gender-pie-legend__swatch gender-pie-legend__swatch--female"></span>
+              <span class="gender-pie-legend__name">Female</span>
+              <span class="gender-pie-legend__stats"><strong>{{ gender_pie.female_pct }}%</strong> <em>{{ gender_pie.female_count }}</em></span>
+            </li>
             {% if gender_pie.other_count %}
-            <li><span class="gender-pie-legend__swatch gender-pie-legend__swatch--other"></span>
-              Unspecified <em>({{ gender_pie.other_count }})</em></li>
+            <li class="gender-pie-legend__row">
+              <span class="gender-pie-legend__swatch gender-pie-legend__swatch--other"></span>
+              <span class="gender-pie-legend__name">Unspecified</span>
+              <span class="gender-pie-legend__stats"><em>{{ gender_pie.other_count }}</em></span>
+            </li>
             {% endif %}
           </ul>
         </div>
