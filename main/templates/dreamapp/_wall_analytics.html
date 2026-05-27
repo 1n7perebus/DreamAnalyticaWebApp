@@ -114,10 +114,10 @@
       <div class="wall-analytics__panel" data-panel="geo" role="tabpanel" hidden>
         {% if country_markers %}
         <p class="wall-panel__hint">{{ geo_total }} geolocated dream{{ geo_total|pluralize }} · brighter countries = more dreams</p>
-        <div class="geo-map-wrap">
-          <object class="geo-map geo-map-object" type="image/svg+xml"
-                  data="{% static 'main/svg/world-map.svg' %}"
-                  aria-label="World map showing dream origins by country"><img class='geo-map geo-map-img' src='/static/main/svg/world-map.svg' alt='World map showing dream origins by country'></object>
+        <div class="geo-map-wrap" data-map-url="{% static 'main/svg/world-map.svg' %}" role="img" aria-label="World map showing dream origins by country">
+          <noscript>
+            <img class="geo-map geo-map-img" src="{% static 'main/svg/world-map.svg' %}" alt="World map">
+          </noscript>
         </div>
         <ul class="geo-country-list">
           {% for c in country_markers|slice:":12" %}

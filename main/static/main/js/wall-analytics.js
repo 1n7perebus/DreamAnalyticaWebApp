@@ -4,6 +4,9 @@
 (function () {
   'use strict';
 
+  const DEFAULT_FILL = 'rgba(0,240,255,0.06)';
+  const DEFAULT_STROKE = 'rgba(0,240,255,0.14)';
+
   function initWallAnalytics() {
     const root = document.querySelector('.wall-analytics');
     if (!root) return;
@@ -54,6 +57,10 @@
         const w = viewport.offsetWidth || 1;
         viewport.scrollTo({ left: activeIndex * w, behavior: 'smooth' });
       }
+
+      if (id === 'geo') {
+        highlightGeoCountries(root);
+      }
     }
 
     tabs.forEach((tab) => {
@@ -67,7 +74,6 @@
       dot.addEventListener('click', () => setActive(i, true));
     });
 
-    /* Mobile swipe: sync tab to scroll position */
     if (viewport) {
       let scrollTimer;
       viewport.addEventListener(
@@ -84,71 +90,91 @@
       );
     }
 
-    /* Touch drag hint on track */
-    let touchStartX = 0;
-    if (viewport) {
-      viewport.addEventListener(
-        'touchstart',
-        (e) => {
-          touchStartX = e.touches[0].clientX;
-        },
-        { passive: true }
-      );
-    }
-
     window.addEventListener('resize', () => setActive(activeIndex, false));
     setActive(activeIndex, false);
-    highlightGeoCountries(root);
+  }
+
+  function getCountryData() {
+    const dataEl = document.getElementById('wall-country-data');
+    if (!dataEl) return [];
+    try {
+      return JSON.parse(dataEl.textContent);
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function paintCountries(svgRoot, countries) {
+    const paths = svgRoot.querySelectorAll('.geo-country');
+    paths.forEach((path) => {
+      path.classList.remove('geo-country--active');
+      path.style.fill = DEFAULT_FILL;
+      path.style.stroke = DEFAULT_STROKE;
+      path.style.strokeWidth = '0.5';
+      path.style.filter = '';
+      path.removeAttribute('data-count');
+      path.removeAttribute('title');
+    });
+
+    if (!countries.length) return;
+
+    const maxCount = Math.max(...countries.map((c) => c.count), 1);
+
+    countries.forEach((c) => {
+      const code = (c.code || '').toUpperCase();
+      const matched = svgRoot.querySelectorAll(
+        `.geo-country[data-iso2="${code}"], .geo-country[data-iso3="${code}"]`
+      );
+      const intensity = 0.35 + (c.count / maxCount) * 0.65;
+      const fillA = Math.max(0, Math.min(1, 0.12 + 0.55 * intensity));
+      const strokeA = Math.max(0, Math.min(1, 0.35 + 0.45 * intensity));
+      const label = `${c.name}: ${c.count} dream${c.count === 1 ? '' : 's'} (${c.pct}% of geolocated)`;
+
+      matched.forEach((path) => {
+        path.classList.add('geo-country--active');
+        path.style.fill = `rgba(0,240,255,${fillA})`;
+        path.style.stroke = `rgba(0,240,255,${strokeA})`;
+        path.style.strokeWidth = '0.75';
+        path.style.filter = 'url(#geoGlow)';
+        path.setAttribute('data-count', String(c.count));
+        path.setAttribute('title', label);
+      });
+    });
   }
 
   function highlightGeoCountries(root) {
-    const mapObj = root.querySelector('.geo-map-object');
-    const dataEl = document.getElementById('wall-country-data');
-    if (!mapObj || !dataEl) return;
+    const wrap = root.querySelector('.geo-map-wrap');
+    if (!wrap) return;
 
-    let countries = [];
-    try {
-      countries = JSON.parse(dataEl.textContent);
-    } catch (e) {
+    const mapUrl = wrap.dataset.mapUrl;
+    const countries = getCountryData();
+    if (!mapUrl) return;
+
+    const existing = wrap.querySelector('svg');
+    if (existing) {
+      paintCountries(wrap, countries);
       return;
     }
 
-    function apply() {
-      const doc = mapObj.contentDocument;
-      if (!doc) return;
+    let loading = wrap.dataset.mapLoading === '1';
+    if (loading) return;
+    wrap.dataset.mapLoading = '1';
 
-      const paths = doc.querySelectorAll('.geo-country');
-      paths.forEach((p) => {
-        p.classList.remove('geo-country--active');
-        p.removeAttribute('data-count');
-        p.removeAttribute('title');
+    fetch(mapUrl, { credentials: 'same-origin' })
+      .then((res) => {
+        if (!res.ok) throw new Error('map fetch failed');
+        return res.text();
+      })
+      .then((svgText) => {
+        wrap.innerHTML = svgText;
+        paintCountries(wrap, countries);
+      })
+      .catch(() => {
+        /* Keep any static fallback already in the template */
+      })
+      .finally(() => {
+        wrap.dataset.mapLoading = '0';
       });
-
-      if (!countries.length) return;
-
-      const maxCount = Math.max(...countries.map((c) => c.count), 1);
-
-      countries.forEach((c) => {
-        const code = (c.code || '').toUpperCase();
-        const matched = doc.querySelectorAll(
-          `.geo-country[data-iso2="${code}"], .geo-country[data-iso3="${code}"]`
-        );
-        const intensity = 0.35 + (c.count / maxCount) * 0.65;
-        const label = `${c.name}: ${c.count} dream${c.count === 1 ? '' : 's'} (${c.pct}% of geolocated)`;
-        matched.forEach((path) => {
-          path.classList.add('geo-country--active');
-          path.style.setProperty('--geo-intensity', String(intensity));
-          path.setAttribute('data-count', String(c.count));
-          path.setAttribute('title', label);
-        });
-      });
-    }
-
-    if (mapObj.contentDocument && mapObj.contentDocument.querySelector('svg')) {
-      apply();
-    } else {
-      mapObj.addEventListener('load', apply, { once: true });
-    }
   }
 
   if (document.readyState === 'loading') {
