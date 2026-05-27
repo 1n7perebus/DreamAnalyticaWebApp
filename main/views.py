@@ -19,6 +19,7 @@ from django.urls import reverse
 from django.db.models import *
 from .forms import *
 from .models import *
+from .geo import apply_geo_to_dream, get_client_ip
 # Checklist
 # Add Sections
 # Advertising Goodgle Adsense 
@@ -56,7 +57,7 @@ def consult(request):
     Dreams.objects.filter(title="DON'T MISS OUT: CLAIM YOUR $50,000 WINNI").delete()
         
     if request.method == "POST":
-        ip_address = request.META.get('REMOTE_ADDR')
+        ip_address = get_client_ip(request)
         recent_submission = Dreams.objects.filter(ip_address=ip_address, submission_time__gte=timezone.now() - timedelta(days=1)).exists()
         
         if recent_submission:
@@ -83,6 +84,7 @@ def consult(request):
         if dream_form.is_valid() and not recent_submission:
             dream_post = dream_form.save(commit=False)
             dream_post.ip_address = ip_address
+            apply_geo_to_dream(dream_post, ip_address)
 
             delete_duplicates(dream_post)   
 
@@ -101,7 +103,11 @@ def consult(request):
                 "title": dream_post.title,
                 "dream": dream_post.dream,
                 "scale": dream_post.scale,
-                "pub": dream_post.pub, 
+                "pub": dream_post.pub,
+                "age": dream_post.age,
+                "country_name": dream_post.country_name,
+                "region": dream_post.region,
+                "city": dream_post.city,
             }
 
             html_message = render_to_string("dreamapp/email_templates/dream_submission.html", context)
@@ -224,13 +230,9 @@ def dreams(request):
 
     dream_count = active_dreams.count()
 
-    gender_counts = Counter(dream.gender for dream in dreams)
-    total_dreams = len(dreams)
-    gender_percentages = {
-        gender: (count / total_dreams) * 100
-        for gender, count in gender_counts.items()
-    }
-    sorted_gender_percentages = sorted(gender_percentages.items())
+    from .wall_analytics import build_wall_analytics
+
+    analytics = build_wall_analytics(active_dreams, dream_count)
 
     return render(request, "dreamapp/dreams.html", {
         "dreams_with_replies": dreams_with_replies,
@@ -239,8 +241,8 @@ def dreams(request):
         "average_scale": average_scale,
         "health_status": health_status,
         "health_color": health_color,
-        "sorted_gender_percentages": sorted_gender_percentages,
         "dream_count": dream_count,
+        **analytics,
     })
 
 

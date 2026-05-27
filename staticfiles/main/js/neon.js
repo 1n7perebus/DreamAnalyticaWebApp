@@ -8,8 +8,14 @@
   const forceMotion = localStorage.getItem('neonForceMotion') === '1';
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches && !forceMotion;
   const isTouch = window.matchMedia('(hover: none)').matches;
+  /* iOS WebKit (incl. Brave) can crash/reload tabs under heavy canvas + rAF + resize storms */
+  const isIOS =
+    /iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const liteHero = isIOS || reduced;
 
   document.documentElement.classList.add(reduced ? 'motion-reduced' : 'motion-on');
+  if (isIOS) document.documentElement.classList.add('ios-lite');
 
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches && !forceMotion) {
     console.info(
@@ -157,30 +163,42 @@
   // Hero particle canvas
   // ------------------------------------------------------------------
   function initHeroParticles() {
-    if (reduced) return;
+    if (liteHero) return;
     const canvas = document.querySelector('.hero-canvas');
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { alpha: true });
+    if (!ctx) return;
+
     let particles = [];
     let w = 0;
     let h = 0;
-    let dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    let lastW = 0;
+    let lastH = 0;
+    const dpr = Math.min(window.devicePixelRatio || 1, isTouch ? 1 : 1.5);
     let raf = null;
+    let resizeTimer = null;
     let mouse = { x: -9999, y: -9999 };
 
     const stage = canvas.parentElement;
+    if (!stage) return;
 
     const resize = () => {
       const rect = stage.getBoundingClientRect();
-      w = rect.width;
-      h = rect.height;
-      canvas.width = w * dpr;
-      canvas.height = h * dpr;
+      const nextW = Math.max(1, Math.round(rect.width));
+      const nextH = Math.max(1, Math.round(rect.height));
+      if (nextW === lastW && nextH === lastH) return;
+      lastW = nextW;
+      lastH = nextH;
+      w = nextW;
+      h = nextH;
+      canvas.width = Math.floor(w * dpr);
+      canvas.height = Math.floor(h * dpr);
       canvas.style.width = w + 'px';
       canvas.style.height = h + 'px';
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-      const baseCount = Math.min(110, Math.floor((w * h) / 14000));
+      const cap = isTouch ? 45 : 110;
+      const baseCount = Math.min(cap, Math.floor((w * h) / 16000));
       particles = new Array(baseCount).fill(0).map(() => ({
         x: Math.random() * w,
         y: Math.random() * h,
@@ -194,7 +212,6 @@
     const tick = () => {
       ctx.clearRect(0, 0, w, h);
 
-      // Connections
       for (let i = 0; i < particles.length; i++) {
         const p = particles[i];
         p.x += p.vx;
@@ -202,14 +219,16 @@
         if (p.x < 0 || p.x > w) p.vx *= -1;
         if (p.y < 0 || p.y > h) p.vy *= -1;
 
-        // Mouse attraction
-        const dxm = p.x - mouse.x;
-        const dym = p.y - mouse.y;
-        const dm2 = dxm * dxm + dym * dym;
-        if (dm2 < 14000) {
-          const f = 1 - dm2 / 14000;
-          p.x -= (dxm / Math.sqrt(dm2 + 0.01)) * f * 0.7;
-          p.y -= (dym / Math.sqrt(dm2 + 0.01)) * f * 0.7;
+        if (!isTouch) {
+          const dxm = p.x - mouse.x;
+          const dym = p.y - mouse.y;
+          const dm2 = dxm * dxm + dym * dym;
+          if (dm2 < 14000) {
+            const f = 1 - dm2 / 14000;
+            const dist = Math.sqrt(dm2 + 0.01);
+            p.x -= (dxm / dist) * f * 0.7;
+            p.y -= (dym / dist) * f * 0.7;
+          }
         }
 
         for (let j = i + 1; j < particles.length; j++) {
@@ -229,18 +248,25 @@
         }
       }
 
-      // Nodes
       for (const p of particles) {
         ctx.fillStyle = `rgba(${p.c}, 0.85)`;
-        ctx.shadowBlur = 8;
-        ctx.shadowColor = `rgba(${p.c}, 0.7)`;
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
         ctx.fill();
       }
-      ctx.shadowBlur = 0;
 
       raf = requestAnimationFrame(tick);
+    };
+
+    const scheduleResize = () => {
+      if (resizeTimer) clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        resizeTimer = null;
+        cancelAnimationFrame(raf);
+        raf = null;
+        resize();
+        tick();
+      }, 200);
     };
 
     const onMouse = (e) => {
@@ -253,15 +279,15 @@
     resize();
     tick();
 
-    window.addEventListener('resize', () => {
-      cancelAnimationFrame(raf);
-      resize();
-      tick();
-    });
-    stage.addEventListener('mousemove', onMouse);
-    stage.addEventListener('mouseleave', onLeave);
+    window.addEventListener('resize', scheduleResize, { passive: true });
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', scheduleResize, { passive: true });
+    }
+    if (!isTouch) {
+      stage.addEventListener('mousemove', onMouse);
+      stage.addEventListener('mouseleave', onLeave);
+    }
 
-    // Pause when off-screen
     const io = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
@@ -279,7 +305,7 @@
   // Glitch random burst on .glitch-text
   // ------------------------------------------------------------------
   function initGlitch() {
-    if (reduced) return;
+    if (liteHero) return;
     const targets = document.querySelectorAll('.glitch-text');
     targets.forEach((el) => {
       setInterval(() => {
@@ -292,13 +318,92 @@
   }
 
   // ------------------------------------------------------------------
-  // Marquee duplication (so seamless scroll works)
+  // Marquee — JS scroll (CSS keyframes + mask-image fail on Chrome desktop)
   // ------------------------------------------------------------------
+  function startMarqueeJs(track) {
+    if (track.dataset.marqueeJs === '1') return;
+    track.dataset.marqueeJs = '1';
+    track.classList.add('is-marquee-running');
+
+    let offset = 0;
+    let halfWidth = 0;
+    let raf = null;
+    let lastTime = 0;
+    const pxPerSecond = reduced ? 28 : 52;
+
+    const measure = () => {
+      halfWidth = track.scrollWidth / 2;
+      if (offset >= halfWidth && halfWidth > 0) offset = offset % halfWidth;
+    };
+
+    const step = (now) => {
+      if (!lastTime) lastTime = now;
+      const dt = Math.min(48, now - lastTime) / 1000;
+      lastTime = now;
+
+      if (halfWidth <= 0) measure();
+      if (halfWidth > 0) {
+        offset += pxPerSecond * dt;
+        if (offset >= halfWidth) offset -= halfWidth;
+        track.style.transform = 'translate3d(' + (-offset) + 'px,0,0)';
+      }
+      raf = requestAnimationFrame(step);
+    };
+
+    const start = () => {
+      measure();
+      if (halfWidth <= 0) return;
+      if (!raf) {
+        lastTime = 0;
+        raf = requestAnimationFrame(step);
+      }
+    };
+
+    const stop = () => {
+      if (raf) {
+        cancelAnimationFrame(raf);
+        raf = null;
+      }
+    };
+
+    if ('ResizeObserver' in window) {
+      new ResizeObserver(measure).observe(track);
+    }
+    window.addEventListener('resize', measure, { passive: true });
+    window.addEventListener('load', measure, { once: true });
+
+    const root = track.closest('.marquee') || track;
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) start();
+            else stop();
+          });
+        },
+        { threshold: 0.05 }
+      ).observe(root);
+    } else {
+      start();
+    }
+
+    start();
+  }
+
   function initMarquee() {
     const tracks = document.querySelectorAll('.marquee__track');
     tracks.forEach((track) => {
-      const clone = track.innerHTML;
-      track.innerHTML = clone + clone;
+      if (track.dataset.marqueeReady === '1') return;
+
+      track.innerHTML = track.innerHTML + track.innerHTML;
+      track.dataset.marqueeReady = '1';
+
+      const run = () => startMarqueeJs(track);
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(run).catch(run);
+      } else {
+        run();
+      }
     });
   }
 
@@ -440,7 +545,7 @@
 
     /* Rings always use CSS animation (orbRingCW / orbRingCCW, 60s) — never touched by JS */
 
-    if (reduced) return;
+    if (liteHero) return;
 
     if (sweep) sweep.classList.add('hero-orb-sweep--js');
     if (orbit) orbit.classList.add('hero-orb-orbit--js');
@@ -477,19 +582,24 @@
   // Boot
   // ------------------------------------------------------------------
   function boot() {
-    initNav();
-    initReveal();
-    initTilt();
-    initCounters();
-    initHeroOrbMotion();
-    initHeroParticles();
-    initGlitch();
-    initMarquee();
-    initStickyCta();
-    initRingMeter();
-    initDreamFilters();
-    initScaleMeter();
-    initFormSubmit();
+    try {
+      initNav();
+      initReveal();
+      initTilt();
+      initCounters();
+      initHeroOrbMotion();
+      initHeroParticles();
+      initGlitch();
+      initMarquee();
+      initStickyCta();
+      initRingMeter();
+      initDreamFilters();
+      initScaleMeter();
+      initFormSubmit();
+    } catch (err) {
+      console.error('[Dream Analytica] neon.js init error:', err);
+      document.documentElement.classList.add('ios-lite');
+    }
   }
 
   if (document.readyState === 'loading') {

@@ -3,9 +3,10 @@ from .models import *
 
 
 class DreamsAdmin(admin.ModelAdmin):
-    search_fields= ['email','pub']
-    list_display = ('email','id', 'name','pub')
-    ordering =['-pub','email']
+    search_fields = ['email', 'pub', 'country_name', 'city']
+    list_display = ('email', 'id', 'name', 'age', 'country_code', 'pub')
+    list_filter = ('country_code', 'gender', 'mbti_type', 'active')
+    ordering = ['-pub', 'email']
 
 class ReplyAdmin(admin.ModelAdmin):
     list_display = ('dream','id','pub')

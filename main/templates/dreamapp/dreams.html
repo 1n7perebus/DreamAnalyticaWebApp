@@ -1,4 +1,5 @@
 {% extends 'dreamapp/header.html' %}
+{% load static %}
 {% block title %}Wall of Dreams — Dream Analytica{% endblock %}
 {% block content %}
 
@@ -46,28 +47,32 @@
     </div>
     {% endif %}
 
-    <div class="gender-stats reveal" style="margin-top: 2em;">
-      <h6 class="gender-heading">Gender Distribution</h6>
-      <div class="stats-bars">
-        {% for gender, percentage in sorted_gender_percentages %}
-        <div class="stat-bar reveal">
-          <div class="stat-label">{{ gender }}</div>
-          <div class="progress">
-            <div class="determinate" style="width: {{ percentage }}%; background: linear-gradient(90deg, {% cycle '#ff2bd6, #7b5cff' '#00f0ff, #7b5cff' '#00f0ff, #ff2bd6' %});"></div>
-          </div>
-          <div class="stat-value">{{ percentage|floatformat:1 }}%</div>
-        </div>
-        {% endfor %}
-      </div>
-    </div>
+    {% if has_wall_analytics %}
+    {% include 'dreamapp/_wall_analytics.html' %}
+    {% endif %}
   </section>
 
   {% if dreams_with_replies %}
-  <div class="dream-filters reveal">
-    <span class="neon-chip chip-filter is-active" data-filter="all">All Dreams</span>
-    <span class="neon-chip chip-filter chip-score score-4" data-filter="positive">Positive</span>
-    <span class="neon-chip chip-filter chip-score score-3" data-filter="neutral">Neutral</span>
-    <span class="neon-chip chip-filter chip-score score-1" data-filter="negative">Negative</span>
+  <div class="dream-wall-controls reveal" data-dream-wall-controls>
+    <div class="dream-wall-controls__group">
+      <span class="dream-wall-controls__label">Filter by mood</span>
+      <div class="dream-filters" role="group" aria-label="Filter dreams by mood score">
+        <span class="neon-chip chip-filter is-active" data-filter="all" tabindex="0">All Dreams</span>
+        <span class="neon-chip chip-filter chip-score score-4" data-filter="positive" tabindex="0">Positive</span>
+        <span class="neon-chip chip-filter chip-score score-3" data-filter="neutral" tabindex="0">Neutral</span>
+        <span class="neon-chip chip-filter chip-score score-1" data-filter="negative" tabindex="0">Negative</span>
+      </div>
+    </div>
+    <div class="dream-wall-controls__group">
+      <span class="dream-wall-controls__label">Sort by</span>
+      <div class="wall-analytics__tabs dream-sort-tabs" role="tablist" aria-label="Sort dreams">
+        <button type="button" class="wall-analytics__tab is-active" role="tab" data-sort="newest" aria-selected="true">Newest</button>
+        <button type="button" class="wall-analytics__tab" role="tab" data-sort="personality" aria-selected="false">Personality</button>
+        <button type="button" class="wall-analytics__tab" role="tab" data-sort="age" aria-selected="false">Age</button>
+        <button type="button" class="wall-analytics__tab" role="tab" data-sort="gender" aria-selected="false">Gender</button>
+        <button type="button" class="wall-analytics__tab" role="tab" data-sort="geo" aria-selected="false">Geography</button>
+      </div>
+    </div>
   </div>
   {% endif %}
 
@@ -76,7 +81,13 @@
       {% if dreams_with_replies %}
       {% for item in dreams_with_replies %}
       <article class="dream-card reveal" id="dream-{{ item.dream.id }}"
-               data-score="{{ item.dream.scale }}" data-mbti="{{ item.dream.mbti_type }}">
+               data-score="{{ item.dream.scale }}"
+               data-mbti="{{ item.dream.mbti_type }}"
+               data-age="{% if item.dream.age is not None %}{{ item.dream.age }}{% endif %}"
+               data-gender="{{ item.dream.gender }}"
+               data-country-code="{{ item.dream.country_code }}"
+               data-country-name="{{ item.dream.country_name }}"
+               data-pub="{{ item.dream.pub|date:'U' }}">
         <div class="dream-card-inner">
           <header class="dream-header">
             {% if item.dream.title %}
@@ -90,6 +101,14 @@
               <span class="dream-chip chip-score score-{{ item.dream.scale }}">Score {{ item.dream.scale }}/5</span>
               {% if item.dream.gender %}
               <span class="dream-chip chip-gender">{{ item.dream.gender }}</span>
+              {% endif %}
+              {% if item.dream.age is not None %}
+              <span class="dream-chip chip-age">Age {{ item.dream.age }}</span>
+              {% endif %}
+              {% if item.dream.country_name %}
+              <span class="dream-chip chip-geo">{{ item.dream.country_name }}</span>
+              {% elif item.dream.country_code %}
+              <span class="dream-chip chip-geo">{{ item.dream.country_code }}</span>
               {% endif %}
             </div>
           </header>
@@ -162,6 +181,7 @@
   </div>
 </div>
 
+<script src="{% static 'main/js/wall-analytics.js' %}?v=20260528c"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     if (typeof M !== 'undefined' && M.textareaAutoInit) {

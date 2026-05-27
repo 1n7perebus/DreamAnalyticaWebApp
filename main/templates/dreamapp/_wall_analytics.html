@@ -1,0 +1,143 @@
+{% load static %}
+<div class="wall-analytics reveal" data-wall-analytics>
+  <div class="wall-analytics__head">
+    <h6 class="wall-analytics__title">Collective Signal Analytics</h6>
+    <p class="wall-analytics__sub">Patterns across dreams on the wall</p>
+  </div>
+
+  <div class="wall-analytics__tabs" role="tablist" aria-label="Dream analytics">
+    <button type="button" class="wall-analytics__tab is-active" role="tab" data-tab="personality" aria-selected="true">
+      Personality
+    </button>
+    <button type="button" class="wall-analytics__tab" role="tab" data-tab="age" aria-selected="false">
+      Age
+    </button>
+    <button type="button" class="wall-analytics__tab" role="tab" data-tab="gender" aria-selected="false">
+      Gender
+    </button>
+    <button type="button" class="wall-analytics__tab" role="tab" data-tab="geo" aria-selected="false">
+      Geography
+    </button>
+  </div>
+
+  <div class="wall-analytics__viewport">
+    <div class="wall-analytics__track">
+
+      <div class="wall-analytics__panel is-active" data-panel="personality" role="tabpanel">
+        {% if mbti_gender_stats %}
+        <p class="wall-panel__hint">Share of wall dreams by type · cyan = male, magenta = female</p>
+        <div class="mbti-stack-legend" aria-hidden="true">
+          <span class="mbti-stack-legend__item mbti-stack-legend__item--male">Male</span>
+          <span class="mbti-stack-legend__item mbti-stack-legend__item--female">Female</span>
+          <span class="mbti-stack-legend__item mbti-stack-legend__item--unknown">Unspecified</span>
+        </div>
+        <div class="stats-bars stats-bars--mbti-stack">
+          {% for row in mbti_gender_stats %}
+          <div class="mbti-stat-row">
+            <div class="stat-bar stat-bar--mbti-stack">
+              <div class="stat-label">
+                <span class="stat-label__text stat-label__text--mbti">{{ row.mbti_type }}</span>
+              </div>
+              <div class="progress progress--stacked"
+                   title="{{ row.mbti_type }}: {{ row.total_pct }}% of wall">
+                {% if row.male_pct_wall %}
+                <span class="stack-seg stack-seg--male" style="width: {{ row.male_pct_wall }}%;"></span>
+                {% endif %}
+                {% if row.female_pct_wall %}
+                <span class="stack-seg stack-seg--female" style="width: {{ row.female_pct_wall }}%;"></span>
+                {% endif %}
+                {% if row.unknown_pct_wall %}
+                <span class="stack-seg stack-seg--unknown" style="width: {{ row.unknown_pct_wall }}%;"></span>
+                {% endif %}
+              </div>
+              <div class="stat-value">{{ row.total_pct }}%</div>
+            </div>
+            <div class="stat-bar-detail">
+              {% if row.male_count %}<span class="stat-bar-detail__male">M {{ row.male_pct_type }}%</span>{% endif %}
+              {% if row.female_count %}<span class="stat-bar-detail__female">F {{ row.female_pct_type }}%</span>{% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p class="wall-panel__empty">No personality types on the wall yet.</p>
+        {% endif %}
+      </div>
+
+      <div class="wall-analytics__panel" data-panel="age" role="tabpanel" hidden>
+        {% if age_stats %}
+        <p class="wall-panel__hint">{{ age_total }} dreamer{{ age_total|pluralize }} shared age · % of those in each range</p>
+        <div class="age-bars">
+          {% for row in age_stats %}
+          <div class="age-bar-row">
+            <span class="age-bar-row__label">{{ row.label }}</span>
+            <div class="age-bar-row__track">
+              <div class="age-bar-row__fill" style="width: {{ row.bar_pct }}%;"></div>
+            </div>
+            <span class="age-bar-row__value">{{ row.pct }}%</span>
+            <span class="age-bar-row__count">{{ row.count }}</span>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p class="wall-panel__empty">Age data appears when dreamers share it on the form (optional field).</p>
+        {% endif %}
+      </div>
+
+      <div class="wall-analytics__panel" data-panel="gender" role="tabpanel" hidden>
+        {% if gender_pie %}
+        <p class="wall-panel__hint">Gender split among wall dreams with a known response</p>
+        <div class="gender-pie-wrap">
+          <div class="gender-pie"
+               style="--male-end: {{ gender_pie.male_end }}%; --female-end: {{ gender_pie.female_end }}%;">
+            <div class="gender-pie__hole">
+              <span class="gender-pie__total">{{ gender_pie.known_total }}</span>
+              <span class="gender-pie__label">dreamers</span>
+            </div>
+          </div>
+          <ul class="gender-pie-legend">
+            <li><span class="gender-pie-legend__swatch gender-pie-legend__swatch--male"></span>
+              Male <strong>{{ gender_pie.male_pct }}%</strong> <em>({{ gender_pie.male_count }})</em></li>
+            <li><span class="gender-pie-legend__swatch gender-pie-legend__swatch--female"></span>
+              Female <strong>{{ gender_pie.female_pct }}%</strong> <em>({{ gender_pie.female_count }})</em></li>
+            {% if gender_pie.other_count %}
+            <li><span class="gender-pie-legend__swatch gender-pie-legend__swatch--other"></span>
+              Unspecified <em>({{ gender_pie.other_count }})</em></li>
+            {% endif %}
+          </ul>
+        </div>
+        {% else %}
+        <p class="wall-panel__empty">No gender data on the wall yet.</p>
+        {% endif %}
+      </div>
+
+      <div class="wall-analytics__panel" data-panel="geo" role="tabpanel" hidden>
+        {% if country_markers %}
+        <p class="wall-panel__hint">{{ geo_total }} geolocated dream{{ geo_total|pluralize }} · brighter countries = more dreams</p>
+        <div class="geo-map-wrap">
+          <object class="geo-map geo-map-object" type="image/svg+xml"
+                  data="{% static 'main/svg/world-map.svg' %}"
+                  aria-label="World map showing dream origins by country"></object>
+        </div>
+        <ul class="geo-country-list">
+          {% for c in country_markers|slice:":12" %}
+          <li><span class="geo-country-list__code">{{ c.code }}</span> {{ c.name }}
+            <span class="geo-country-list__count">{{ c.count }}</span></li>
+          {% endfor %}
+        </ul>
+        {{ country_markers|json_script:"wall-country-data" }}
+        {% else %}
+        <p class="wall-panel__empty">Geography fills in when dreams are submitted from public IPs (country detected automatically).</p>
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
+
+  <div class="wall-analytics__dots" aria-hidden="true">
+    <button type="button" class="wall-analytics__dot is-active" tabindex="-1"></button>
+    <button type="button" class="wall-analytics__dot" tabindex="-1"></button>
+    <button type="button" class="wall-analytics__dot" tabindex="-1"></button>
+    <button type="button" class="wall-analytics__dot" tabindex="-1"></button>
+  </div>
+</div>

@@ -58,6 +58,13 @@ class DreamForm(forms.ModelForm):
     active = forms.BooleanField(required=False)
     mbti_type = forms.ChoiceField(choices=MBTI_CHOICES, label="MBTI Type")
     gender = forms.ChoiceField(choices=GENDER_CHOICES, label="Gender", required=True)
+    age = forms.IntegerField(
+        required=False,
+        min_value=13,
+        max_value=120,
+        label="Age (optional)",
+        widget=forms.NumberInput(attrs={'min': 13, 'max': 120, 'inputmode': 'numeric'}),
+    )
     scale = forms.ChoiceField(
         choices=[(i, str(i)) for i in range(1, 6)],  # Updated to 1-5 to match the model
         label="Dream Scale", 
@@ -68,7 +75,7 @@ class DreamForm(forms.ModelForm):
 
     class Meta:
         model = Dreams
-        fields = ['email', 'name', 'title', 'dream', 'active', 'mbti_type', 'gender', 'scale']
+        fields = ['email', 'name', 'title', 'dream', 'active', 'mbti_type', 'gender', 'age', 'scale']
 
 
 

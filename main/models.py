@@ -48,6 +48,17 @@ class Dreams(models.Model):
 
     mbti_type = models.CharField(max_length=4, choices=MBTI_CHOICES, default='')
     gender = models.CharField(max_length=10, choices=GENDER_CHOICES, default='')
+    age = models.PositiveSmallIntegerField(
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(13), MaxValueValidator(120)],
+        help_text='Optional; used for collective pattern analysis.',
+    )
+    country_code = models.CharField(max_length=2, blank=True, default='')
+    country_name = models.CharField(max_length=80, blank=True, default='')
+    region = models.CharField(max_length=100, blank=True, default='')
+    city = models.CharField(max_length=100, blank=True, default='')
+    geo_timezone = models.CharField(max_length=64, blank=True, default='')
     #child = models.ForeignKey('self', related_name='reps', blank=True, null=True, on_delete=models.CASCADE)
 
     pub = models.DateTimeField("date published", default=timezone.now)

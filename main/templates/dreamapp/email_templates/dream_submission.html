@@ -13,8 +13,9 @@
         <ul style="list-style-type: none; padding: 0;">
             <li><strong>Name:</strong> {{ name }}</li>
             <li><strong>MBTI-TYPE:</strong> {{ mbti_type }}</li>
+            {% if age %}<li><strong>Age:</strong> {{ age }}</li>{% endif %}
+            {% if country_name %}<li><strong>Location:</strong> {{ country_name }}{% if region %}, {{ region }}{% endif %}{% if city %} · {{ city }}{% endif %}</li>{% endif %}
             <li><strong>Email:</strong> {{ email }}</li>
-            <li><strong>Phone:</strong> {{ phone }}</li>
             <li><strong>Title:</strong> {{ title }}</li>
             <li><strong>Dream:</strong> {{ dream }}</li>
             <li><strong>Scale:</strong> {{ scale }}</li>
