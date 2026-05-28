@@ -20,6 +20,7 @@ from django.db.models import *
 from .forms import *
 from .models import *
 from .geo import apply_geo_to_dream, get_client_ip
+from .dream_symbols import resolve_symbol_tags
 # Checklist
 # Add Sections
 # Advertising Goodgle Adsense 
@@ -90,6 +91,9 @@ def consult(request):
 
             sender = dream_post.email 
             dream_post.save()
+            pending_symbols = getattr(dream_form, '_pending_symbol_names', [])
+            if pending_symbols:
+                dream_post.symbols.set(resolve_symbol_tags(pending_symbols))
             Dreams.objects.filter(name="AlbertJipix").delete()
 
             from_email = 'dreamanalytica@outlook.com'
@@ -131,13 +135,15 @@ def consult(request):
 
     mbti_choices = DreamForm.MBTI_CHOICES
     gender_choices = DreamForm.GENDER_CHOICES
-    
+    symbol_suggestions = DreamSymbol.objects.all()[:200]
+
     return render(request, "dreamapp/consult.html", context={
         "dreams": dreams,
         "dream_form": dream_form,
         "recent_submission": recent_submission,
         "mbti_choices": mbti_choices,
         'gender_choices': gender_choices,
+        'symbol_suggestions': symbol_suggestions,
     })
 
 

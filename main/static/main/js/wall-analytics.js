@@ -7,6 +7,106 @@
   const DEFAULT_FILL = 'rgba(0,240,255,0.06)';
   const DEFAULT_STROKE = 'rgba(0,240,255,0.14)';
   const GEO_TOOLTIP_CLASS = 'geo-tooltip';
+  const SVG_NS = 'http://www.w3.org/2000/svg';
+
+  function ensureGeoRainbowDefs(svgRoot) {
+    if (!svgRoot) return;
+
+    svgRoot.querySelector('#geoRainbowFill')?.remove();
+    svgRoot.querySelector('#geoRainbowGlow')?.remove();
+
+    let defs = svgRoot.querySelector('defs');
+    if (!defs) {
+      defs = document.createElementNS(SVG_NS, 'defs');
+      svgRoot.insertBefore(defs, svgRoot.firstChild);
+    }
+
+    const grad = document.createElementNS(SVG_NS, 'linearGradient');
+    grad.setAttribute('id', 'geoRainbowFill');
+    grad.setAttribute('gradientUnits', 'userSpaceOnUse');
+    grad.setAttribute('x1', '0');
+    grad.setAttribute('y1', '0');
+    grad.setAttribute('x2', '960');
+    grad.setAttribute('y2', '480');
+
+    const stopDefs = [
+      { offset: '0%', colors: '#00e8f5;#b878d8;#8b9cff;#d070e8;#00e8f5' },
+      { offset: '50%', colors: '#c878e0;#7b9cff;#00e8f5;#d888e8;#9cb8f0' },
+      { offset: '100%', colors: '#8b9cff;#00e8f5;#c878e0;#9cb8f0;#8b9cff' }
+    ];
+
+    stopDefs.forEach(({ offset, colors }) => {
+      const stop = document.createElementNS(SVG_NS, 'stop');
+      stop.setAttribute('offset', offset);
+      stop.setAttribute('stop-color', '#9cb0e8');
+      const anim = document.createElementNS(SVG_NS, 'animate');
+      anim.setAttribute('attributeName', 'stop-color');
+      anim.setAttribute('values', colors);
+      anim.setAttribute('dur', '5.5s');
+      anim.setAttribute('repeatCount', 'indefinite');
+      stop.appendChild(anim);
+      grad.appendChild(stop);
+    });
+    defs.appendChild(grad);
+
+    const filter = document.createElementNS(SVG_NS, 'filter');
+    filter.setAttribute('id', 'geoRainbowGlow');
+    filter.setAttribute('x', '-70%');
+    filter.setAttribute('y', '-70%');
+    filter.setAttribute('width', '240%');
+    filter.setAttribute('height', '240%');
+
+    const blur = document.createElementNS(SVG_NS, 'feGaussianBlur');
+    blur.setAttribute('in', 'SourceGraphic');
+    blur.setAttribute('stdDeviation', '1.85');
+    blur.setAttribute('result', 'blur');
+
+    const merge = document.createElementNS(SVG_NS, 'feMerge');
+    ['blur', 'blur', 'SourceGraphic'].forEach((nodeIn) => {
+      const mergeNode = document.createElementNS(SVG_NS, 'feMergeNode');
+      mergeNode.setAttribute('in', nodeIn);
+      merge.appendChild(mergeNode);
+    });
+
+    filter.appendChild(blur);
+    filter.appendChild(merge);
+    defs.appendChild(filter);
+  }
+
+  function countryPathsByCode(svgRoot, code) {
+    const c = (code || '').toUpperCase();
+    return svgRoot.querySelectorAll(
+      `.geo-country--active[data-iso2="${c}"], .geo-country--active[data-iso3="${c}"]`
+    );
+  }
+
+  function clearCountryHover(svgRoot, code) {
+    if (!svgRoot || !code) return;
+    countryPathsByCode(svgRoot, code).forEach((path) => {
+      path.classList.remove('geo-country--hover');
+      requestAnimationFrame(() => {
+        if (path.dataset.geoBaseFill) path.style.fill = path.dataset.geoBaseFill;
+        if (path.dataset.geoBaseStroke) path.style.stroke = path.dataset.geoBaseStroke;
+        path.style.fillOpacity = '';
+        path.style.strokeWidth = '0.75';
+        path.style.filter = 'url(#geoGlow)';
+      });
+    });
+  }
+
+  function applyCountryHover(svgRoot, code) {
+    if (!svgRoot || !code) return;
+    countryPathsByCode(svgRoot, code).forEach((path) => {
+      path.classList.add('geo-country--hover');
+      requestAnimationFrame(() => {
+        path.style.fill = 'url(#geoRainbowFill)';
+        path.style.fillOpacity = '0.78';
+        path.style.stroke = 'rgba(200, 120, 220, 0.62)';
+        path.style.strokeWidth = '0.9';
+        path.style.filter = 'url(#geoRainbowGlow)';
+      });
+    });
+  }
 
   function initWallAnalytics() {
     const root = document.querySelector('.wall-analytics');
@@ -113,7 +213,7 @@
   function paintCountries(svgRoot, countries) {
     const paths = svgRoot.querySelectorAll('.geo-country');
     paths.forEach((path) => {
-      path.classList.remove('geo-country--active');
+      path.classList.remove('geo-country--active', 'geo-country--hover');
       path.style.fill = DEFAULT_FILL;
       path.style.stroke = DEFAULT_STROKE;
       path.style.strokeWidth = '0.5';
@@ -121,7 +221,11 @@
       path.removeAttribute('data-count');
       path.removeAttribute('data-tooltip');
       path.removeAttribute('title');
+      delete path.dataset.geoBaseFill;
+      delete path.dataset.geoBaseStroke;
     });
+
+    ensureGeoRainbowDefs(svgRoot);
 
     if (!countries.length) return;
 
@@ -135,7 +239,10 @@
       const intensity = 0.35 + (c.count / maxCount) * 0.65;
       const fillA = Math.max(0, Math.min(1, 0.12 + 0.55 * intensity));
       const strokeA = Math.max(0, Math.min(1, 0.35 + 0.45 * intensity));
-      const tooltipText = `${c.name}: ${c.count} dreamer${c.count === 1 ? '' : 's'}`;
+      const symbolText = c.top_symbol
+        ? `\nTop symbol: ${c.top_symbol} (${c.top_symbol_count})`
+        : '';
+      const tooltipText = `${c.name}: ${c.count} dreamer${c.count === 1 ? '' : 's'}${symbolText}`;
 
       matched.forEach((path) => {
         path.classList.add('geo-country--active');
@@ -143,6 +250,8 @@
         path.style.stroke = `rgba(0,240,255,${strokeA})`;
         path.style.strokeWidth = '0.75';
         path.style.filter = 'url(#geoGlow)';
+        path.dataset.geoBaseFill = path.style.fill;
+        path.dataset.geoBaseStroke = path.style.stroke;
         path.setAttribute('data-count', String(c.count));
         path.setAttribute('data-tooltip', tooltipText);
         path.setAttribute('title', tooltipText);
@@ -162,6 +271,8 @@
     }
     if (wrap.dataset.geoTooltipBound === '1') return;
     wrap.dataset.geoTooltipBound = '1';
+
+    let hoverCode = null;
 
     const hideTooltip = () => {
       tooltip.classList.remove('is-visible');
@@ -185,10 +296,21 @@
     };
 
     wrap.addEventListener('pointermove', (event) => {
-      if (wrap.dataset.geoTooltipPinned === '1') return;
+      const svg = wrap.querySelector('svg');
       const target = event.target && event.target.closest
         ? event.target.closest('.geo-country--active')
         : null;
+      const nextCode = target
+        ? (target.getAttribute('data-iso2') || target.getAttribute('data-iso3') || '').toUpperCase()
+        : null;
+
+      if (nextCode !== hoverCode) {
+        if (svg) clearCountryHover(svg, hoverCode);
+        hoverCode = nextCode;
+        if (svg && hoverCode) applyCountryHover(svg, hoverCode);
+      }
+
+      if (wrap.dataset.geoTooltipPinned === '1') return;
       if (!target) {
         hideTooltip();
         return;
@@ -204,7 +326,12 @@
       showTooltip(text, x, y, false);
     });
 
-    wrap.addEventListener('mouseleave', hideTooltip);
+    wrap.addEventListener('mouseleave', () => {
+      const svg = wrap.querySelector('svg');
+      if (svg) clearCountryHover(svg, hoverCode);
+      hoverCode = null;
+      hideTooltip();
+    });
 
     wrap.addEventListener('click', (event) => {
       const target = event.target && event.target.closest
@@ -238,7 +365,7 @@
     const existing = wrap.querySelector('svg');
     if (existing) {
       setupGeoTooltip(wrap);
-      paintCountries(wrap, countries);
+      paintCountries(existing, countries);
       return;
     }
 
@@ -254,7 +381,8 @@
       .then((svgText) => {
         wrap.innerHTML = svgText;
         setupGeoTooltip(wrap);
-        paintCountries(wrap, countries);
+        const svg = wrap.querySelector('svg');
+        if (svg) paintCountries(svg, countries);
       })
       .catch(() => {
         /* Keep any static fallback already in the template */

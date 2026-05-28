@@ -62,6 +62,39 @@
         <label for="dream">Your Dream</label>
       </div>
 
+      <div class="reveal dream-symbols-field symbol-tags-field"
+           data-min-symbols="1"
+           data-max-symbols="5">
+        <label for="symbol-tags-input" class="symbol-tags-field__label">Dream symbols</label>
+        <div class="symbol-tags__input-wrap" id="symbol-tags-widget">
+          <input
+            type="text"
+            id="symbol-tags-input"
+            class="symbol-tags__input"
+            placeholder="Type a symbol, press Enter"
+            list="dream-symbol-suggestions"
+            autocomplete="off"
+            maxlength="40"
+          >
+        </div>
+        <div class="symbol-tags__chips" id="symbol-tags-chips" aria-live="polite"></div>
+        <input type="hidden" name="dream_symbols" id="dream_symbols" value="" required>
+        <span class="helper-text symbol-tags-field__hint">
+          Add <strong>1–5</strong> key images. Press <strong>Enter</strong> or <strong>,</strong> after each symbol.
+          Capitals are ignored (<strong>snake</strong> = <strong>Snake</strong>). Typos stay separate (<strong>snak</strong> ≠ <strong>snake</strong>).
+        </span>
+        <span class="symbol-tags-field__count" id="symbol-tags-count">0 / 5 symbols</span>
+        {% if symbol_suggestions %}
+        <datalist id="dream-symbol-suggestions">
+          {% for symbol in symbol_suggestions %}
+          <option value="{{ symbol.name }}"></option>
+          {% endfor %}
+        </datalist>
+        {% else %}
+        <datalist id="dream-symbol-suggestions"></datalist>
+        {% endif %}
+      </div>
+
       <div class="form-section-label">03 · Profile</div>
       <p class="helper-text reveal" style="margin: 0 0 1.25em; color: var(--muted);">
         Country and region are detected automatically from your connection to help map collective dream patterns. We do not ask for your street address.
@@ -174,21 +207,135 @@
       var email = form.querySelector('#email').value.trim();
       var title = form.querySelector('#title').value.trim();
       var dream = form.querySelector('#dream').value.trim();
+      var symbolsEl = form.querySelector('#dream_symbols');
+      var symbols = symbolsEl ? symbolsEl.value.trim() : '';
       var gender = form.querySelector('[name="gender"]').value;
       var mbti = form.querySelector('[name="mbti_type"]').value;
+      var dreamComplete = !!(title && dream && symbols);
 
       steps[0].classList.toggle('is-complete', !!(name && email));
-      steps[1].classList.toggle('is-complete', !!(title && dream));
+      steps[1].classList.toggle('is-complete', dreamComplete);
       steps[2].classList.toggle('is-complete', !!(gender && mbti));
       steps[0].classList.toggle('is-active', !(name && email));
-      steps[1].classList.toggle('is-active', !!(name && email) && !(title && dream));
-      steps[2].classList.toggle('is-active', !!(title && dream) && !(gender && mbti));
+      steps[1].classList.toggle('is-active', !!(name && email) && !dreamComplete);
+      steps[2].classList.toggle('is-active', dreamComplete && !(gender && mbti));
     }
     if (form) {
       form.addEventListener('input', updateProgress);
       form.addEventListener('change', updateProgress);
       updateProgress();
     }
+
+    (function initDreamSymbolTags() {
+      var root = document.querySelector('.symbol-tags-field');
+      if (!root) return;
+
+      var minSymbols = parseInt(root.dataset.minSymbols, 10) || 1;
+      var maxSymbols = parseInt(root.dataset.maxSymbols, 10) || 5;
+      var chipsEl = document.getElementById('symbol-tags-chips');
+      var inputEl = document.getElementById('symbol-tags-input');
+      var hiddenEl = document.getElementById('dream_symbols');
+      var countEl = document.getElementById('symbol-tags-count');
+      var tags = [];
+
+      function titleCase(str) {
+        return str.trim().split(/\s+/).filter(Boolean).map(function (w) {
+          return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+        }).join(' ');
+      }
+
+      function syncHidden() {
+        hiddenEl.value = tags.join(', ');
+        if (countEl) {
+          countEl.textContent = tags.length + ' / ' + maxSymbols + ' symbol' + (maxSymbols === 1 ? '' : 's');
+        }
+        var atMax = tags.length >= maxSymbols;
+        inputEl.disabled = atMax;
+        inputEl.placeholder = atMax ? 'Maximum reached' : 'Type a symbol, press Enter';
+        root.classList.toggle('is-full', atMax);
+        if (form) form.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+
+      function hasTag(name) {
+        var key = name.toLowerCase();
+        return tags.some(function (t) { return t.toLowerCase() === key; });
+      }
+
+      function addTag(raw) {
+        var name = titleCase(raw.replace(/[,;]+/g, ' '));
+        if (!name || name.length < 2) return false;
+        if (!/^[a-zA-Z0-9][a-zA-Z0-9\s\-']*$/.test(name)) return false;
+        if (hasTag(name)) return false;
+        if (tags.length >= maxSymbols) return false;
+        tags.push(name);
+        renderChips();
+        syncHidden();
+        return true;
+      }
+
+      function removeTag(index) {
+        tags.splice(index, 1);
+        renderChips();
+        syncHidden();
+        inputEl.focus();
+      }
+
+      function renderChips() {
+        chipsEl.innerHTML = '';
+        tags.forEach(function (name, i) {
+          var chip = document.createElement('button');
+          chip.type = 'button';
+          chip.className = 'symbol-tags__chip';
+          chip.setAttribute('aria-label', 'Remove ' + name);
+          chip.appendChild(document.createTextNode(name));
+          var remove = document.createElement('span');
+          remove.className = 'symbol-tags__chip-remove';
+          remove.setAttribute('aria-hidden', 'true');
+          remove.textContent = '×';
+          chip.appendChild(remove);
+          chip.addEventListener('click', function () { removeTag(i); });
+          chipsEl.appendChild(chip);
+        });
+      }
+
+      function commitInput() {
+        var parts = inputEl.value.split(/[,;]+/);
+        var added = false;
+        parts.forEach(function (p) {
+          if (addTag(p)) added = true;
+        });
+        inputEl.value = '';
+        return added;
+      }
+
+      inputEl.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ',') {
+          e.preventDefault();
+          commitInput();
+          return;
+        }
+        if (e.key === 'Backspace' && !inputEl.value && tags.length) {
+          removeTag(tags.length - 1);
+        }
+      });
+
+      inputEl.addEventListener('blur', function () {
+        if (inputEl.value.trim()) commitInput();
+      });
+
+      if (form) {
+        form.addEventListener('submit', function (e) {
+          if (inputEl.value.trim()) commitInput();
+          if (tags.length < minSymbols) {
+            e.preventDefault();
+            inputEl.focus();
+            alert('Please add at least ' + minSymbols + ' dream symbol (press Enter after each).');
+          }
+        });
+      }
+
+      syncHidden();
+    })();
   });
 </script>
 

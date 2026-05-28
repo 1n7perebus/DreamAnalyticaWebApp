@@ -4,6 +4,8 @@ from django.contrib.auth.models import User
 from django.core.validators import RegexValidator
 from phonenumber_field.formfields import PhoneNumberField
 
+from .dream_symbols import parse_symbol_tags, resolve_symbol_tags
+
 class UserRegistrationForm(forms.ModelForm):
     username = forms.CharField(
         max_length=30,
@@ -55,6 +57,12 @@ class DreamForm(forms.ModelForm):
     #phone = PhoneNumberField(required=False, label="Phone Number")
     title = forms.CharField(required=True, label="Title")
     dream = forms.CharField(required=True)
+    dream_symbols = forms.CharField(
+        required=True,
+        label='Dream symbols',
+        help_text='Add 1–5 key images (Enter or comma). Case-insensitive; check spelling.',
+        widget=forms.HiddenInput(),
+    )
     active = forms.BooleanField(required=False)
     mbti_type = forms.ChoiceField(choices=MBTI_CHOICES, label="MBTI Type")
     gender = forms.ChoiceField(choices=GENDER_CHOICES, label="Gender", required=True)
@@ -75,8 +83,34 @@ class DreamForm(forms.ModelForm):
 
     class Meta:
         model = Dreams
-        fields = ['email', 'name', 'title', 'dream', 'active', 'mbti_type', 'gender', 'age', 'scale']
+        fields = [
+            'email', 'name', 'title', 'dream', 'active',
+            'mbti_type', 'gender', 'age', 'scale',
+        ]
 
+    def clean_dream_symbols(self):
+        raw = self.cleaned_data.get('dream_symbols', '')
+        try:
+            names = parse_symbol_tags(raw)
+        except ValueError as exc:
+            raise forms.ValidationError(str(exc)) from exc
+        if not names:
+            raise forms.ValidationError(
+                'Add at least one dream symbol (comma-separated), e.g. snake, water, flying.'
+            )
+        self._parsed_symbol_names = names
+        return ', '.join(names)
+
+    def save(self, commit=True):
+        dream = super().save(commit=False)
+        symbol_names = getattr(self, '_parsed_symbol_names', [])
+        if commit:
+            dream.save()
+            if symbol_names:
+                dream.symbols.set(resolve_symbol_tags(symbol_names))
+        else:
+            self._pending_symbol_names = symbol_names
+        return dream
 
 
 class ReplyForm(forms.ModelForm):

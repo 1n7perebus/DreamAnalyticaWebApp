@@ -64,6 +64,12 @@ class Dreams(models.Model):
     pub = models.DateTimeField("date published", default=timezone.now)
     title = models.CharField(max_length=44)
     dream = models.TextField(default="")
+    symbols = models.ManyToManyField(
+        'DreamSymbol',
+        blank=True,
+        related_name='dreams',
+        help_text='Normalized dream imagery tags for collective pattern analysis.',
+    )
     scale = models.IntegerField(default=3, validators=[MinValueValidator(1), MaxValueValidator(5)])
     viewobj = models.IntegerField(default=0)
     timer = models.DateTimeField(blank=True,null=True)
@@ -78,7 +84,25 @@ class Dreams(models.Model):
     
     def __str__(self):
         return str(self.email)
-    
+
+    def symbol_names(self):
+        return list(self.symbols.values_list('name', flat=True))
+
+
+class DreamSymbol(models.Model):
+    """Canonical symbol tag (e.g. Snake) — one row per unique meaning, case-insensitive."""
+
+    name = models.CharField(max_length=80, unique=True)
+
+    class Meta:
+        ordering = ['name']
+        verbose_name = 'dream symbol'
+        verbose_name_plural = 'dream symbols'
+
+    def __str__(self):
+        return self.name
+
+
 class Reply(models.Model):
     dream = models.ForeignKey(Dreams, on_delete=models.CASCADE)
     name = models.CharField(max_length=50, default="R")  # Field made optional
