@@ -252,17 +252,35 @@ def dreams(request):
     })
 
 
-from django.contrib import messages
+CONTACT_TOPIC_LABELS = {
+    'general': 'General question',
+    'dream': 'Dream / analysis',
+    'collaboration': 'Collaboration / press',
+    'technical': 'Technical / app',
+    'other': 'Other',
+}
+
+
+def _contact_topic_prefix(topic_key):
+    label = CONTACT_TOPIC_LABELS.get(topic_key, CONTACT_TOPIC_LABELS['general'])
+    return f'[Topic: {label}]\n\n'
+
 
 def contact(request):
+    contact_sent = request.session.pop('contact_sent', False)
+
     if request.method == "POST":
         ip_address = request.META.get('REMOTE_ADDR')
-        recent_submission = Contact.objects.filter(ip_address=ip_address, submission_time__gte=timezone.now() - timedelta(seconds=1)).exists()
-        
+        recent_submission = Contact.objects.filter(
+            ip_address=ip_address,
+            submission_time__gte=timezone.now() - timedelta(seconds=1),
+        ).exists()
+
         if recent_submission:
-            last_submission_time = Contact.objects.filter(ip_address=ip_address).latest('submission_time').submission_time
-            current_time = timezone.now()
-            time_difference = current_time - last_submission_time
+            last_submission_time = Contact.objects.filter(
+                ip_address=ip_address,
+            ).latest('submission_time').submission_time
+            time_difference = timezone.now() - last_submission_time
             wait_time_seconds = timedelta(days=1).total_seconds() - time_difference.total_seconds()
 
             hours, remainder = divmod(wait_time_seconds, 3600)
@@ -276,28 +294,55 @@ def contact(request):
             if seconds >= 1:
                 wait_message += f" {int(seconds)} second{'s' if int(seconds) > 1 else ''}"
 
-            messages.error(request, f"To prevent spamming, please wait {wait_message} before resubmitting.")
-            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+            messages.error(
+                request,
+                f"To prevent spamming, please wait {wait_message.strip()} before resubmitting.",
+            )
+            return redirect('main:contact')
 
         contact_form = ContactForm(request.POST)
         if contact_form.is_valid() and not recent_submission:
+            topic_key = request.POST.get('contact_topic', 'general').strip().lower()
+            if topic_key not in CONTACT_TOPIC_LABELS:
+                topic_key = 'general'
+
             contact_post = contact_form.save(commit=False)
             contact_post.ip_address = ip_address
-
+            body = (contact_post.desc or '').strip()
+            contact_post.desc = _contact_topic_prefix(topic_key) + body
             contact_post.save()
-            
-            # Add a success message here
-            messages.success(request, "Form submitted successfully!")
-            
-            return HttpResponseRedirect(reverse('main:dreams'))
-        else:
-            messages.error(request, "Invalid form data. Please check the entered information.")
-            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-    
-    else:
-        contact_form = ContactForm()
 
-    return render(request, "dreamapp/contact.html", {"contact_form": contact_form})
+            request.session['contact_sent'] = True
+            messages.success(
+                request,
+                "Message received. We will reply to your email within 24–48 hours.",
+            )
+            return redirect('main:contact')
+
+        topic_key = request.POST.get('contact_topic', 'general').strip().lower()
+        if topic_key not in CONTACT_TOPIC_LABELS:
+            topic_key = 'general'
+        messages.error(request, "Please fix the highlighted fields below.")
+        return render(
+            request,
+            "dreamapp/contact.html",
+            {
+                "contact_form": contact_form,
+                "contact_sent": False,
+                "contact_topic": topic_key,
+            },
+        )
+
+    contact_form = ContactForm()
+    return render(
+        request,
+        "dreamapp/contact.html",
+        {
+            "contact_form": contact_form,
+            "contact_sent": contact_sent,
+            "contact_topic": "general",
+        },
+    )
 
 
 

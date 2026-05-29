@@ -1,10 +1,53 @@
+import re
+
+import phonenumbers
 from django import forms
 from .models import *
 from django.contrib.auth.models import User
 from django.core.validators import RegexValidator
 from phonenumber_field.formfields import PhoneNumberField
+from phonenumber_field.phonenumber import PhoneNumber
 
 from .dream_symbols import parse_symbol_tags, resolve_symbol_tags
+
+
+def normalize_contact_phone(raw):
+    """
+    Accept flexible user input (+1 293-939-9337, +1292929999, etc.)
+    and return an E.164 PhoneNumber for storage, or None when empty.
+    """
+    if raw is None:
+        return None
+    text = str(raw).strip()
+    if not text:
+        return None
+
+    digits_only = re.sub(r'\D', '', text)
+    has_plus = text.lstrip().startswith('+')
+
+    if has_plus:
+        candidate = '+' + digits_only
+    elif len(digits_only) == 10:
+        candidate = '+1' + digits_only
+    elif len(digits_only) == 11 and digits_only.startswith('1'):
+        candidate = '+' + digits_only
+    else:
+        candidate = '+' + digits_only
+
+    try:
+        parsed = phonenumbers.parse(candidate, None)
+    except phonenumbers.NumberParseException as exc:
+        raise forms.ValidationError(
+            'Enter a valid phone with country code (e.g. +1 293-939-9337).'
+        ) from exc
+
+    if not phonenumbers.is_valid_number(parsed):
+        raise forms.ValidationError(
+            'That phone number does not look valid. Include your country code.'
+        )
+
+    e164 = phonenumbers.format_number(parsed, phonenumbers.PhoneNumberFormat.E164)
+    return PhoneNumber.from_string(e164)
 
 class UserRegistrationForm(forms.ModelForm):
     username = forms.CharField(
@@ -123,9 +166,25 @@ class ReplyForm(forms.ModelForm):
 class ContactForm(forms.ModelForm):
     email = forms.EmailField(required=True, label="Email")
     name = forms.CharField(required=True, label="Name")
-    phone = PhoneNumberField(required=False, label="Phone Number")
-    desc = forms.CharField(required=False)
+    phone = forms.CharField(
+        required=False,
+        label="Phone (optional)",
+        max_length=32,
+    )
+    desc = forms.CharField(required=True, label="Message")
 
     class Meta:
         model = Contact
         fields = ['email', 'name', 'phone', 'desc']
+
+    def clean_phone(self):
+        return normalize_contact_phone(self.cleaned_data.get('phone'))
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        phone = self.cleaned_data.get('phone')
+        if phone:
+            instance.phone = phone
+        if commit:
+            instance.save()
+        return instance

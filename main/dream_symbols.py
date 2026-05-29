@@ -64,6 +64,9 @@ def resolve_symbol_tags(names: list[str]):
 
     objs = []
     for name in names:
+        name = normalize_symbol_name(name)
+        if not name:
+            continue
         existing = DreamSymbol.objects.filter(name__iexact=name).first()
         if existing:
             objs.append(existing)

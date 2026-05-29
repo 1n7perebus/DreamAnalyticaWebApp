@@ -2,10 +2,12 @@ import os
 import datetime
 import uuid
 from django.db import models
+from django.db.models.functions import Lower
 from django.utils import timezone
 from datetime import datetime
 from phonenumber_field.modelfields import PhoneNumberField
 from django.core.validators import MinValueValidator, MaxValueValidator
+from .dream_symbols import normalize_symbol_name
 
 
 class Dreams(models.Model):
@@ -98,9 +100,19 @@ class DreamSymbol(models.Model):
         ordering = ['name']
         verbose_name = 'dream symbol'
         verbose_name_plural = 'dream symbols'
+        constraints = [
+            models.UniqueConstraint(
+                Lower('name'),
+                name='main_dreamsymbol_name_ci_unique',
+            ),
+        ]
 
     def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        self.name = normalize_symbol_name(self.name)
+        super().save(*args, **kwargs)
 
 
 class Reply(models.Model):

@@ -1,9 +1,10 @@
 {% extends 'dreamapp/header.html' %}
+{% load static %}
 {% block title %}Contact — Dream Analytica{% endblock %}
 {% block content %}
 
-<div class="container" style="margin: 3em auto; max-width: 1080px;">
-  <div class="reveal" style="text-align:center; margin-bottom: 2em;">
+<div class="container contact-page">
+  <div class="reveal contact-page__head">
     <span class="section-eyebrow">Open Channel</span>
     <h1 class="section-title gradient-text glitch-text" data-text="CONTACT US">CONTACT US</h1>
     <p class="section-sub">Questions, collaborations, or just want to say hello — we listen on every frequency.</p>
@@ -14,80 +15,173 @@
       <h6>Direct Channels</h6>
       <ul>
         <li>
-          <i class="material-icons">email</i>
+          <i class="material-icons" aria-hidden="true">email</i>
           <a href="mailto:dreamanalytica08@gmail.com">dreamanalytica08@gmail.com</a>
         </li>
         <li>
-          <i class="material-icons">phone_iphone</i>
-          <span>iOS &amp; Android app</span>
+          <i class="material-icons" aria-hidden="true">auto_stories</i>
+          <a href="{% url 'main:consult' %}">Share a dream for analysis</a>
         </li>
         <li>
-          <i class="material-icons">psychology</i>
-          <span>Jungian dream analysis</span>
+          <i class="material-icons" aria-hidden="true">phone_iphone</i>
+          <a href="{% url 'main:app' %}">Dream Analytica mobile app</a>
         </li>
         <li>
-          <i class="material-icons">public</i>
+          <i class="material-icons" aria-hidden="true">public</i>
           <span>Worldwide consultations</span>
         </li>
       </ul>
 
-      <h6 style="margin-top: 1.6em;">Response Time</h6>
-      <p style="color: var(--muted); font-size: 0.92rem; line-height: 1.6; margin: 0;">
-        Most messages receive a reply within 24–48 hours. For urgent matters, mention "urgent" in your message.
+      <h6 class="contact-aside__subhead">Response Time</h6>
+      <p class="contact-aside__note">
+        Most messages receive a reply within 24–48 hours. For urgent matters, mention <strong>urgent</strong> in your message.
       </p>
     </aside>
 
-    <div class="neon-card reveal">
-      <span class="neon-card__corner neon-card__corner--tl"></span>
-      <span class="neon-card__corner neon-card__corner--tr"></span>
-      <span class="neon-card__corner neon-card__corner--bl"></span>
-      <span class="neon-card__corner neon-card__corner--br"></span>
+    <div class="contact-form-col reveal">
+      <div class="neon-card form-card contact-card">
+        <span class="neon-card__corner neon-card__corner--tl"></span>
+        <span class="neon-card__corner neon-card__corner--tr"></span>
+        <span class="neon-card__corner neon-card__corner--bl"></span>
+        <span class="neon-card__corner neon-card__corner--br"></span>
 
-      {% if messages %}
-      <div class="messages-container" style="margin-bottom: 1.5em;">
-        {% for message in messages %}
-        <div class="auth-error-list"><span>{{ message }}</span></div>
-        {% endfor %}
+        {% if messages and not contact_sent %}
+        <div class="contact-alerts" role="status" aria-live="polite">
+          {% for message in messages %}
+          {% if 'error' in message.tags %}
+          <div class="contact-alert contact-alert--error">
+            <i class="material-icons contact-alert__icon" aria-hidden="true">error_outline</i>
+            <span>{{ message }}</span>
+          </div>
+          {% endif %}
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if contact_sent %}
+        <div class="contact-success" role="status">
+          <div class="contact-success__icon" aria-hidden="true">
+            <i class="material-icons">mark_email_read</i>
+          </div>
+          <h2 class="contact-success__title">Signal received</h2>
+          <p class="contact-success__text">
+            Thanks for reaching out. We will reply to the email you provided within 24–48 hours.
+          </p>
+          <div class="contact-success__actions">
+            <a href="{% url 'main:consult' %}" class="neon-btn neon-btn--primary">Post a Dream</a>
+            <a href="{% url 'main:dreams' %}" class="neon-btn">Wall of Dreams</a>
+          </div>
+        </div>
+        {% else %}
+        <form method="POST" class="contact-form" id="contact-form" novalidate>
+          {% csrf_token %}
+
+          <div class="form-section-label">01 · Your details</div>
+          <div class="row contact-form__row">
+            <div class="col s12 m6">
+              <div class="contact-field{% if contact_form.name.errors %} contact-field--invalid{% endif %}">
+                <label class="contact-field__label" for="name">Name</label>
+                <input id="name" name="name" type="text" class="contact-field__input" required autocomplete="name"
+                       value="{{ contact_form.name.value|default_if_none:'' }}">
+                {% if contact_form.name.errors %}
+                <span class="contact-field__hint contact-field__hint--error">{{ contact_form.name.errors.0 }}</span>
+                {% endif %}
+              </div>
+            </div>
+            <div class="col s12 m6">
+              <div class="contact-field{% if contact_form.email.errors %} contact-field--invalid{% endif %}">
+                <label class="contact-field__label" for="email">Email</label>
+                <input id="email" name="email" type="email" class="contact-field__input" required autocomplete="email"
+                       value="{{ contact_form.email.value|default_if_none:'' }}">
+                {% if contact_form.email.errors %}
+                <span class="contact-field__hint contact-field__hint--error">{{ contact_form.email.errors.0 }}</span>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          <div class="contact-field{% if contact_form.phone.errors %} contact-field--invalid{% endif %}">
+            <label class="contact-field__label" for="phone">Phone (optional)</label>
+            <input id="phone" name="phone" type="tel" class="contact-field__input"
+                   inputmode="tel" autocomplete="tel"
+                   placeholder="+1 234 567 8900"
+                   value="{{ contact_form.phone.value|default_if_none:'' }}">
+            {% if contact_form.phone.errors %}
+            <span class="contact-field__hint contact-field__hint--error">{{ contact_form.phone.errors.0 }}</span>
+            {% else %}
+            <span class="helper-text contact-field__hint">Spaces and dashes are fine — we normalize it (e.g. +1 293-939-9337).</span>
+            {% endif %}
+          </div>
+
+          <div class="form-section-label">02 · Message</div>
+
+          <div class="contact-topic" data-contact-topic>
+            <span class="contact-field__label" id="contact-topic-label">What is this about?</span>
+            <div class="contact-topic__chips" role="group" aria-labelledby="contact-topic-label">
+              <button type="button" class="neon-chip chip-filter contact-topic__chip is-active" data-topic="general" aria-pressed="true">General</button>
+              <button type="button" class="neon-chip chip-filter contact-topic__chip" data-topic="dream" aria-pressed="false">Dream</button>
+              <button type="button" class="neon-chip chip-filter contact-topic__chip" data-topic="collaboration" aria-pressed="false">Collaboration</button>
+              <button type="button" class="neon-chip chip-filter contact-topic__chip" data-topic="technical" aria-pressed="false">Technical</button>
+              <button type="button" class="neon-chip chip-filter contact-topic__chip" data-topic="other" aria-pressed="false">Other</button>
+            </div>
+            <input type="hidden" name="contact_topic" id="contact_topic" value="{{ contact_topic|default:'general' }}">
+          </div>
+
+          <div class="contact-field contact-field--message{% if contact_form.desc.errors %} contact-field--invalid{% endif %}">
+            <label class="contact-field__label" for="message">Your message</label>
+            <textarea id="message" name="desc" class="contact-field__input contact-message" required
+                      placeholder="Tell us what you need help with — the more context, the better we can reply."
+                      rows="6">{{ contact_form.desc.value|default_if_none:'' }}</textarea>
+            {% if contact_form.desc.errors %}
+            <span class="contact-field__hint contact-field__hint--error">{{ contact_form.desc.errors.0 }}</span>
+            {% else %}
+            <span class="helper-text contact-field__hint">A few sentences (50+ characters) helps us respond with useful detail.</span>
+            {% endif %}
+          </div>
+
+          <button class="neon-btn neon-btn--primary neon-btn--block neon-btn--lg contact-form__submit" type="submit">
+            <span class="contact-form__submit-label">Send Message</span>
+          </button>
+        </form>
+        {% endif %}
       </div>
-      {% endif %}
-
-      <form method="POST" class="contact-form">
-        {% csrf_token %}
-
-        <div class="row" style="margin-bottom: 0;">
-          <div class="col s12 m6">
-            <div class="input-field">
-              <input id="name" name="name" type="text" class="validate" required placeholder=" ">
-              <label for="name">Name</label>
-            </div>
-          </div>
-          <div class="col s12 m6">
-            <div class="input-field">
-              <input id="email" name="email" type="email" class="validate" required placeholder=" ">
-              <label for="email">Email</label>
-            </div>
-          </div>
-        </div>
-
-        <div class="input-field">
-          <input id="phone" name="phone" type="tel" class="validate"
-                 pattern="^\+[0-9]{1,4}[0-9]+$"
-                 placeholder=" ">
-          <label for="phone">WhatsApp Number (Optional)</label>
-          <span class="helper-text">Include country code (e.g., +1234567890)</span>
-        </div>
-
-        <div class="input-field">
-          <textarea id="message" name="desc" class="materialize-textarea" required placeholder=" "></textarea>
-          <label for="message">Your Message</label>
-        </div>
-
-        <button class="neon-btn neon-btn--primary neon-btn--block neon-btn--lg" type="submit">
-          <span>Send Message</span>
-        </button>
-      </form>
     </div>
   </div>
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var topicRoot = document.querySelector('[data-contact-topic]');
+    if (topicRoot) {
+      var hidden = document.getElementById('contact_topic');
+      var chips = topicRoot.querySelectorAll('.contact-topic__chip');
+
+      function setTopic(topic) {
+        if (!topic || !hidden) return;
+        hidden.value = topic;
+        chips.forEach(function (c) {
+          var on = c.getAttribute('data-topic') === topic;
+          c.classList.toggle('is-active', on);
+          c.setAttribute('aria-pressed', on ? 'true' : 'false');
+        });
+      }
+
+      if (hidden && hidden.value) {
+        setTopic(hidden.value);
+      }
+
+      chips.forEach(function (chip) {
+        chip.addEventListener('click', function () {
+          setTopic(chip.getAttribute('data-topic'));
+        });
+      });
+    }
+
+    var form = document.getElementById('contact-form');
+    if (form && typeof M !== 'undefined' && M.textareaAutoInit) {
+      M.textareaAutoInit();
+    }
+  });
+</script>
 
 {% endblock %}

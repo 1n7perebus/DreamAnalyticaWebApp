@@ -34,7 +34,7 @@
     <form method="POST" class="dream-form">
       {% csrf_token %}
 
-      <div class="form-section-label">01 · Identity</div>
+      <div class="form-section-label">01 · Dreamer</div>
       <div class="row" style="margin-bottom: 0;">
         <div class="col s12 m6">
           <div class="input-field reveal">
@@ -50,7 +50,7 @@
         </div>
       </div>
 
-      <div class="form-section-label">02 · The Dream</div>
+      <div class="form-section-label">02 · Dream</div>
       <div class="input-field reveal">
         <input id="title" name="title" type="text" class="validate" maxlength="40" required placeholder=" ">
         <label for="title">Dream Title</label>
@@ -62,28 +62,26 @@
         <label for="dream">Your Dream</label>
       </div>
 
-      <div class="reveal dream-symbols-field symbol-tags-field"
+      <div class="input-field reveal dream-symbols-field symbol-tags-field"
            data-min-symbols="1"
            data-max-symbols="5">
-        <label for="symbol-tags-input" class="symbol-tags-field__label">Dream symbols</label>
-        <div class="symbol-tags__input-wrap" id="symbol-tags-widget">
-          <input
-            type="text"
-            id="symbol-tags-input"
-            class="symbol-tags__input"
-            placeholder="Type a symbol, press Enter"
-            list="dream-symbol-suggestions"
-            autocomplete="off"
-            maxlength="40"
-          >
-        </div>
+        <input
+          type="text"
+          id="symbol-tags-input"
+          class="symbol-tags__input validate"
+          placeholder=" "
+          list="dream-symbol-suggestions"
+          autocomplete="off"
+          maxlength="40"
+        >
+        <label for="symbol-tags-input">Dream symbols</label>
         <div class="symbol-tags__chips" id="symbol-tags-chips" aria-live="polite"></div>
         <input type="hidden" name="dream_symbols" id="dream_symbols" value="" required>
         <span class="helper-text symbol-tags-field__hint">
-          Add <strong>1–5</strong> key images. Press <strong>Enter</strong> or <strong>,</strong> after each symbol.
-          Capitals are ignored (<strong>snake</strong> = <strong>Snake</strong>). Typos stay separate (<strong>snak</strong> ≠ <strong>snake</strong>).
+          Add 1–5 Symbol, Key Images, Motifs. Press Enter or , after each symbol.
+          Capitals are ignored (snake = Snake). Typos stay separate (snak ≠ snake). Example: Chased, Ex, Water, etc.
         </span>
-        <span class="symbol-tags-field__count" id="symbol-tags-count">0 / 5 symbols</span>
+        <span class="helper-text symbol-tags-field__count" id="symbol-tags-count">0 / 5 symbols</span>
         {% if symbol_suggestions %}
         <datalist id="dream-symbol-suggestions">
           {% for symbol in symbol_suggestions %}
@@ -136,7 +134,7 @@
 
       <div class="dream-scale form-lower-section reveal">
         <h6 class="form-section-label">04 · Dream Resonance</h6>
-        <p class="helper-text" style="margin: 0 0 1em;">How did this dream feel? 1 = unsettling, 5 = profound.</p>
+        <p class="helper-text" style="margin: 0 0 1em;">How did this dream feel? 1 = Nightmare, 5 = Good Dream.</p>
         <div class="scale-meter">
           {% for choice in dream_form.fields.scale.choices %}
           <input type="radio" name="scale" id="scale-{{ choice.0 }}" value="{{ choice.0 }}" required>
@@ -144,8 +142,8 @@
           {% endfor %}
         </div>
         <div class="scale-labels">
-          <span>Negative</span>
-          <span>Positive</span>
+          <span>Nightmare</span>
+          <span>Good Dream</span>
         </div>
       </div>
 
@@ -251,7 +249,7 @@
         }
         var atMax = tags.length >= maxSymbols;
         inputEl.disabled = atMax;
-        inputEl.placeholder = atMax ? 'Maximum reached' : 'Type a symbol, press Enter';
+        inputEl.placeholder = atMax ? 'Maximum reached' : ' ';
         root.classList.toggle('is-full', atMax);
         if (form) form.dispatchEvent(new Event('input', { bubbles: true }));
       }
