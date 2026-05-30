@@ -14,10 +14,10 @@ import sys
 from pathlib import Path
 from dotenv import load_dotenv
 
-load_dotenv()
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+load_dotenv(BASE_DIR / 'mysite' / '.env')
 
 
 SERVER_EMAIL = os.environ.get('EMAIL_HOST_USER')

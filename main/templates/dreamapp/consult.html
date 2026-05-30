@@ -38,13 +38,15 @@
       <div class="row" style="margin-bottom: 0;">
         <div class="col s12 m6">
           <div class="input-field reveal">
-            <input id="name" name="name" type="text" class="validate" required placeholder=" ">
+            <input id="name" name="name" type="text" class="validate" required placeholder=" "
+                   autocomplete="name" value="{{ dream_form.name.value|default_if_none:'' }}">
             <label for="name">Name</label>
           </div>
         </div>
         <div class="col s12 m6">
           <div class="input-field reveal">
-            <input id="email" name="email" type="email" class="validate" required placeholder=" ">
+            <input id="email" name="email" type="email" class="validate" required placeholder=" "
+                   autocomplete="email" value="{{ dream_form.email.value|default_if_none:'' }}">
             <label for="email">Email</label>
           </div>
         </div>

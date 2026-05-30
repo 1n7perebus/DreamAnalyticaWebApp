@@ -1,10 +1,10 @@
 {% extends 'dreamapp/header.html' %}
-{% block title %}Sign In — Dream Analytica{% endblock %}
+{% block title %}{% if profile_setup %}Choose Your Name{% else %}Sign In{% endif %} — Dream Analytica{% endblock %}
 {% block content %}
 
+{% if not profile_setup %}
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<meta name="google-signin-client_id"
-      content="915694272692-dr7nbn2tv5101nja17e2v6nc1kurt3bn.apps.googleusercontent.com">
+{% endif %}
 
 <div class="auth-shell">
   <div class="auth-card reveal">
@@ -13,73 +13,141 @@
     <span class="neon-card__corner neon-card__corner--bl"></span>
     <span class="neon-card__corner neon-card__corner--br"></span>
 
-    <h1 class="auth-card__title goldman-regular glitch-text gradient-text" data-text="LOGIN">LOGIN</h1>
-    <p class="auth-card__sub">Access the network</p>
+    {% if profile_setup %}
+    <header class="auth-card__head">
+      <span class="auth-card__eyebrow">Almost there</span>
+      <h1 class="auth-card__title goldman-regular">Choose your name</h1>
+      <p class="auth-card__lead">This is how you will appear when you comment on dreams.</p>
+    </header>
 
     {% if messages %}
-    <ul class="auth-error-list">
+    <ul class="auth-error-list" role="alert">
       {% for message in messages %}
       <li>{{ message }}</li>
       {% endfor %}
     </ul>
     {% endif %}
 
-    <form method="post">
+    <form method="post" class="auth-form">
       {% csrf_token %}
-      <div class="input-field">
-        <input type="email" name="email" id="email" required placeholder=" ">
-        <label for="email">Email</label>
-      </div>
-      <div class="input-field">
-        <input type="password" name="password" id="password" required placeholder=" ">
-        <label for="password">Password</label>
+      <div class="contact-field">
+        <label class="contact-field__label" for="display_name">Display name</label>
+        <input type="text" name="display_name" id="display_name" class="contact-field__input"
+               required maxlength="50" autocomplete="nickname" autofocus
+               placeholder="e.g. Luna, DreamWalker">
       </div>
       <button class="neon-btn neon-btn--primary neon-btn--block neon-btn--lg" type="submit">
-        <span>Authenticate</span>
+        <span>Continue</span>
       </button>
     </form>
 
-    <div class="auth-divider">or</div>
+    {% else %}
 
-    <div id="buttonDiv" style="display:flex; justify-content:center;"></div>
+    <header class="auth-card__head">
+      <span class="auth-card__eyebrow">Secure access</span>
+      <h1 class="auth-card__title goldman-regular">Sign in</h1>
+      <p class="auth-card__lead">Join the network to interpret dreams on the Wall.</p>
+    </header>
 
-    <p>Don't have an account? <a href="{% url 'main:register' %}">Register here</a>.</p>
+    {% if messages %}
+    <ul class="auth-error-list" role="alert">
+      {% for message in messages %}
+      <li>{{ message }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+
+    <ul id="auth-google-error" class="auth-error-list" role="alert" hidden></ul>
+
+    <section class="auth-panel auth-panel--social" aria-label="Google sign-in">
+      <p class="auth-panel__label">Continue with</p>
+      <div id="auth-google-wrap" class="auth-google">
+        <div id="buttonDiv"></div>
+      </div>
+    </section>
+
+    <div class="auth-divider" role="separator"><span>or email</span></div>
+
+    <section class="auth-panel auth-panel--email" aria-label="Email sign-in">
+      <form method="post" class="auth-form">
+        {% csrf_token %}
+        <div class="contact-field">
+          <label class="contact-field__label" for="email">Email</label>
+          <input type="email" name="email" id="email" class="contact-field__input"
+                 required autocomplete="email" placeholder="you@example.com">
+        </div>
+        <div class="contact-field">
+          <label class="contact-field__label" for="password">Password</label>
+          <input type="password" name="password" id="password" class="contact-field__input"
+                 required autocomplete="current-password" placeholder="••••••••">
+        </div>
+        <button class="neon-btn neon-btn--primary neon-btn--block neon-btn--lg" type="submit">
+          <span>Sign in</span>
+        </button>
+      </form>
+    </section>
+
+    <p class="auth-card__footer">
+      No account yet?
+      <a href="{% url 'main:register' %}">Create one</a>
+    </p>
+
+    {% endif %}
   </div>
 </div>
 
+{% if not profile_setup %}
 <script>
-  function handleCredentialResponse(response) {
-    const id_token = response.credential;
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', '{% url "main:google_auth_callback" %}');
-    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-    xhr.onload = function () {
-      if (xhr.status === 200) {
-        window.location.href = "{% url 'main:index' %}";
-      } else {
-        console.error('Error logging in with Google', xhr.responseText);
-      }
-    };
-    xhr.onerror = function () { console.error('Network error occurred'); };
-    xhr.send('code=' + id_token);
+(function () {
+  var clientId = '{{ google_client_id|escapejs }}';
+  var loginUri = '{{ google_login_uri|escapejs }}';
+  var googleError = document.getElementById('auth-google-error');
+
+  function showGoogleError(msg) {
+    if (!googleError) return;
+    googleError.innerHTML = '<li>' + msg + '</li>';
+    googleError.hidden = false;
   }
 
-  window.onload = function () {
-    try {
-      if (typeof google !== 'undefined' && google.accounts) {
-        google.accounts.id.initialize({
-          client_id: '915694272692-dr7nbn2tv5101nja17e2v6nc1kurt3bn.apps.googleusercontent.com',
-          callback: handleCredentialResponse
-        });
-        google.accounts.id.renderButton(
-          document.getElementById('buttonDiv'),
-          { theme: "filled_black", size: "large", shape: "pill", text: "signin_with" }
-        );
-      }
-    } catch (error) {
-      console.error('Error initializing Google Sign-In', error);
+  function initGoogleButton() {
+    if (!clientId) {
+      showGoogleError('Google sign-in is not configured.');
+      return true;
     }
-  };
+    if (typeof google === 'undefined' || !google.accounts) return false;
+    google.accounts.id.initialize({
+      client_id: clientId,
+      ux_mode: 'redirect',
+      login_uri: loginUri,
+      auto_select: false,
+      use_fedcm_for_prompt: false
+    });
+    google.accounts.id.renderButton(
+      document.getElementById('buttonDiv'),
+      { theme: 'filled_black', size: 'large', shape: 'pill', text: 'signin_with', width: 320 }
+    );
+    return true;
+  }
+
+  function waitForGoogle() {
+    if (initGoogleButton()) return;
+    var tries = 0;
+    var timer = setInterval(function () {
+      tries += 1;
+      if (initGoogleButton() || tries > 50) {
+        clearInterval(timer);
+        if (tries > 50 && clientId) showGoogleError('Could not load Google Sign-In. Use email instead.');
+      }
+    }, 100);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', waitForGoogle);
+  } else {
+    waitForGoogle();
+  }
+})();
 </script>
+{% endif %}
 
 {% endblock %}

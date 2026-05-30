@@ -14,9 +14,9 @@ urlpatterns = [
     path("about/", views.about, name="about"),
     path("error/", views.error, name="error"),
     path('dreams/<uuid:dream_id>/', views.dreams, name='specific_dream'),
+    path('login/', views.login_view, name='login'),
+    path('register/', views.register_view, name='register'),
+    path('logout/', views.logout_view, name='logout'),
+    path('google/auth/callback/', views.google_auth_callback, name='google_auth_callback'),
     re_path(r'^static/(?P<path>.*)$', serve,{'document_root': settings.STATIC_ROOT}),
 ]
-
-    #path('login/', views.login_view, name='login'),
-    #path('register/', views.register_view, name='register'),
-    #path('logout/', views.logout_view, name='logout'),

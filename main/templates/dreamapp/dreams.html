@@ -149,6 +149,13 @@
               <span>Submit Analysis</span>
             </button>
           </form>
+          {% else %}
+          <div class="dreams-login-cta">
+            <p class="dreams-login-cta__text">Log in to add your interpretation</p>
+            <a href="{% url 'main:login' %}" class="neon-btn neon-btn--mag neon-btn--block">
+              <span>Login</span>
+            </a>
+          </div>
           {% endif %}
         </div>
       </article>

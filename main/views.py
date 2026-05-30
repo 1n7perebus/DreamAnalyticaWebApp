@@ -3,9 +3,15 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.http import HttpResponseRedirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.views.decorators.cache import never_cache
+from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
 
 from django.conf import settings
+
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
 
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
@@ -26,7 +32,27 @@ from .dream_symbols import resolve_symbol_tags
 # Advertising Goodgle Adsense 
 # Payment Mothod
 # Adjust Submission Time
-CLIENT_SECRET_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'secrets', 'client_secret.json')
+
+
+def redirect_after_login(request, user):
+    if not (user.first_name or '').strip():
+        return reverse('main:login') + '?setup=1'
+    return request.session.pop('next', reverse('main:index'))
+
+
+def user_form_identity(request):
+    """Default name/email for dream and contact forms when user is signed in."""
+    if not request.user.is_authenticated:
+        return {}
+    name = (request.user.first_name or '').strip() or request.user.username
+    email = (request.user.email or '').strip()
+    initial = {}
+    if name:
+        initial['name'] = name
+    if email:
+        initial['email'] = email
+    return initial
+
 
 def delete_duplicates(dream_post):
     duplicates = Dreams.objects.filter(
@@ -45,9 +71,104 @@ def index(request):
     return render(request, "dreamapp/index.html", context={})
 
 
-#def logout_view(request):
-#    logout(request)
-#    return redirect('main:login')
+def register_view(request):
+    if request.method == 'POST':
+        form = UserRegistrationForm(request.POST)
+        if form.is_valid():
+            new_user = form.save(commit=False)
+            new_user.set_password(form.cleaned_data['password'])
+            new_user.save()
+            messages.success(request, 'Registration successful. You can now log in.')
+            return redirect('main:login')
+    else:
+        form = UserRegistrationForm()
+    return render(request, 'dreamapp/register.html', {'form': form})
+
+
+def login_view(request):
+    if request.user.is_authenticated:
+        if request.method == 'POST' and 'display_name' in request.POST:
+            name = request.POST.get('display_name', '').strip()[:50]
+            if name:
+                request.user.first_name = name
+                request.user.save(update_fields=['first_name'])
+                messages.success(request, f'Welcome, {name}!')
+                return redirect(request.session.pop('next', reverse('main:index')))
+            messages.error(request, 'Please enter a display name.')
+        if not (request.user.first_name or '').strip() or request.GET.get('setup') == '1':
+            return render(request, 'dreamapp/login.html', {
+                'profile_setup': True,
+                'google_client_id': settings.GOOGLE_CLIENT_ID,
+            })
+        return redirect('main:index')
+
+    if request.method == 'POST':
+        email = request.POST['email']
+        password = request.POST['password']
+        try:
+            user = User.objects.get(email=email)
+            user = authenticate(request, username=user.username, password=password)
+            if user is not None:
+                login(request, user)
+                return redirect(redirect_after_login(request, user))
+            messages.error(request, 'Invalid email or password')
+        except User.DoesNotExist:
+            messages.error(request, 'Invalid email or password')
+
+    return render(request, 'dreamapp/login.html', {
+        'google_client_id': settings.GOOGLE_CLIENT_ID,
+        'google_login_uri': request.build_absolute_uri(reverse('main:google_auth_callback')),
+    })
+
+
+def logout_view(request):
+    logout(request)
+    return redirect('main:login')
+
+
+def _login_user_from_google_token(token):
+    if not settings.GOOGLE_CLIENT_ID:
+        raise ValueError('Google sign-in is not configured')
+    idinfo = id_token.verify_oauth2_token(
+        token, google_requests.Request(), settings.GOOGLE_CLIENT_ID
+    )
+    email = idinfo.get('email')
+    if not email:
+        raise ValueError('Email not provided by Google')
+    google_name = (idinfo.get('given_name') or idinfo.get('name') or '').strip()[:50]
+    user = User.objects.filter(email=email).first()
+    if not user:
+        base = email.split('@')[0].replace('.', '')[:20] or 'user'
+        username = base
+        n = 1
+        while User.objects.filter(username=username).exists():
+            username = f'{base}{n}'
+            n += 1
+        user = User.objects.create_user(username=username, email=email)
+        user.set_unusable_password()
+        if google_name:
+            user.first_name = google_name
+        user.save()
+    elif google_name and not (user.first_name or '').strip():
+        user.first_name = google_name
+        user.save(update_fields=['first_name'])
+    return user
+
+
+@csrf_exempt
+@require_POST
+def google_auth_callback(request):
+    token = request.POST.get('credential') or request.POST.get('code')
+    if not token:
+        messages.error(request, 'Google sign-in did not return a token.')
+        return redirect('main:login')
+    try:
+        user = _login_user_from_google_token(token)
+    except ValueError as exc:
+        messages.error(request, str(exc))
+        return redirect('main:login')
+    login(request, user)
+    return redirect(redirect_after_login(request, user))
 
 
 def consult(request):
@@ -131,7 +252,7 @@ def consult(request):
             return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
     
     else:
-        dream_form = DreamForm()
+        dream_form = DreamForm(initial=user_form_identity(request))
 
     mbti_choices = DreamForm.MBTI_CHOICES
     gender_choices = DreamForm.GENDER_CHOICES
@@ -333,7 +454,7 @@ def contact(request):
             },
         )
 
-    contact_form = ContactForm()
+    contact_form = ContactForm(initial=user_form_identity(request))
     return render(
         request,
         "dreamapp/contact.html",
@@ -354,88 +475,3 @@ def about(request):
 
 def error(request):
     return render(request, "dreamapp/error.html")
-
-
-
-
-
-
-    '''
-def register_view(request):
-    if request.method == 'POST':
-        form = UserRegistrationForm(request.POST)
-        if form.is_valid():
-            new_user = form.save(commit=False)
-            new_user.set_password(form.cleaned_data['password'])
-            new_user.save()
-            messages.success(request, 'Registration successful. You can now log in.')
-            return redirect('main:login')
-    else:
-        form = UserRegistrationForm()
-    return render(request, 'dreamapp/register.html', {'form': form})
-
-
-def login_view(request):
-    if request.method == 'POST':
-        email = request.POST['email']
-        password = request.POST['password']
-        try:
-            user = User.objects.get(email=email)
-            user = authenticate(request, username=user.username, password=password)
-            if user is not None:
-                login(request, user)
-                return redirect('index')
-            else:
-                messages.error(request, 'Invalid email or password')
-        except User.DoesNotExist:
-            messages.error(request, 'Invalid email or password')
-    return render(request, 'dreamapp/login.html')
-
-
-
-    if dreams.exists():
-        for dream_post in dreams:
-            file_path = f"dreams/{dream_post.id}.json"
-            # Get the download URL for the file from Firebase Storage
-            download_url = storage.child(file_path).get_url(None)
-            # Make an HTTP GET request to the download URL
-            response = requests.get(download_url)
-            # Check if the request was successful
-            if response.status_code == 200:
-                # Read the JSON data from the response
-                json_data = response.json()
-                # Append the JSON data to the list
-                all_json_data.append(json_data)
-            else:
-                print(f"Error: Unable to fetch JSON data for dream ID {dream_post.id} from Firebase Storage. Status code: {response.status_code}")
-    else:
-        print("No dreams found.")
-    '''
-
-    '''
-    pub_str = dream_post.pub.strftime('%Y-%m-%d %H:%M:%S') if dream_post.pub else None
-
-    dream_data = {
-        'id': str(dream_post.id),
-        'ip_address': dream_post.ip_address,
-        'submission_time': dream_post.submission_time.strftime('%Y-%m-%d %H:%M:%S'),
-        'name': dream_post.name,
-        'mbti_type': dream_post.mbti_type,
-        'email': dream_post.email,
-        'phone': str(dream_post.phone),
-        'title': dream_post.title,
-        'dream': dream_post.dream,
-        'active': dream_post.active,
-        'pub': pub_str,
-    }
-    
-    json_data = json.dumps(dream_data)
-
-    file_path = os.path.join(os.getcwd(), f"{dream_post.id}.json")
-
-    with open(file_path, 'w') as file:
-        file.write(json_data)
-    # Store the JSON data in Firebase storage
-    storage.child("dreams").child(f"{dream_post.id}.json").put(file_path)
-    '''
-    
