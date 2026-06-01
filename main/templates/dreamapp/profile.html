@@ -97,13 +97,13 @@
               You can change birth year {{ birth_year_updates_remaining }} more time{{ birth_year_updates_remaining|pluralize }}.
               {% endif %}
             </p>
-            <div class="input-field profile-select-field">
-              <select id="id_birth_year" name="birth_year" class="no-autoinit" required>
+            <div class="profile-field">
+              <label class="contact-field__label" for="id_birth_year">{{ birth_year_form.birth_year.label }}</label>
+              <select id="id_birth_year" name="birth_year" class="profile-native-select" required>
                 {% for value, label in birth_year_form.fields.birth_year.choices %}
                 <option value="{{ value }}"{% if value == '' %} disabled{% if not profile.birth_year %} selected{% endif %}{% elif profile.birth_year == value %} selected{% endif %}>{{ label }}</option>
                 {% endfor %}
               </select>
-              <label for="id_birth_year">{{ birth_year_form.birth_year.label }}</label>
             </div>
             <button type="submit" class="neon-btn neon-btn--primary">Save birth year</button>
           </form>
@@ -113,7 +113,7 @@
         {% if mbti_updates_remaining > 0 %}
         <div id="profile-mbti-panel" class="profile-collapsible-panel{% if mbti_form_open %} is-open{% endif %}"
              {% if profile.mbti_type and not mbti_form_open %}hidden{% endif %}>
-          <form method="post" class="profile-inline-form profile-mbti-form">
+          <form method="post" class="profile-inline-form profile-mbti-form" novalidate>
             {% csrf_token %}
             <input type="hidden" name="action" value="update_mbti">
             <p class="profile-country-note">
@@ -122,13 +122,13 @@
               You can change it {{ mbti_updates_remaining }} more time{{ mbti_updates_remaining|pluralize }}.
               {% endif %}
             </p>
-            <div class="input-field profile-select-field">
-              <select id="id_mbti_type" name="mbti_type" class="no-autoinit">
+            <div class="profile-field">
+              <label class="contact-field__label" for="id_mbti_type">{{ mbti_form.mbti_type.label }}</label>
+              <select id="id_mbti_type" name="mbti_type" class="profile-native-select" required>
                 {% for value, label in mbti_form.fields.mbti_type.choices %}
                 <option value="{{ value }}"{% if value == '' %} disabled{% if not profile.mbti_type %} selected{% endif %}{% elif profile.mbti_type == value %} selected{% endif %}>{{ label }}</option>
                 {% endfor %}
               </select>
-              <label for="id_mbti_type">{{ mbti_form.mbti_type.label }}</label>
             </div>
             <button type="submit" class="neon-btn neon-btn--primary">Save personality type</button>
           </form>
@@ -140,15 +140,14 @@
           {% csrf_token %}
           <input type="hidden" name="action" value="set_country">
           <p class="profile-country-note">Set your country once — it updates every dream on your account.</p>
-          <div class="input-field profile-select-field">
-            <select id="id_country_code" name="country_code" class="no-autoinit" required>
+          <div class="profile-field">
+            <label class="contact-field__label" for="id_country_code">{{ country_form.country_code.label }}</label>
+            <select id="id_country_code" name="country_code" class="profile-native-select" required>
               {% for value, label in country_form.fields.country_code.choices %}
               <option value="{{ value }}"{% if value == '' %} disabled{% if not country_form.country_code.value %} selected{% endif %}{% elif country_form.country_code.value == value %} selected{% endif %}>{{ label }}</option>
               {% endfor %}
             </select>
-            <label for="id_country_code">{{ country_form.country_code.label }}</label>
           </div>
-          <div id="profile-country-dropdown-root" class="profile-dropdown-root" aria-hidden="true"></div>
           <button type="submit" class="neon-btn neon-btn--primary">Save country</button>
         </form>
         {% endif %}
@@ -224,9 +223,26 @@
 </div>
 
 <script>
-  function initProfileMbtiPanel() {
-    var trigger = document.getElementById('profile-mbti-trigger');
-    var panel = document.getElementById('profile-mbti-panel');
+  function restoreNativeProfileSelects() {
+    document.querySelectorAll('.profile-page select.profile-native-select').forEach(function(selectEl) {
+      if (typeof M !== 'undefined' && M.FormSelect) {
+        var inst = M.FormSelect.getInstance(selectEl);
+        if (inst) inst.destroy();
+      }
+      var wrapper = selectEl.closest('.select-wrapper');
+      if (wrapper && wrapper.parentNode) {
+        wrapper.parentNode.insertBefore(selectEl, wrapper);
+        wrapper.remove();
+      }
+      selectEl.style.display = 'block';
+      selectEl.style.visibility = 'visible';
+      selectEl.style.pointerEvents = 'auto';
+    });
+  }
+
+  function initProfileCollapsible(triggerId, panelId) {
+    var trigger = document.getElementById(triggerId);
+    var panel = document.getElementById(panelId);
     if (!trigger || !panel) return;
 
     trigger.addEventListener('click', function() {
@@ -234,128 +250,17 @@
       if (open) {
         panel.removeAttribute('hidden');
         trigger.setAttribute('aria-expanded', 'true');
-        initProfileMbtiSelect();
       } else {
         panel.setAttribute('hidden', '');
         trigger.setAttribute('aria-expanded', 'false');
-      }
-    });
-  }
-
-  function initProfileMbtiSelect() {
-    var mbtiSelect = document.querySelector('#id_mbti_type');
-    if (typeof M === 'undefined' || !mbtiSelect) return;
-    var existing = M.FormSelect.getInstance(mbtiSelect);
-    if (existing) existing.destroy();
-    M.FormSelect.init(mbtiSelect, {
-      dropdownOptions: {
-        container: document.body,
-        coverTrigger: false,
-        constrainWidth: true,
-        closeOnClick: true,
-        belowOrigin: true
-      }
-    });
-  }
-
-  function syncProfileSelectBeforeSubmit(formSelector, selectId) {
-    var form = document.querySelector(formSelector);
-    var selectEl = document.getElementById(selectId);
-    if (!form || !selectEl) return;
-    form.addEventListener('submit', function() {
-      var option = selectEl.options[selectEl.selectedIndex];
-      if (option && option.value) {
-        selectEl.value = option.value;
-      }
-    });
-  }
-
-  function initProfileBirthYearPanel() {
-    var trigger = document.getElementById('profile-birth-year-trigger');
-    var panel = document.getElementById('profile-birth-year-panel');
-    if (!trigger || !panel) return;
-
-    trigger.addEventListener('click', function() {
-      var open = panel.classList.toggle('is-open');
-      if (open) {
-        panel.removeAttribute('hidden');
-        trigger.setAttribute('aria-expanded', 'true');
-        initProfileBirthYearSelect();
-      } else {
-        panel.setAttribute('hidden', '');
-        trigger.setAttribute('aria-expanded', 'false');
-      }
-    });
-  }
-
-  function initProfileBirthYearSelect() {
-    var birthYearSelect = document.querySelector('#id_birth_year');
-    if (typeof M === 'undefined' || !birthYearSelect) return;
-    var existing = M.FormSelect.getInstance(birthYearSelect);
-    if (existing) existing.destroy();
-    M.FormSelect.init(birthYearSelect, {
-      dropdownOptions: {
-        container: document.body,
-        coverTrigger: false,
-        constrainWidth: true,
-        closeOnClick: true,
-        belowOrigin: true
-      }
-    });
-  }
-
-  function initProfileCountrySelect() {
-    var countrySelect = document.querySelector('#id_country_code');
-    var dropdownRoot = document.getElementById('profile-country-dropdown-root');
-    if (typeof M === 'undefined' || !countrySelect || !dropdownRoot) return;
-
-    var existing = M.FormSelect.getInstance(countrySelect);
-    if (existing) existing.destroy();
-
-    M.FormSelect.init(countrySelect, {
-      dropdownOptions: {
-        container: dropdownRoot,
-        coverTrigger: false,
-        constrainWidth: false,
-        closeOnClick: true,
-        belowOrigin: true
-      },
-      onOpenEnd: function() {
-        var dropdown = dropdownRoot.querySelector('.dropdown-content');
-        if (!dropdown) return;
-        dropdown.classList.add('profile-country-dropdown');
-        dropdown.style.setProperty('background-color', '#0a0d14', 'important');
-        dropdown.style.setProperty('opacity', '1', 'important');
-        dropdown.style.setProperty('z-index', '500', 'important');
       }
     });
   }
 
   document.addEventListener('DOMContentLoaded', function() {
-    syncProfileSelectBeforeSubmit('.profile-mbti-form', 'id_mbti_type');
-    syncProfileSelectBeforeSubmit('.profile-birth-year-form', 'id_birth_year');
-    initProfileBirthYearPanel();
-    initProfileMbtiPanel();
-    if (document.getElementById('profile-birth-year-panel') &&
-        document.getElementById('profile-birth-year-panel').classList.contains('is-open')) {
-      initProfileBirthYearSelect();
-    }
-    if (document.getElementById('profile-mbti-panel') &&
-        document.getElementById('profile-mbti-panel').classList.contains('is-open')) {
-      initProfileMbtiSelect();
-    }
-    initProfileCountrySelect();
-    setTimeout(function() {
-      if (document.getElementById('profile-birth-year-panel') &&
-          document.getElementById('profile-birth-year-panel').classList.contains('is-open')) {
-        initProfileBirthYearSelect();
-      }
-      if (document.getElementById('profile-mbti-panel') &&
-          document.getElementById('profile-mbti-panel').classList.contains('is-open')) {
-        initProfileMbtiSelect();
-      }
-      initProfileCountrySelect();
-    }, 0);
+    restoreNativeProfileSelects();
+    initProfileCollapsible('profile-birth-year-trigger', 'profile-birth-year-panel');
+    initProfileCollapsible('profile-mbti-trigger', 'profile-mbti-panel');
   });
 </script>
 
