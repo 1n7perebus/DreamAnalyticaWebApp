@@ -34,23 +34,41 @@
     <form method="POST" class="dream-form">
       {% csrf_token %}
 
+      {% if hide_dreamer_section %}
+      <div class="consult-identity-snap reveal">
+        <p class="consult-identity-snap__label">Posting as</p>
+        <p class="consult-identity-snap__value">{{ consult_display_name }}</p>
+        <p class="consult-identity-snap__hint">{{ consult_identity.email }}</p>
+        <input type="hidden" name="name" value="{{ consult_identity.name }}">
+        <input type="hidden" name="email" value="{{ consult_identity.email }}">
+      </div>
+      {% else %}
       <div class="form-section-label">01 · Dreamer</div>
       <div class="row" style="margin-bottom: 0;">
-        <div class="col s12 m6">
+        {% if not consult_hide.name %}
+        <div class="col s12 {% if consult_hide.email %}m12{% else %}m6{% endif %}">
           <div class="input-field reveal">
             <input id="name" name="name" type="text" class="validate" required placeholder=" "
                    autocomplete="name" value="{{ dream_form.name.value|default_if_none:'' }}">
             <label for="name">Name</label>
           </div>
         </div>
-        <div class="col s12 m6">
+        {% else %}
+        <input type="hidden" name="name" value="{{ consult_identity.name }}">
+        {% endif %}
+        {% if not consult_hide.email %}
+        <div class="col s12 {% if consult_hide.name %}m12{% else %}m6{% endif %}">
           <div class="input-field reveal">
             <input id="email" name="email" type="email" class="validate" required placeholder=" "
                    autocomplete="email" value="{{ dream_form.email.value|default_if_none:'' }}">
             <label for="email">Email</label>
           </div>
         </div>
+        {% else %}
+        <input type="hidden" name="email" value="{{ consult_identity.email }}">
+        {% endif %}
       </div>
+      {% endif %}
 
       <div class="form-section-label">02 · Dream</div>
       <div class="input-field reveal">
@@ -97,16 +115,52 @@
 
       <div class="form-section-label">03 · Profile</div>
       <p class="helper-text reveal" style="margin: 0 0 1.25em; color: var(--muted);">
-        Country and region are detected automatically from your connection to help map collective dream patterns. We do not ask for your street address.
+        Country and region are detected automatically from your connection. Fields from your account are applied and saved on this dream permanently.
       </p>
-      <div class="row" style="margin-bottom: 0;">
-        <div class="col s12 m4">
-          <div class="input-field reveal">
-            <input id="age" name="age" type="number" min="13" max="120" class="validate" placeholder=" ">
-            <label for="age">Age (optional)</label>
+      {% if hide_all_profile_fields %}
+      <div class="row consult-profile-snaps" style="margin-bottom: 0;">
+        {% if consult_hide.age %}
+        <div class="col s12 m6">
+          <div class="consult-age-snap reveal">
+            <p class="consult-age-snap__label">Age for this dream</p>
+            <p class="consult-age-snap__value">{{ consult_snaps.age }}</p>
+            <p class="consult-age-snap__hint">From birth year {{ consult_snaps.birth_year }} · fixed on this dream</p>
           </div>
         </div>
-        <div class="col s12 m4">
+        {% endif %}
+        {% if consult_hide.mbti %}
+        <div class="col s12 m6">
+          <div class="consult-age-snap reveal">
+            <p class="consult-age-snap__label">Personality type</p>
+            <p class="consult-age-snap__value">{{ consult_snaps.mbti_display }}</p>
+            <p class="consult-age-snap__hint">From your profile · fixed on this dream</p>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+      {% endif %}
+      {% if consult_hide.age and consult_snaps.age %}
+      <input type="hidden" name="age" value="{{ consult_snaps.age }}">
+      {% endif %}
+      {% if consult_hide.mbti and consult_snaps.mbti %}
+      <input type="hidden" name="mbti_type" value="{{ consult_snaps.mbti }}">
+      {% endif %}
+      <div class="row" style="margin-bottom: 0;">
+        {% if not consult_hide.age %}
+        <div class="col s12 {% if consult_hide.mbti %}m6{% else %}m4{% endif %}">
+          <div class="input-field reveal">
+            <input id="age" name="age" type="number" min="13" max="120" class="validate" placeholder=" "
+              {% if dream_form.age.value %}value="{{ dream_form.age.value }}"{% endif %}>
+            <label for="age">Age when you had this dream (optional)</label>
+          </div>
+          {% if user.is_authenticated %}
+          <p class="helper-text" style="margin-top: -0.5em;">
+            <a href="{% url 'main:profile' %}">Set birth year on your profile</a> to auto-fill age on future dreams.
+          </p>
+          {% endif %}
+        </div>
+        {% endif %}
+        <div class="col s12 {% if consult_hide.age and consult_hide.mbti %}m12{% elif consult_hide.age or consult_hide.mbti %}m6{% else %}m4{% endif %}">
           <div class="input-field reveal select-field">
             <select id="gender" name="gender" required>
               <option value="" disabled selected>Select gender</option>
@@ -119,7 +173,8 @@
             <label for="gender">Gender</label>
           </div>
         </div>
-        <div class="col s12 m4">
+        {% if not consult_hide.mbti %}
+        <div class="col s12 {% if consult_hide.age %}m6{% else %}m4{% endif %}">
           <div class="input-field reveal select-field">
             <select id="mbti_type" name="mbti_type" required>
               <option value="" disabled selected>Choose your type</option>
@@ -131,7 +186,13 @@
             </select>
             <label for="mbti_type">Personality Type</label>
           </div>
+          {% if user.is_authenticated %}
+          <p class="helper-text" style="margin-top: -0.5em;">
+            <a href="{% url 'main:profile' %}">Set personality type on your profile</a> to auto-fill on future dreams.
+          </p>
+          {% endif %}
         </div>
+        {% endif %}
       </div>
 
       <div class="dream-scale form-lower-section reveal">

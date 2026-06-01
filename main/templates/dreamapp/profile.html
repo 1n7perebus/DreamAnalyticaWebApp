@@ -1,0 +1,362 @@
+{% extends 'dreamapp/header.html' %}
+{% load static %}
+{% block title %}Profile — Dream Analytica{% endblock %}
+{% block content %}
+
+<div class="container profile-page">
+  <div class="reveal profile-page__head">
+    <span class="section-eyebrow">Your signal</span>
+    <h1 class="section-title gradient-text glitch-text" data-text="PROFILE">PROFILE</h1>
+    <p class="section-sub">Account details, comment alerts, and dreams tied to your email.</p>
+  </div>
+
+  <div class="profile-grid">
+    <section class="profile-section profile-section--account reveal">
+      <div class="neon-card profile-card profile-card--account">
+        <span class="neon-card__corner neon-card__corner--tl"></span>
+        <span class="neon-card__corner neon-card__corner--tr"></span>
+        <span class="neon-card__corner neon-card__corner--bl"></span>
+        <span class="neon-card__corner neon-card__corner--br"></span>
+
+        <h2 class="profile-card__title goldman-regular">Account</h2>
+        <dl class="profile-info-grid">
+          <div class="profile-info-row">
+            <dt>Name</dt>
+            <dd>{{ display_name }}</dd>
+          </div>
+          <div class="profile-info-row">
+            <dt>Email</dt>
+            <dd>{{ user.email }}</dd>
+          </div>
+          <div class="profile-info-row">
+            <dt>Birth year</dt>
+            <dd>
+              {% if profile.birth_year %}
+                {% if birth_year_updates_remaining > 0 %}
+                  <button type="button" class="profile-value-trigger" id="profile-birth-year-trigger"
+                          aria-expanded="false" aria-controls="profile-birth-year-panel">
+                    <span class="profile-value-trigger__main">{{ profile.birth_year }}</span>
+                    {% if profile_current_age %}
+                    <span class="profile-age-hint">(currently {{ profile_current_age }})</span>
+                    {% endif %}
+                    <span class="profile-edit-hint">Click to change · {{ birth_year_updates_remaining }} left</span>
+                  </button>
+                {% else %}
+                  <span class="profile-value-trigger__main">{{ profile.birth_year }}</span>
+                  {% if profile_current_age %}
+                  <span class="profile-age-hint">(currently {{ profile_current_age }})</span>
+                  {% endif %}
+                  <span class="profile-locked-tag">Locked</span>
+                {% endif %}
+              {% else %}
+                <span class="profile-muted">Not set</span>
+              {% endif %}
+            </dd>
+          </div>
+          <div class="profile-info-row">
+            <dt>Personality</dt>
+            <dd>
+              {% if profile.mbti_type %}
+                {% if mbti_updates_remaining > 0 %}
+                  <button type="button" class="profile-value-trigger" id="profile-mbti-trigger"
+                          aria-expanded="false" aria-controls="profile-mbti-panel">
+                    <span class="profile-value-trigger__main">{{ profile_mbti_display }}</span>
+                    <span class="profile-edit-hint">Click to change · {{ mbti_updates_remaining }} left</span>
+                  </button>
+                {% else %}
+                  <span class="profile-value-trigger__main">{{ profile_mbti_display }}</span>
+                  <span class="profile-locked-tag">Locked</span>
+                {% endif %}
+              {% else %}
+                <span class="profile-muted">Not set</span>
+              {% endif %}
+            </dd>
+          </div>
+          <div class="profile-info-row">
+            <dt>Country</dt>
+            <dd>
+              {% if profile.country_name %}
+                {{ profile.country_name }}
+                {% if profile.country_locked %}<span class="profile-locked-tag">Locked</span>{% endif %}
+              {% else %}
+                <span class="profile-muted">Not set</span>
+              {% endif %}
+            </dd>
+          </div>
+        </dl>
+
+        {% if birth_year_updates_remaining > 0 %}
+        <div id="profile-birth-year-panel" class="profile-collapsible-panel{% if birth_year_form_open %} is-open{% endif %}"
+             {% if profile.birth_year and not birth_year_form_open %}hidden{% endif %}>
+          <form method="post" class="profile-inline-form profile-birth-year-form" novalidate>
+            {% csrf_token %}
+            <input type="hidden" name="action" value="update_birth_year">
+            <p class="profile-country-note">
+              Your age on each new dream is calculated from birth year and saved on that dream permanently.
+              {% if profile.birth_year %}
+              You can change birth year {{ birth_year_updates_remaining }} more time{{ birth_year_updates_remaining|pluralize }}.
+              {% endif %}
+            </p>
+            <div class="input-field profile-select-field">
+              <select id="id_birth_year" name="birth_year" class="no-autoinit" required>
+                {% for value, label in birth_year_form.fields.birth_year.choices %}
+                <option value="{{ value }}"{% if value == '' %} disabled{% if not profile.birth_year %} selected{% endif %}{% elif profile.birth_year == value %} selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+              <label for="id_birth_year">{{ birth_year_form.birth_year.label }}</label>
+            </div>
+            <button type="submit" class="neon-btn neon-btn--primary">Save birth year</button>
+          </form>
+        </div>
+        {% endif %}
+
+        {% if mbti_updates_remaining > 0 %}
+        <div id="profile-mbti-panel" class="profile-collapsible-panel{% if mbti_form_open %} is-open{% endif %}"
+             {% if profile.mbti_type and not mbti_form_open %}hidden{% endif %}>
+          <form method="post" class="profile-inline-form profile-mbti-form">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="update_mbti">
+            <p class="profile-country-note">
+              Your personality type is saved on each new dream and will not change on past dreams.
+              {% if profile.mbti_type %}
+              You can change it {{ mbti_updates_remaining }} more time{{ mbti_updates_remaining|pluralize }}.
+              {% endif %}
+            </p>
+            <div class="input-field profile-select-field">
+              <select id="id_mbti_type" name="mbti_type" class="no-autoinit">
+                {% for value, label in mbti_form.fields.mbti_type.choices %}
+                <option value="{{ value }}"{% if value == '' %} disabled{% if not profile.mbti_type %} selected{% endif %}{% elif profile.mbti_type == value %} selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+              <label for="id_mbti_type">{{ mbti_form.mbti_type.label }}</label>
+            </div>
+            <button type="submit" class="neon-btn neon-btn--primary">Save personality type</button>
+          </form>
+        </div>
+        {% endif %}
+
+        {% if country_form %}
+        <form method="post" class="profile-country-form">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="set_country">
+          <p class="profile-country-note">Set your country once — it updates every dream on your account.</p>
+          <div class="input-field profile-select-field">
+            <select id="id_country_code" name="country_code" class="no-autoinit" required>
+              {% for value, label in country_form.fields.country_code.choices %}
+              <option value="{{ value }}"{% if value == '' %} disabled{% if not country_form.country_code.value %} selected{% endif %}{% elif country_form.country_code.value == value %} selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+            <label for="id_country_code">{{ country_form.country_code.label }}</label>
+          </div>
+          <div id="profile-country-dropdown-root" class="profile-dropdown-root" aria-hidden="true"></div>
+          <button type="submit" class="neon-btn neon-btn--primary">Save country</button>
+        </form>
+        {% endif %}
+      </div>
+    </section>
+
+    <section class="profile-section reveal">
+      <div class="neon-card profile-card">
+        <span class="neon-card__corner neon-card__corner--tl"></span>
+        <span class="neon-card__corner neon-card__corner--tr"></span>
+        <span class="neon-card__corner neon-card__corner--bl"></span>
+        <span class="neon-card__corner neon-card__corner--br"></span>
+
+        <h2 class="profile-card__title goldman-regular">Notifications</h2>
+        {% if notifications %}
+        <ul class="profile-notification-list">
+          {% for note in notifications %}
+          <li class="profile-notification-item{% if not note.read %} profile-notification-item--unread{% endif %}">
+            <p class="profile-notification-text">
+              <strong>{{ note.comment.name }}</strong> commented on
+              <a href="{% url 'main:specific_dream' note.dream.id %}#dream-{{ note.dream.id }}">
+                {% if note.dream.title %}{{ note.dream.title|truncatechars:48 }}{% else %}your dream{% endif %}
+              </a>
+            </p>
+            <time class="profile-notification-time">{{ note.created_at }}</time>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p class="profile-empty">No comments on your dreams yet.</p>
+        {% endif %}
+      </div>
+    </section>
+
+    <section class="profile-section profile-section--wide reveal">
+      <div class="neon-card profile-card">
+        <span class="neon-card__corner neon-card__corner--tl"></span>
+        <span class="neon-card__corner neon-card__corner--tr"></span>
+        <span class="neon-card__corner neon-card__corner--bl"></span>
+        <span class="neon-card__corner neon-card__corner--br"></span>
+
+        <h2 class="profile-card__title goldman-regular">My dreams</h2>
+        {% if user_dreams %}
+        <ul class="profile-dream-list">
+          {% for dream in user_dreams %}
+          <li class="profile-dream-item">
+            <div class="profile-dream-item__main">
+              <a class="profile-dream-title" href="{% url 'main:specific_dream' dream.id %}#dream-{{ dream.id }}">
+                {% if dream.title %}{{ dream.title }}{% else %}Untitled dream{% endif %}
+              </a>
+              <time class="profile-dream-date">{{ dream.pub|date:"M j, Y" }}</time>
+            </div>
+            <div class="profile-dream-item__meta">
+              {% if dream.active %}
+              <span class="profile-dream-badge profile-dream-badge--live">On wall</span>
+              {% else %}
+              <span class="profile-dream-badge">Pending</span>
+              {% endif %}
+              {% if dream.country_name %}
+              <span class="profile-dream-geo">{{ dream.country_name }}</span>
+              {% endif %}
+            </div>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p class="profile-empty">No dreams linked to this account yet.</p>
+        <a href="{% url 'main:consult' %}" class="neon-btn neon-btn--primary">Post a dream</a>
+        {% endif %}
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+  function initProfileMbtiPanel() {
+    var trigger = document.getElementById('profile-mbti-trigger');
+    var panel = document.getElementById('profile-mbti-panel');
+    if (!trigger || !panel) return;
+
+    trigger.addEventListener('click', function() {
+      var open = panel.classList.toggle('is-open');
+      if (open) {
+        panel.removeAttribute('hidden');
+        trigger.setAttribute('aria-expanded', 'true');
+        initProfileMbtiSelect();
+      } else {
+        panel.setAttribute('hidden', '');
+        trigger.setAttribute('aria-expanded', 'false');
+      }
+    });
+  }
+
+  function initProfileMbtiSelect() {
+    var mbtiSelect = document.querySelector('#id_mbti_type');
+    if (typeof M === 'undefined' || !mbtiSelect) return;
+    var existing = M.FormSelect.getInstance(mbtiSelect);
+    if (existing) existing.destroy();
+    M.FormSelect.init(mbtiSelect, {
+      dropdownOptions: {
+        container: document.body,
+        coverTrigger: false,
+        constrainWidth: true,
+        closeOnClick: true,
+        belowOrigin: true
+      }
+    });
+  }
+
+  function syncProfileSelectBeforeSubmit(formSelector, selectId) {
+    var form = document.querySelector(formSelector);
+    var selectEl = document.getElementById(selectId);
+    if (!form || !selectEl) return;
+    form.addEventListener('submit', function() {
+      var option = selectEl.options[selectEl.selectedIndex];
+      if (option && option.value) {
+        selectEl.value = option.value;
+      }
+    });
+  }
+
+  function initProfileBirthYearPanel() {
+    var trigger = document.getElementById('profile-birth-year-trigger');
+    var panel = document.getElementById('profile-birth-year-panel');
+    if (!trigger || !panel) return;
+
+    trigger.addEventListener('click', function() {
+      var open = panel.classList.toggle('is-open');
+      if (open) {
+        panel.removeAttribute('hidden');
+        trigger.setAttribute('aria-expanded', 'true');
+        initProfileBirthYearSelect();
+      } else {
+        panel.setAttribute('hidden', '');
+        trigger.setAttribute('aria-expanded', 'false');
+      }
+    });
+  }
+
+  function initProfileBirthYearSelect() {
+    var birthYearSelect = document.querySelector('#id_birth_year');
+    if (typeof M === 'undefined' || !birthYearSelect) return;
+    var existing = M.FormSelect.getInstance(birthYearSelect);
+    if (existing) existing.destroy();
+    M.FormSelect.init(birthYearSelect, {
+      dropdownOptions: {
+        container: document.body,
+        coverTrigger: false,
+        constrainWidth: true,
+        closeOnClick: true,
+        belowOrigin: true
+      }
+    });
+  }
+
+  function initProfileCountrySelect() {
+    var countrySelect = document.querySelector('#id_country_code');
+    var dropdownRoot = document.getElementById('profile-country-dropdown-root');
+    if (typeof M === 'undefined' || !countrySelect || !dropdownRoot) return;
+
+    var existing = M.FormSelect.getInstance(countrySelect);
+    if (existing) existing.destroy();
+
+    M.FormSelect.init(countrySelect, {
+      dropdownOptions: {
+        container: dropdownRoot,
+        coverTrigger: false,
+        constrainWidth: false,
+        closeOnClick: true,
+        belowOrigin: true
+      },
+      onOpenEnd: function() {
+        var dropdown = dropdownRoot.querySelector('.dropdown-content');
+        if (!dropdown) return;
+        dropdown.classList.add('profile-country-dropdown');
+        dropdown.style.setProperty('background-color', '#0a0d14', 'important');
+        dropdown.style.setProperty('opacity', '1', 'important');
+        dropdown.style.setProperty('z-index', '500', 'important');
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    syncProfileSelectBeforeSubmit('.profile-mbti-form', 'id_mbti_type');
+    syncProfileSelectBeforeSubmit('.profile-birth-year-form', 'id_birth_year');
+    initProfileBirthYearPanel();
+    initProfileMbtiPanel();
+    if (document.getElementById('profile-birth-year-panel') &&
+        document.getElementById('profile-birth-year-panel').classList.contains('is-open')) {
+      initProfileBirthYearSelect();
+    }
+    if (document.getElementById('profile-mbti-panel') &&
+        document.getElementById('profile-mbti-panel').classList.contains('is-open')) {
+      initProfileMbtiSelect();
+    }
+    initProfileCountrySelect();
+    setTimeout(function() {
+      if (document.getElementById('profile-birth-year-panel') &&
+          document.getElementById('profile-birth-year-panel').classList.contains('is-open')) {
+        initProfileBirthYearSelect();
+      }
+      if (document.getElementById('profile-mbti-panel') &&
+          document.getElementById('profile-mbti-panel').classList.contains('is-open')) {
+        initProfileMbtiSelect();
+      }
+      initProfileCountrySelect();
+    }, 0);
+  });
+</script>
+
+{% endblock %}

@@ -17,6 +17,7 @@ urlpatterns = [
     path('login/', views.login_view, name='login'),
     path('register/', views.register_view, name='register'),
     path('logout/', views.logout_view, name='logout'),
+    path('profile/', views.profile_view, name='profile'),
     path('google/auth/callback/', views.google_auth_callback, name='google_auth_callback'),
     re_path(r'^static/(?P<path>.*)$', serve,{'document_root': settings.STATIC_ROOT}),
 ]

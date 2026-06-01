@@ -27,6 +27,28 @@ from .forms import *
 from .models import *
 from .geo import apply_geo_to_dream, get_client_ip
 from .dream_symbols import resolve_symbol_tags
+from .profile_helpers import (
+    age_from_birth_year,
+    apply_profile_country_to_dreams,
+    apply_profile_to_dream_post,
+    birth_year_updates_remaining,
+    can_update_birth_year,
+    can_update_mbti,
+    comment_author_name,
+    consult_form_visibility,
+    contact_form_visibility,
+    create_comment_notification,
+    current_age_for_profile,
+    dreams_for_user,
+    enrich_contact_post_data,
+    enrich_dream_post_data,
+    get_or_create_profile,
+    mark_notifications_read,
+    mbti_display,
+    mbti_updates_remaining,
+    resolve_country_from_code,
+    user_form_identity,
+)
 # Checklist
 # Add Sections
 # Advertising Goodgle Adsense 
@@ -38,20 +60,6 @@ def redirect_after_login(request, user):
     if not (user.first_name or '').strip():
         return reverse('main:login') + '?setup=1'
     return request.session.pop('next', reverse('main:index'))
-
-
-def user_form_identity(request):
-    """Default name/email for dream and contact forms when user is signed in."""
-    if not request.user.is_authenticated:
-        return {}
-    name = (request.user.first_name or '').strip() or request.user.username
-    email = (request.user.email or '').strip()
-    initial = {}
-    if name:
-        initial['name'] = name
-    if email:
-        initial['email'] = email
-    return initial
 
 
 def delete_duplicates(dream_post):
@@ -124,6 +132,127 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     return redirect('main:login')
+
+
+@login_required
+def profile_view(request):
+    profile = get_or_create_profile(request.user)
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'set_country' and not profile.country_locked:
+            country_form = ProfileCountryForm(request.POST)
+            if country_form.is_valid():
+                code, name = resolve_country_from_code(
+                    country_form.cleaned_data['country_code'],
+                )
+                if code and name:
+                    profile.country_code = code
+                    profile.country_name = name
+                    profile.country_locked = True
+                    profile.save()
+                    apply_profile_country_to_dreams(request.user, code, name)
+                    messages.success(
+                        request,
+                        'Country saved. All your dreams now show this country on the wall.',
+                    )
+                else:
+                    messages.error(request, 'Please select a valid country.')
+            else:
+                messages.error(request, 'Please select a country.')
+        elif action == 'update_birth_year':
+            if not can_update_birth_year(profile):
+                messages.error(
+                    request,
+                    'Birth year can only be set or changed 3 times. Contact support if you need help.',
+                )
+            else:
+                previous_birth_year = profile.birth_year
+                birth_year_form = ProfileBirthYearForm(request.POST, instance=profile)
+                if birth_year_form.is_valid():
+                    new_year = birth_year_form.cleaned_data['birth_year']
+                    if new_year != previous_birth_year:
+                        profile.birth_year = new_year
+                        profile.birth_year_updates_count += 1
+                        profile.save(
+                            update_fields=['birth_year', 'birth_year_updates_count'],
+                        )
+                        remaining = birth_year_updates_remaining(profile)
+                        if remaining:
+                            messages.success(
+                                request,
+                                f'Birth year saved. You have {remaining} '
+                                f'update{"s" if remaining != 1 else ""} left.',
+                            )
+                        else:
+                            messages.success(
+                                request,
+                                'Birth year saved. No more changes allowed.',
+                            )
+                    else:
+                        messages.info(request, 'Birth year unchanged.')
+                else:
+                    messages.error(request, 'Please select a valid birth year.')
+        elif action == 'update_mbti':
+            if not can_update_mbti(profile):
+                messages.error(
+                    request,
+                    'Personality type can only be set or changed 3 times. Contact support if you need help.',
+                )
+            else:
+                previous_mbti = profile.mbti_type
+                mbti_form = ProfileMbtiForm(request.POST, instance=profile)
+                if mbti_form.is_valid():
+                    new_mbti = mbti_form.cleaned_data['mbti_type']
+                    if new_mbti != previous_mbti:
+                        profile.mbti_type = new_mbti
+                        profile.mbti_updates_count += 1
+                        profile.save(
+                            update_fields=['mbti_type', 'mbti_updates_count'],
+                        )
+                        remaining = mbti_updates_remaining(profile)
+                        if remaining:
+                            messages.success(
+                                request,
+                                f'Personality type saved. You have {remaining} '
+                                f'update{"s" if remaining != 1 else ""} left.',
+                            )
+                        else:
+                            messages.success(
+                                request,
+                                'Personality type saved. No more changes allowed.',
+                            )
+                    else:
+                        messages.info(request, 'Personality type unchanged.')
+                else:
+                    messages.error(request, 'Please select a valid personality type.')
+        else:
+            messages.error(request, 'Could not save profile changes.')
+        return redirect('main:profile')
+
+    mark_notifications_read(request.user)
+
+    notifications = (
+        Notification.objects.filter(recipient=request.user)
+        .select_related('comment', 'dream')
+        .order_by('-created_at')[:50]
+    )
+
+    return render(request, 'dreamapp/profile.html', {
+        'profile': profile,
+        'display_name': comment_author_name(request.user),
+        'user_dreams': dreams_for_user(request.user),
+        'notifications': notifications,
+        'country_form': None if profile.country_locked else ProfileCountryForm(),
+        'birth_year_form': ProfileBirthYearForm(instance=profile),
+        'mbti_form': ProfileMbtiForm(instance=profile),
+        'profile_current_age': current_age_for_profile(profile),
+        'profile_mbti_display': mbti_display(profile.mbti_type) if profile.mbti_type else '',
+        'birth_year_updates_remaining': birth_year_updates_remaining(profile),
+        'mbti_updates_remaining': mbti_updates_remaining(profile),
+        'birth_year_form_open': not profile.birth_year,
+        'mbti_form_open': not profile.mbti_type,
+    })
 
 
 def _login_user_from_google_token(token):
@@ -202,15 +331,23 @@ def consult(request):
             messages.error(request, f"To prevent spamming, please wait {wait_message} before resubmitting.")
             return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
-        dream_form = DreamForm(request.POST)
+        profile = None
+        if request.user.is_authenticated:
+            profile = get_or_create_profile(request.user)
+
+        dream_form = DreamForm(enrich_dream_post_data(request, profile))
         if dream_form.is_valid() and not recent_submission:
             dream_post = dream_form.save(commit=False)
             dream_post.ip_address = ip_address
             apply_geo_to_dream(dream_post, ip_address)
 
-            delete_duplicates(dream_post)   
+            if request.user.is_authenticated:
+                dream_post.posted_by = request.user
+                apply_profile_to_dream_post(request, dream_post, profile)
 
-            sender = dream_post.email 
+            delete_duplicates(dream_post)
+
+            sender = dream_post.email
             dream_post.save()
             pending_symbols = getattr(dream_form, '_pending_symbol_names', [])
             if pending_symbols:
@@ -258,19 +395,36 @@ def consult(request):
     gender_choices = DreamForm.GENDER_CHOICES
     symbol_suggestions = DreamSymbol.objects.all()[:200]
 
-    return render(request, "dreamapp/consult.html", context={
+    profile = None
+    if request.user.is_authenticated:
+        profile = get_or_create_profile(request.user)
+
+    consult_ctx = consult_form_visibility(request, profile)
+
+    return render(request, "dreamapp/consult.html", {
         "dreams": dreams,
         "dream_form": dream_form,
         "recent_submission": recent_submission,
         "mbti_choices": mbti_choices,
         'gender_choices': gender_choices,
         'symbol_suggestions': symbol_suggestions,
+        'user_profile': profile,
+        **consult_ctx,
     })
 
 
 
-def dreams(request):
-    reply_form = ReplyForm()
+def dreams(request, dream_id=None):
+    focus_dream = None
+    if dream_id is not None:
+        focus_dream = get_object_or_404(Dreams, pk=dream_id)
+        if not focus_dream.active:
+            messages.info(
+                request,
+                'This dream is not on the public wall yet.',
+            )
+
+    comment_form = CommentForm()
     dreams = Dreams.objects.all()
 
     avg_result = dreams.filter(active=True).aggregate(Avg('scale'))['scale__avg']
@@ -302,25 +456,12 @@ def dreams(request):
         if not request.user.is_authenticated:
             # Store the current URL in the session and redirect to login
             request.session['next'] = request.path
-            messages.error(request, 'You need to be logged in to reply.')
-            return redirect('main:login')  # Adjust the URL name as necessary
+            messages.error(request, 'You need to be logged in to comment.')
+            return redirect('main:login')
 
-        ip_address = request.META.get('REMOTE_ADDR')
-        reply_form = ReplyForm(request.POST)
+        comment_form = CommentForm(request.POST)
 
-        # Check if the user has submitted a reply in the last 24 hours
-        recent_submission = Share.objects.filter(ip_address=ip_address, submission_time__gte=timezone.now() - timedelta(days=1)).exists()
-
-        if recent_submission:
-            last_submission_time = Share.objects.filter(ip_address=ip_address).latest('submission_time').submission_time
-            current_time = timezone.now()
-            time_difference = current_time - last_submission_time
-            wait_time = timedelta(days=1) - time_difference
-
-            messages.error(request, f"You have already submitted the form. Please wait {wait_time} before resubmitting.")
-            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-
-        elif reply_form.is_valid():
+        if comment_form.is_valid():
             dream_id = request.POST.get('dream_id')
             dream_email = request.POST.get('dream_email')
             try:
@@ -328,14 +469,27 @@ def dreams(request):
                     dream_instance = get_object_or_404(Dreams, id=dream_id)
                 else:
                     dream_instance = get_object_or_404(Dreams, email=dream_email)
-                reply = reply_form.save(commit=False)
-                reply.dream = dream_instance
-                reply.reply = request.POST.get('reply')
-                reply.pub = timezone.now()
-                reply.save()
 
-                # Record the submission
-                Share.objects.create(ip_address=ip_address, submission_time=timezone.now())
+                recent_comment = DreamComment.objects.filter(
+                    user=request.user,
+                    dream=dream_instance,
+                    pub__gte=timezone.now() - timedelta(days=1),
+                ).exists()
+
+                if recent_comment:
+                    messages.error(
+                        request,
+                        'You can post one comment per dream per day. Try again tomorrow.',
+                    )
+                    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+                comment = comment_form.save(commit=False)
+                comment.dream = dream_instance
+                comment.user = request.user
+                comment.name = comment_author_name(request.user)
+                comment.pub = timezone.now()
+                comment.save()
+                create_comment_notification(comment)
 
                 return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
             except Dreams.DoesNotExist:
@@ -349,9 +503,9 @@ def dreams(request):
             messages.error(request, "Invalid form data. Please check the entered information.")
             return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
-    active_dreams = Dreams.objects.filter(active=True).prefetch_related('reply_set').order_by('-pub')
-    dreams_with_replies = [
-        {'dream': dream, 'replies': dream.reply_set.all()}
+    active_dreams = Dreams.objects.filter(active=True).prefetch_related('comments').order_by('-pub')
+    dreams_with_comments = [
+        {'dream': dream, 'comments': dream.comments.all()}
         for dream in active_dreams
     ]
 
@@ -362,13 +516,14 @@ def dreams(request):
     analytics = build_wall_analytics(active_dreams, dream_count)
 
     return render(request, "dreamapp/dreams.html", {
-        "dreams_with_replies": dreams_with_replies,
+        "dreams_with_comments": dreams_with_comments,
         "dreams": dreams,
-        "reply_form": reply_form,
+        "comment_form": comment_form,
         "average_scale": average_scale,
         "health_status": health_status,
         "health_color": health_color,
         "dream_count": dream_count,
+        "focus_dream": focus_dream,
         **analytics,
     })
 
@@ -421,7 +576,7 @@ def contact(request):
             )
             return redirect('main:contact')
 
-        contact_form = ContactForm(request.POST)
+        contact_form = ContactForm(enrich_contact_post_data(request))
         if contact_form.is_valid() and not recent_submission:
             topic_key = request.POST.get('contact_topic', 'general').strip().lower()
             if topic_key not in CONTACT_TOPIC_LABELS:
@@ -451,6 +606,7 @@ def contact(request):
                 "contact_form": contact_form,
                 "contact_sent": False,
                 "contact_topic": topic_key,
+                **contact_form_visibility(request),
             },
         )
 
@@ -462,6 +618,7 @@ def contact(request):
             "contact_form": contact_form,
             "contact_sent": contact_sent,
             "contact_topic": "general",
+            **contact_form_visibility(request),
         },
     )
 

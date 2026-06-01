@@ -76,9 +76,19 @@
         <form method="POST" class="contact-form" id="contact-form" novalidate>
           {% csrf_token %}
 
+          {% if hide_contact_identity %}
+          <div class="consult-identity-snap">
+            <p class="consult-identity-snap__label">Sending as</p>
+            <p class="consult-identity-snap__value">{{ contact_display_name }}</p>
+            <p class="consult-identity-snap__hint">{{ contact_identity.email }}</p>
+            <input type="hidden" name="name" value="{{ contact_identity.name }}">
+            <input type="hidden" name="email" value="{{ contact_identity.email }}">
+          </div>
+          {% else %}
           <div class="form-section-label">01 · Your details</div>
           <div class="row contact-form__row">
-            <div class="col s12 m6">
+            {% if not contact_hide.name %}
+            <div class="col s12 {% if contact_hide.email %}m12{% else %}m6{% endif %}">
               <div class="contact-field{% if contact_form.name.errors %} contact-field--invalid{% endif %}">
                 <label class="contact-field__label" for="name">Name</label>
                 <input id="name" name="name" type="text" class="contact-field__input" required autocomplete="name"
@@ -88,7 +98,11 @@
                 {% endif %}
               </div>
             </div>
-            <div class="col s12 m6">
+            {% else %}
+            <input type="hidden" name="name" value="{{ contact_identity.name }}">
+            {% endif %}
+            {% if not contact_hide.email %}
+            <div class="col s12 {% if contact_hide.name %}m12{% else %}m6{% endif %}">
               <div class="contact-field{% if contact_form.email.errors %} contact-field--invalid{% endif %}">
                 <label class="contact-field__label" for="email">Email</label>
                 <input id="email" name="email" type="email" class="contact-field__input" required autocomplete="email"
@@ -98,7 +112,11 @@
                 {% endif %}
               </div>
             </div>
+            {% else %}
+            <input type="hidden" name="email" value="{{ contact_identity.email }}">
+            {% endif %}
           </div>
+          {% endif %}
 
           <div class="contact-field{% if contact_form.phone.errors %} contact-field--invalid{% endif %}">
             <label class="contact-field__label" for="phone">Phone (optional)</label>

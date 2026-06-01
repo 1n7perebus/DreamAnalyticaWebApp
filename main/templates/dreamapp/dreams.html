@@ -19,7 +19,7 @@
   <section class="health-score-section reveal">
     <span class="section-eyebrow">Collective Unconscious</span>
     <h1 class="section-title gradient-text glitch-text" data-text="WALL OF DREAMS">WALL OF DREAMS</h1>
-    <p class="dreams-intro">Community dreams · Expert analysis · Real-time signal</p>
+    <p class="dreams-intro">Community dreams · Comments · Real-time signal</p>
 
     {% if average_scale is not None %}
     <div class="ring-meter reveal" data-value="{{ average_scale }}" data-max="5">
@@ -52,7 +52,7 @@
     {% endif %}
   </section>
 
-  {% if dreams_with_replies %}
+  {% if dreams_with_comments %}
   <div class="dream-wall-controls reveal" data-dream-wall-controls>
     <div class="dream-wall-controls__group">
       <span class="dream-wall-controls__label">Filter by mood</span>
@@ -78,9 +78,9 @@
 
   <div class="row dreams-list-row">
     <section class="dreams-list col s12 m10 l8 offset-m1 offset-l2">
-      {% if dreams_with_replies %}
-      {% for item in dreams_with_replies %}
-      <article class="dream-card reveal" id="dream-{{ item.dream.id }}"
+      {% if dreams_with_comments %}
+      {% for item in dreams_with_comments %}
+      <article class="dream-card reveal{% if focus_dream and focus_dream.id == item.dream.id %} dream-card--focus{% endif %}" id="dream-{{ item.dream.id }}"
                data-score="{{ item.dream.scale }}"
                data-mbti="{{ item.dream.mbti_type }}"
                data-age="{% if item.dream.age is not None %}{{ item.dream.age }}{% endif %}"
@@ -121,37 +121,38 @@
             <time class="dream-date">{{ item.dream.pub }}</time>
           </div>
 
-          {% if item.replies %}
-          <section class="analysis-section" aria-label="Expert analysis">
-            <h6 class="analysis-heading">
-              <i class="material-icons analysis-icon" aria-hidden="true">psychology</i>
-              Analysis
+          {% if item.comments %}
+          <section class="comments-section" aria-label="Comments">
+            <h6 class="comments-heading">
+              <i class="material-icons comments-icon" aria-hidden="true">forum</i>
+              Comments
             </h6>
-            {% for reply in item.replies %}
-            <div class="analysis-item">
-              <p class="analysis-text">{{ reply.reply }}</p>
-              <time class="analysis-date">{{ reply.pub }}</time>
+            {% for comment in item.comments %}
+            <div class="comment-item">
+              <p class="comment-author">{{ comment.name }}</p>
+              <p class="comment-text">{{ comment.body }}</p>
+              <time class="comment-date">{{ comment.pub }}</time>
             </div>
             {% endfor %}
           </section>
           {% endif %}
 
           {% if request.user.is_authenticated %}
-          <form method="post" action="{% url 'main:dreams' %}" class="reply-form">
+          <form method="post" action="{% url 'main:dreams' %}" class="comment-form">
             {% csrf_token %}
             <input type="hidden" name="dream_id" value="{{ item.dream.id }}">
             <input type="hidden" name="dream_email" value="{{ item.dream.email }}">
-            <div class="input-field">
-              <textarea id="reply-{{ item.dream.id }}" name="reply" class="materialize-textarea" required placeholder="Share your interpretation…"></textarea>
-              <label for="reply-{{ item.dream.id }}">Add analysis</label>
+            <div class="contact-field contact-field--message">
+              <label class="contact-field__label" for="comment-{{ item.dream.id }}">Your comment</label>
+              <textarea id="comment-{{ item.dream.id }}" name="body" class="contact-field__input" rows="3" required placeholder="Share your thoughts…"></textarea>
             </div>
             <button class="neon-btn neon-btn--primary neon-btn--block" type="submit">
-              <span>Submit Analysis</span>
+              <span>Post</span>
             </button>
           </form>
           {% else %}
           <div class="dreams-login-cta">
-            <p class="dreams-login-cta__text">Log in to add your interpretation</p>
+            <p class="dreams-login-cta__text">Log in to comment</p>
             <a href="{% url 'main:login' %}" class="neon-btn neon-btn--mag neon-btn--block">
               <span>Login</span>
             </a>

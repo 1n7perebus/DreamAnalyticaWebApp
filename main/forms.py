@@ -8,7 +8,9 @@ from django.core.validators import RegexValidator
 from phonenumber_field.formfields import PhoneNumberField
 from phonenumber_field.phonenumber import PhoneNumber
 
+from .country_data import COUNTRY_CHOICES
 from .dream_symbols import parse_symbol_tags, resolve_symbol_tags
+from .models import UserProfile
 
 
 def normalize_contact_phone(raw):
@@ -156,11 +158,87 @@ class DreamForm(forms.ModelForm):
         return dream
 
 
-class ReplyForm(forms.ModelForm):
-    reply = forms.CharField(required= True, label="Reply")
+class ProfileCountryForm(forms.Form):
+    country_code = forms.ChoiceField(
+        choices=[('', 'Select country…')] + list(COUNTRY_CHOICES),
+        label='Country',
+        required=True,
+    )
+
+
+class ProfileMbtiForm(forms.ModelForm):
+    mbti_type = forms.ChoiceField(
+        choices=[],
+        required=True,
+        label='Personality type',
+        widget=forms.Select(attrs={'class': 'no-autoinit'}),
+    )
+
     class Meta:
-        model = Reply
-        fields = ['reply']
+        model = UserProfile
+        fields = ['mbti_type']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        choices = [('', 'Select type…')] + [
+            (value, label)
+            for value, label in Dreams.MBTI_CHOICES
+            if value
+        ]
+        self.fields['mbti_type'].choices = choices
+
+    def clean_mbti_type(self):
+        value = (self.cleaned_data.get('mbti_type') or '').strip().upper()
+        valid = {code for code, _ in Dreams.MBTI_CHOICES if code}
+        if value not in valid:
+            raise forms.ValidationError('Please choose a valid personality type.')
+        return value
+
+
+class ProfileBirthYearForm(forms.ModelForm):
+    birth_year = forms.TypedChoiceField(
+        choices=[],
+        coerce=int,
+        required=True,
+        label='Birth year',
+        widget=forms.Select(attrs={'class': 'no-autoinit'}),
+    )
+
+    class Meta:
+        model = UserProfile
+        fields = ['birth_year']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        from .profile_helpers import birth_year_choices
+
+        choices = [('', 'Select birth year…')] + birth_year_choices()
+        self.fields['birth_year'].choices = choices
+
+    def clean_birth_year(self):
+        from .profile_helpers import max_birth_year, min_birth_year
+
+        birth_year = self.cleaned_data.get('birth_year')
+        if birth_year in (None, ''):
+            return None
+        if birth_year < min_birth_year() or birth_year > max_birth_year():
+            raise forms.ValidationError('Please choose a valid birth year.')
+        return birth_year
+
+
+class CommentForm(forms.ModelForm):
+    body = forms.CharField(
+        required=True,
+        label='Comment',
+        widget=forms.Textarea(attrs={
+            'rows': 3,
+            'placeholder': 'Share your thoughts…',
+        }),
+    )
+
+    class Meta:
+        model = DreamComment
+        fields = ['body']
 
 
 class ContactForm(forms.ModelForm):

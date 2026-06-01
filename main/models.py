@@ -1,10 +1,8 @@
-import os
-import datetime
 import uuid
+from django.conf import settings
 from django.db import models
 from django.db.models.functions import Lower
 from django.utils import timezone
-from datetime import datetime
 from phonenumber_field.modelfields import PhoneNumberField
 from django.core.validators import MinValueValidator, MaxValueValidator
 from .dream_symbols import normalize_symbol_name
@@ -76,6 +74,13 @@ class Dreams(models.Model):
     viewobj = models.IntegerField(default=0)
     timer = models.DateTimeField(blank=True,null=True)
     active = models.BooleanField(default=False)
+    posted_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='dreams_posted',
+    )
 
     class Meta:
         verbose_name = "dreams"
@@ -115,16 +120,93 @@ class DreamSymbol(models.Model):
         super().save(*args, **kwargs)
 
 
-class Reply(models.Model):
-    dream = models.ForeignKey(Dreams, on_delete=models.CASCADE)
-    name = models.CharField(max_length=50, default="R")  # Field made optional
-    reply = models.TextField()
-    pub = models.DateTimeField(default=datetime.now)
+class DreamComment(models.Model):
+    dream = models.ForeignKey(Dreams, on_delete=models.CASCADE, related_name='comments')
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='dream_comments',
+        null=True,
+        blank=True,
+    )
+    name = models.CharField(max_length=50)
+    body = models.TextField()
+    pub = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        ordering = ['pub']
+        verbose_name = 'dream comment'
+        verbose_name_plural = 'dream comments'
 
     def __str__(self):
-        return str(self.dream.id)
-    
-    
+        return f'{self.name} on {self.dream_id}'
+
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='profile',
+    )
+    birth_year = models.PositiveSmallIntegerField(
+        null=True,
+        blank=True,
+        help_text='Used to compute age on each new dream submission; past dreams keep their saved age.',
+    )
+    birth_year_updates_count = models.PositiveSmallIntegerField(
+        default=0,
+        help_text='Number of times birth year was saved (max 3).',
+    )
+    mbti_type = models.CharField(
+        max_length=4,
+        choices=Dreams.MBTI_CHOICES,
+        blank=True,
+        default='',
+    )
+    mbti_updates_count = models.PositiveSmallIntegerField(
+        default=0,
+        help_text='Number of times personality type was saved (max 3).',
+    )
+    country_code = models.CharField(max_length=2, blank=True, default='')
+    country_name = models.CharField(max_length=80, blank=True, default='')
+    country_locked = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = 'user profile'
+        verbose_name_plural = 'user profiles'
+
+    def __str__(self):
+        return f'Profile for {self.user_id}'
+
+
+class Notification(models.Model):
+    recipient = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='notifications',
+    )
+    comment = models.ForeignKey(
+        DreamComment,
+        on_delete=models.CASCADE,
+        related_name='notifications',
+    )
+    dream = models.ForeignKey(
+        Dreams,
+        on_delete=models.CASCADE,
+        related_name='notifications',
+    )
+    read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'notification'
+        verbose_name_plural = 'notifications'
+
+    def __str__(self):
+        return f'Notification for {self.recipient_id}'
+
+
 class Contact(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 

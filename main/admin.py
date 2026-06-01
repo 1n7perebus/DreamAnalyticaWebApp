@@ -24,15 +24,36 @@ class DreamSymbolAdmin(admin.ModelAdmin):
     def dream_count(self, obj):
         return getattr(obj, 'dream_count', obj.dreams.count())
 
-class ReplyAdmin(admin.ModelAdmin):
-    list_display = ('dream','id','pub')
-    ordering =['-pub']
+class DreamCommentAdmin(admin.ModelAdmin):
+    list_display = ('name', 'user', 'dream', 'pub')
+    list_filter = ('pub',)
+    search_fields = ('name', 'body', 'user__username', 'user__email')
+    ordering = ['-pub']
 
 class ContactAdmin(admin.ModelAdmin):
     list_display = ('name','id', 'email', 'phone', 'pub')
     ordering =['-pub']
 
+
+class UserProfileAdmin(admin.ModelAdmin):
+    list_display = (
+        'user', 'birth_year', 'birth_year_updates_count',
+        'mbti_type', 'mbti_updates_count', 'country_name', 'country_locked',
+    )
+    search_fields = ('user__username', 'user__email')
+    list_filter = ('country_locked',)
+
+
+class NotificationAdmin(admin.ModelAdmin):
+    list_display = ('recipient', 'dream', 'read', 'created_at')
+    list_filter = ('read', 'created_at')
+    search_fields = ('recipient__username', 'recipient__email', 'dream__title')
+    ordering = ['-created_at']
+
+
 admin.site.register(Dreams, DreamsAdmin)
 admin.site.register(DreamSymbol, DreamSymbolAdmin)
-admin.site.register(Reply, ReplyAdmin)
+admin.site.register(DreamComment, DreamCommentAdmin)
 admin.site.register(Contact, ContactAdmin)
+admin.site.register(UserProfile, UserProfileAdmin)
+admin.site.register(Notification, NotificationAdmin)
