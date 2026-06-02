@@ -99,7 +99,7 @@
             </p>
             <div class="profile-field">
               <label class="contact-field__label" for="id_birth_year">{{ birth_year_form.birth_year.label }}</label>
-              <select id="id_birth_year" name="birth_year" class="profile-native-select" required>
+              <select id="id_birth_year" name="birth_year" class="profile-native-select no-autoinit" required>
                 {% for value, label in birth_year_form.fields.birth_year.choices %}
                 <option value="{{ value }}"{% if value == '' %} disabled{% if not profile.birth_year %} selected{% endif %}{% elif profile.birth_year == value %} selected{% endif %}>{{ label }}</option>
                 {% endfor %}
@@ -124,7 +124,7 @@
             </p>
             <div class="profile-field">
               <label class="contact-field__label" for="id_mbti_type">{{ mbti_form.mbti_type.label }}</label>
-              <select id="id_mbti_type" name="mbti_type" class="profile-native-select" required>
+              <select id="id_mbti_type" name="mbti_type" class="profile-native-select no-autoinit" required>
                 {% for value, label in mbti_form.fields.mbti_type.choices %}
                 <option value="{{ value }}"{% if value == '' %} disabled{% if not profile.mbti_type %} selected{% endif %}{% elif profile.mbti_type == value %} selected{% endif %}>{{ label }}</option>
                 {% endfor %}
@@ -142,7 +142,7 @@
           <p class="profile-country-note">Set your country once — it updates every dream on your account.</p>
           <div class="profile-field">
             <label class="contact-field__label" for="id_country_code">{{ country_form.country_code.label }}</label>
-            <select id="id_country_code" name="country_code" class="profile-native-select" required>
+            <select id="id_country_code" name="country_code" class="profile-native-select no-autoinit" required>
               {% for value, label in country_form.fields.country_code.choices %}
               <option value="{{ value }}"{% if value == '' %} disabled{% if not country_form.country_code.value %} selected{% endif %}{% elif country_form.country_code.value == value %} selected{% endif %}>{{ label }}</option>
               {% endfor %}
@@ -257,11 +257,11 @@
     });
   }
 
-  document.addEventListener('DOMContentLoaded', function() {
+  window.initProfilePage = function() {
     restoreNativeProfileSelects();
     initProfileCollapsible('profile-birth-year-trigger', 'profile-birth-year-panel');
     initProfileCollapsible('profile-mbti-trigger', 'profile-mbti-panel');
-  });
+  };
 </script>
 
 {% endblock %}

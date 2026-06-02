@@ -171,7 +171,7 @@ class ProfileMbtiForm(forms.ModelForm):
         choices=[],
         required=True,
         label='Personality type',
-        widget=forms.Select(attrs={'class': 'profile-native-select'}),
+        widget=forms.Select(attrs={'class': 'profile-native-select no-autoinit'}),
     )
 
     class Meta:
@@ -201,7 +201,7 @@ class ProfileBirthYearForm(forms.ModelForm):
         coerce=int,
         required=True,
         label='Birth year',
-        widget=forms.Select(attrs={'class': 'profile-native-select'}),
+        widget=forms.Select(attrs={'class': 'profile-native-select no-autoinit'}),
     )
 
     class Meta:
