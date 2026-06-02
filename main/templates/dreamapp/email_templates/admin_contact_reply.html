@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Response from Dream Analytica</title>
+</head>
+
+<body style="margin:0;padding:0;background:#05060a;font-family:Arial,sans-serif;color:#dbe7f7;">
+
+  <div style="
+    max-width:620px;
+    margin:0 auto;
+    padding:40px 18px;
+  ">
+
+    <div style="
+      border:1px solid rgba(0,240,255,.22);
+      border-radius:18px;
+      overflow:hidden;
+      background:
+        radial-gradient(circle at top center, rgba(83,255,251,.08), transparent 45%),
+        linear-gradient(180deg, rgba(12,16,28,.97), rgba(8,10,18,.97));
+      box-shadow:
+        0 0 0 1px rgba(83,255,251,.04),
+        0 10px 40px rgba(0,0,0,.55),
+        0 0 30px rgba(83,255,251,.06);
+    ">
+
+      <div style="
+        height:3px;
+        background:linear-gradient(
+          90deg,
+          rgba(83,255,251,0),
+          rgba(83,255,251,.9),
+          rgba(83,255,251,0)
+        );
+      "></div>
+
+      <div style="padding:32px;">
+
+        <p style="
+          margin:0 0 10px;
+          font-size:11px;
+          letter-spacing:.22em;
+          color:#7ec7d1;
+          text-transform:uppercase;
+        ">
+          Dream Analytica
+        </p>
+
+        <h1 style="
+          margin:0 0 18px;
+          font-size:28px;
+          line-height:1.2;
+          font-weight:600;
+          color:#53FFFB;
+        ">
+          Message from Dream Analytica
+        </h1>
+
+        <p style="
+          margin:0 0 28px;
+          font-size:15px;
+          line-height:1.7;
+          color:#c6d3e6;
+        ">
+          Hello, {{ recipient_name|default:to_email }}
+        </p>
+
+        <div style="
+          margin:0 0 32px;
+          line-height:1.9;
+          font-size:15px;
+          color:#dbe7f7;
+          white-space:pre-wrap;
+        ">
+          {{ message }}
+        </div>
+
+        <p style="
+          margin:0;
+          font-size:14px;
+          line-height:1.6;
+          color:#53FFFB;
+        ">
+          Warmest, <strong>R</strong>
+        </p>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</body>
+</html>

@@ -4,6 +4,7 @@ from django.http import HttpResponseRedirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.contrib.auth.tokens import default_token_generator
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
@@ -18,8 +19,11 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from datetime import timedelta
 from django.utils import timezone
+from django.utils.encoding import force_bytes, force_str
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.contrib import messages
 from django.urls import reverse
+from django.core.paginator import Paginator
 
 
 from django.db.models import *
@@ -43,7 +47,6 @@ from .profile_helpers import (
     enrich_contact_post_data,
     enrich_dream_post_data,
     get_or_create_profile,
-    mark_notifications_read,
     mbti_display,
     mbti_updates_remaining,
     resolve_country_from_code,
@@ -85,8 +88,11 @@ def register_view(request):
         if form.is_valid():
             new_user = form.save(commit=False)
             new_user.set_password(form.cleaned_data['password'])
+            new_user.is_active = False
             new_user.save()
-            messages.success(request, 'Registration successful. You can now log in.')
+            form.save_profile(new_user)
+            send_verification_email(request, new_user)
+            messages.success(request, 'Account created. Check your email to verify your account before signing in.')
             return redirect('main:login')
     else:
         form = UserRegistrationForm()
@@ -115,6 +121,12 @@ def login_view(request):
         password = request.POST['password']
         try:
             user = User.objects.get(email=email)
+            if not user.is_active:
+                messages.error(request, 'Your account is not verified yet. Please check your email for the verification link.')
+                return render(request, 'dreamapp/login.html', {
+                    'google_client_id': settings.GOOGLE_CLIENT_ID,
+                    'google_login_uri': request.build_absolute_uri(reverse('main:google_auth_callback')),
+                })
             user = authenticate(request, username=user.username, password=password)
             if user is not None:
                 login(request, user)
@@ -132,6 +144,52 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     return redirect('main:login')
+
+
+def send_verification_email(request, user):
+    uid = urlsafe_base64_encode(force_bytes(user.pk))
+    token = default_token_generator.make_token(user)
+    verify_url = request.build_absolute_uri(
+        reverse('main:verify_email', kwargs={'uidb64': uid, 'token': token})
+    )
+    context = {
+        'user': user,
+        'verify_url': verify_url,
+    }
+    html_message = render_to_string('dreamapp/email_templates/account_verification.html', context)
+    plain_message = strip_tags(html_message)
+    email = EmailMultiAlternatives(
+        subject='Verify your Dream Analytica account',
+        body=plain_message,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[user.email],
+    )
+    email.attach_alternative(html_message, 'text/html')
+    email.send(fail_silently=False)
+
+
+def verify_email(request, uidb64, token):
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    if user and default_token_generator.check_token(user, token):
+        user.is_active = True
+        user.save(update_fields=['is_active'])
+        messages.success(request, 'Email verified. You can now sign in.')
+        return redirect('main:login')
+
+    messages.error(request, 'Verification link is invalid or has expired.')
+    return redirect('main:login')
+
+
+def _admin_only_or_redirect(request):
+    if request.user.is_staff or request.user.is_superuser:
+        return None
+    messages.error(request, 'Admin access required.')
+    return redirect('main:profile')
 
 
 @login_required
@@ -226,23 +284,39 @@ def profile_view(request):
                         messages.info(request, 'Personality type unchanged.')
                 else:
                     messages.error(request, 'Please select a valid personality type.')
+        elif action == 'mark_all_notifications_read':
+            Notification.objects.filter(recipient=request.user, read=False).update(read=True)
+            messages.success(request, 'All notifications marked as read.')
         else:
             messages.error(request, 'Could not save profile changes.')
         return redirect('main:profile')
 
-    mark_notifications_read(request.user)
+    notif_filter = request.GET.get('notif', 'unread').strip().lower()
+    if notif_filter not in {'unread', 'all'}:
+        notif_filter = 'unread'
 
-    notifications = (
+    notifications_qs = (
         Notification.objects.filter(recipient=request.user)
         .select_related('comment', 'dream')
-        .order_by('-created_at')[:50]
+        .order_by('-created_at')
     )
+    if notif_filter == 'unread':
+        notifications_qs = notifications_qs.filter(read=False)
+
+    notif_paginator = Paginator(notifications_qs, 25)
+    notifications_page = notif_paginator.get_page(request.GET.get('np'))
+
+    admin_contacts = None
+    if request.user.is_staff or request.user.is_superuser:
+        admin_contacts = Contact.objects.order_by('-pub')[:25]
 
     return render(request, 'dreamapp/profile.html', {
         'profile': profile,
         'display_name': comment_author_name(request.user),
         'user_dreams': dreams_for_user(request.user),
-        'notifications': notifications,
+        'notifications': notifications_page,
+        'notifications_total_count': notifications_qs.count(),
+        'notification_filter': notif_filter,
         'country_form': None if profile.country_locked else ProfileCountryForm(),
         'birth_year_form': ProfileBirthYearForm(instance=profile),
         'mbti_form': ProfileMbtiForm(instance=profile),
@@ -252,7 +326,70 @@ def profile_view(request):
         'mbti_updates_remaining': mbti_updates_remaining(profile),
         'birth_year_form_open': not profile.birth_year,
         'mbti_form_open': not profile.mbti_type,
+        'admin_contacts': admin_contacts,
     })
+
+
+@login_required
+def admin_contact_reply(request):
+    denied_response = _admin_only_or_redirect(request)
+    if denied_response:
+        return denied_response
+
+    contact_id = (request.GET.get('contact') or request.POST.get('contact_id') or '').strip()
+    contact_item = None
+    if contact_id:
+        contact_item = Contact.objects.filter(pk=contact_id).first()
+
+    initial = {}
+    if contact_item:
+        initial['to_email'] = contact_item.email
+
+    if request.method == 'POST':
+        form = AdminContactReplyForm(request.POST, initial=initial)
+        if form.is_valid():
+            to_email = form.cleaned_data['to_email']
+            message_body = form.cleaned_data['message'].strip()
+            recipient_name = ''
+            if contact_item and (contact_item.name or '').strip():
+                recipient_name = contact_item.name.strip()
+            if not recipient_name:
+                recipient_name = to_email
+
+            context = {
+                'to_email': to_email,
+                'recipient_name': recipient_name,
+                'message': message_body,
+                'admin_name': comment_author_name(request.user),
+            }
+            html_message = render_to_string(
+                'dreamapp/email_templates/admin_contact_reply.html',
+                context,
+            )
+            plain_message = strip_tags(html_message)
+            email = EmailMultiAlternatives(
+                subject='Dream Analytica — Response to your inquiry',
+                body=plain_message,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                to=[to_email],
+            )
+            email.attach_alternative(html_message, 'text/html')
+            email.send(fail_silently=False)
+            messages.success(request, f'Reply sent to {to_email}.')
+            return redirect('main:admin_contact_reply')
+    else:
+        form = AdminContactReplyForm(initial=initial)
+
+    recent_contacts = Contact.objects.order_by('-pub')[:100]
+    return render(
+        request,
+        'dreamapp/admin_contact_reply.html',
+        {
+            'form': form,
+            'contact_item': contact_item,
+            'recent_contacts': recent_contacts,
+        },
+    )
 
 
 @login_required

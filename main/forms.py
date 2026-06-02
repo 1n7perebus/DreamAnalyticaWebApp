@@ -2,6 +2,7 @@ import re
 
 import phonenumbers
 from django import forms
+from django.utils import timezone
 from .models import *
 from django.contrib.auth.models import User
 from django.core.validators import RegexValidator
@@ -57,6 +58,28 @@ class UserRegistrationForm(forms.ModelForm):
         validators=[RegexValidator(regex='^[a-zA-Z]*$', message='Username must contain only letters.')],
         label='Username'
     )
+    display_name = forms.CharField(max_length=50, label='Name')
+    country_code = forms.ChoiceField(
+        choices=[('', 'Select country…')] + list(COUNTRY_CHOICES),
+        label='Country',
+        required=True,
+    )
+    age = forms.IntegerField(
+        required=True,
+        min_value=13,
+        max_value=120,
+        label='Age',
+        widget=forms.NumberInput(attrs={'min': 13, 'max': 120, 'inputmode': 'numeric'}),
+    )
+    mbti_type = forms.ChoiceField(
+        choices=[('', 'Select type…')] + [
+            (value, label)
+            for value, label in Dreams.MBTI_CHOICES
+            if value
+        ],
+        label='Personality type',
+        required=True,
+    )
     password = forms.CharField(label='Password', widget=forms.PasswordInput)
     password2 = forms.CharField(label='Confirm Password', widget=forms.PasswordInput)
 
@@ -64,11 +87,41 @@ class UserRegistrationForm(forms.ModelForm):
         model = User
         fields = ('username', 'email')
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        input_class = 'contact-field__input'
+        for name in ['display_name', 'username', 'email', 'age', 'password', 'password2']:
+            self.fields[name].widget.attrs['class'] = input_class
+        self.fields['country_code'].widget.attrs['class'] = 'profile-native-select no-autoinit'
+        self.fields['mbti_type'].widget.attrs['class'] = 'profile-native-select no-autoinit'
+
     def clean_password2(self):
         cd = self.cleaned_data
         if cd['password'] != cd['password2']:
             raise forms.ValidationError("Passwords don't match.")
         return cd['password2']
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.first_name = self.cleaned_data['display_name'].strip()[:50]
+        if commit:
+            user.save()
+        return user
+
+    def save_profile(self, user):
+        birth_year = timezone.now().year - int(self.cleaned_data['age'])
+        UserProfile.objects.update_or_create(
+            user=user,
+            defaults={
+                'birth_year': birth_year,
+                'birth_year_updates_count': 1,
+                'mbti_type': self.cleaned_data['mbti_type'],
+                'mbti_updates_count': 1,
+                'country_code': self.cleaned_data['country_code'],
+                'country_name': dict(COUNTRY_CHOICES).get(self.cleaned_data['country_code'], ''),
+                'country_locked': True,
+            },
+        )
 
 class DreamForm(forms.ModelForm):
     MBTI_CHOICES = [
@@ -266,3 +319,22 @@ class ContactForm(forms.ModelForm):
         if commit:
             instance.save()
         return instance
+
+
+class AdminContactReplyForm(forms.Form):
+    to_email = forms.EmailField(
+        required=True,
+        label='Send to',
+        widget=forms.EmailInput(attrs={'class': 'contact-field__input'}),
+    )
+    message = forms.CharField(
+        required=True,
+        label='Message',
+        widget=forms.Textarea(
+            attrs={
+                'class': 'contact-field__input',
+                'rows': 8,
+                'placeholder': 'Write your response message...',
+            }
+        ),
+    )

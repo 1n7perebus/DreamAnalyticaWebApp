@@ -151,6 +151,13 @@
           <button type="submit" class="neon-btn neon-btn--primary">Save country</button>
         </form>
         {% endif %}
+
+        {% if user.is_staff or user.is_superuser %}
+        <div class="profile-country-form">
+          <p class="profile-country-note">Admin tools</p>
+          <a href="{% url 'main:admin_contact_reply' %}" class="neon-btn neon-btn--primary">Open contact reply form</a>
+        </div>
+        {% endif %}
       </div>
     </section>
 
@@ -162,13 +169,26 @@
         <span class="neon-card__corner neon-card__corner--br"></span>
 
         <h2 class="profile-card__title goldman-regular">Notifications</h2>
-        {% if notifications %}
+        <div class="profile-notification-toolbar">
+          <div class="profile-notification-filters">
+            <a href="?notif=unread" class="profile-filter-pill{% if notification_filter == 'unread' %} is-active{% endif %}">Unread</a>
+            <a href="?notif=all" class="profile-filter-pill{% if notification_filter == 'all' %} is-active{% endif %}">All</a>
+          </div>
+          {% if unread_notification_count > 0 %}
+          <form method="post" class="profile-notification-mark-all">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="mark_all_notifications_read">
+            <button type="submit" class="profile-mini-btn">Mark all read</button>
+          </form>
+          {% endif %}
+        </div>
+        {% if notifications.object_list %}
         <ul class="profile-notification-list">
-          {% for note in notifications %}
+          {% for note in notifications.object_list %}
           <li class="profile-notification-item{% if not note.read %} profile-notification-item--unread{% endif %}">
             <p class="profile-notification-text">
               <strong>{{ note.comment.name }}</strong> commented on
-              <a href="{% url 'main:specific_dream' note.dream.id %}#dream-{{ note.dream.id }}">
+              <a href="{% url 'main:open_notification' note.id %}">
                 {% if note.dream.title %}{{ note.dream.title|truncatechars:48 }}{% else %}your dream{% endif %}
               </a>
             </p>
@@ -176,8 +196,25 @@
           </li>
           {% endfor %}
         </ul>
+        {% if notifications.paginator.num_pages > 1 %}
+        <div class="profile-pagination">
+          {% if notifications.has_previous %}
+          <a class="profile-page-link" href="?notif={{ notification_filter }}&np={{ notifications.previous_page_number }}">Previous</a>
+          {% endif %}
+          <span class="profile-page-state">Page {{ notifications.number }} / {{ notifications.paginator.num_pages }}</span>
+          {% if notifications.has_next %}
+          <a class="profile-page-link" href="?notif={{ notification_filter }}&np={{ notifications.next_page_number }}">Next</a>
+          {% endif %}
+        </div>
+        {% endif %}
         {% else %}
-        <p class="profile-empty">No comments on your dreams yet.</p>
+        <p class="profile-empty">
+          {% if notification_filter == 'unread' %}
+          No unread notifications.
+          {% else %}
+          No comments on your dreams yet.
+          {% endif %}
+        </p>
         {% endif %}
       </div>
     </section>
@@ -219,6 +256,32 @@
         {% endif %}
       </div>
     </section>
+
+    {% if user.is_staff or user.is_superuser %}
+    <section class="profile-section profile-section--wide reveal">
+      <div class="neon-card profile-card">
+        <h2 class="profile-card__title goldman-regular">Contact inbox (admin)</h2>
+        {% if admin_contacts %}
+        <ul class="profile-dream-list">
+          {% for item in admin_contacts %}
+          <li class="profile-dream-item">
+            <div class="profile-dream-item__main">
+              <span class="profile-dream-title">{{ item.name }} · {{ item.email }}</span>
+              <time class="profile-dream-date">{{ item.pub|date:"M j, Y · g:i A" }}</time>
+              <p class="profile-notification-text">{{ item.desc|truncatechars:180 }}</p>
+            </div>
+            <div class="profile-dream-item__meta">
+              <a class="profile-mini-btn" href="{% url 'main:admin_contact_reply' %}?contact={{ item.id }}">Reply</a>
+            </div>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p class="profile-empty">No contact messages yet.</p>
+        {% endif %}
+      </div>
+    </section>
+    {% endif %}
   </div>
 </div>
 

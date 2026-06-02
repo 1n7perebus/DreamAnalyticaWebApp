@@ -1,0 +1,65 @@
+{% extends 'dreamapp/header.html' %}
+{% block title %}Admin Contact Reply — Dream Analytica{% endblock %}
+{% block content %}
+<div class="container profile-page">
+  <div class="reveal profile-page__head">
+    <span class="section-eyebrow">Admin</span>
+    <h1 class="section-title gradient-text glitch-text" data-text="CONTACT REPLIES">CONTACT REPLIES</h1>
+    <p class="section-sub">Send direct responses to prospective clients with branded email design.</p>
+  </div>
+
+  <section class="profile-section profile-section--wide reveal">
+    <div class="neon-card profile-card">
+      <h2 class="profile-card__title goldman-regular">Compose reply</h2>
+      <form method="post" class="profile-country-form">
+        {% csrf_token %}
+        {% if contact_item %}
+        <input type="hidden" name="contact_id" value="{{ contact_item.id }}">
+        {% endif %}
+
+        <div class="profile-field">
+          <label class="contact-field__label" for="{{ form.to_email.id_for_label }}">{{ form.to_email.label }}</label>
+          {{ form.to_email }}
+          {% if form.to_email.errors %}
+          <p class="profile-empty">{{ form.to_email.errors|striptags }}</p>
+          {% endif %}
+        </div>
+
+        <div class="profile-field">
+          <label class="contact-field__label" for="{{ form.message.id_for_label }}">{{ form.message.label }}</label>
+          {{ form.message }}
+          {% if form.message.errors %}
+          <p class="profile-empty">{{ form.message.errors|striptags }}</p>
+          {% endif %}
+        </div>
+
+        <button type="submit" class="neon-btn neon-btn--primary">Send email response</button>
+      </form>
+    </div>
+  </section>
+
+  <section class="profile-section profile-section--wide reveal">
+    <div class="neon-card profile-card">
+      <h2 class="profile-card__title goldman-regular">Recent contact messages</h2>
+      {% if recent_contacts %}
+      <ul class="profile-dream-list">
+        {% for item in recent_contacts %}
+        <li class="profile-dream-item">
+          <div class="profile-dream-item__main">
+            <span class="profile-dream-title">{{ item.name }} · {{ item.email }}</span>
+            <time class="profile-dream-date">{{ item.pub|date:"M j, Y · g:i A" }}</time>
+            <p class="profile-notification-text">{{ item.desc|truncatechars:220 }}</p>
+          </div>
+          <div class="profile-dream-item__meta">
+            <a class="profile-mini-btn" href="{% url 'main:admin_contact_reply' %}?contact={{ item.id }}">Reply</a>
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="profile-empty">No contact messages yet.</p>
+      {% endif %}
+    </div>
+  </section>
+</div>
+{% endblock %}
