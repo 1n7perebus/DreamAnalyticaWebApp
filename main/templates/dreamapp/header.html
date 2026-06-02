@@ -17,7 +17,7 @@
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3CradialGradient id='g' cx='50%25' cy='50%25' r='50%25'%3E%3Cstop offset='0%25' stop-color='%2300f0ff'/%3E%3Cstop offset='100%25' stop-color='%23ff2bd6'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='32' cy='32' r='28' fill='none' stroke='url(%23g)' stroke-width='4'/%3E%3Ccircle cx='32' cy='32' r='6' fill='url(%23g)'/%3E%3C/svg%3E">
 
   <link href="{% static 'main/css/materialize.min.css' %}" rel="stylesheet">
-  <link href="{% static 'main/css/neon.css' %}?v=20260601e" rel="stylesheet">
+  <link href="{% static 'main/css/neon.css' %}?v=20260602d" rel="stylesheet">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -55,10 +55,36 @@
         <div class="nav-account">
           <a href="{% url 'main:profile' %}" class="nav-profile-link nav-user">
             Hello, <strong>{% firstof user.first_name user.username %}</strong>
+          </a>
+          <button
+            type="button"
+            class="nav-notify-trigger"
+            id="nav-notify-trigger"
+            aria-haspopup="true"
+            aria-expanded="false"
+            aria-controls="nav-notify-menu"
+          >
+            <i class="material-icons" aria-hidden="true">notifications</i>
             {% if unread_notification_count and request.resolver_match.url_name != 'profile' %}
             <span class="nav-notify-badge" aria-label="{{ unread_notification_count }} unread notification{{ unread_notification_count|pluralize }}">{{ unread_notification_count }}</span>
             {% endif %}
-          </a>
+          </button>
+          <div class="nav-notify-menu" id="nav-notify-menu" hidden>
+            <p class="nav-notify-menu__title">Notifications</p>
+            {% if recent_notifications %}
+              {% for note in recent_notifications %}
+              <a href="{% url 'main:open_notification' note.id %}" class="nav-notify-item{% if not note.read %} is-unread{% endif %}">
+                <span class="nav-notify-item__text">
+                  <strong>{{ note.comment.name }}</strong> commented on
+                  {% if note.dream.title %}{{ note.dream.title|truncatechars:42 }}{% else %}your dream{% endif %}
+                </span>
+                <span class="nav-notify-item__time">{{ note.created_at|timesince }} ago</span>
+              </a>
+              {% endfor %}
+            {% else %}
+            <p class="nav-notify-empty">No notifications yet.</p>
+            {% endif %}
+          </div>
           <span class="nav-account__sep" aria-hidden="true"></span>
           <a class="nav-logout" href="{% url 'main:logout' %}">Logout</a>
         </div>
@@ -105,6 +131,28 @@
       if (typeof M !== 'undefined') M.AutoInit();
       if (typeof window.initProfilePage === 'function') {
         window.initProfilePage();
+      }
+      var notifyTrigger = document.getElementById('nav-notify-trigger');
+      var notifyMenu = document.getElementById('nav-notify-menu');
+      if (notifyTrigger && notifyMenu) {
+        notifyTrigger.addEventListener('click', function(e) {
+          e.stopPropagation();
+          var open = notifyMenu.hasAttribute('hidden');
+          if (open) {
+            notifyMenu.removeAttribute('hidden');
+            notifyTrigger.setAttribute('aria-expanded', 'true');
+          } else {
+            notifyMenu.setAttribute('hidden', '');
+            notifyTrigger.setAttribute('aria-expanded', 'false');
+          }
+        });
+
+        document.addEventListener('click', function(e) {
+          if (!notifyMenu.contains(e.target) && e.target !== notifyTrigger) {
+            notifyMenu.setAttribute('hidden', '');
+            notifyTrigger.setAttribute('aria-expanded', 'false');
+          }
+        });
       }
 
       {% if messages %}

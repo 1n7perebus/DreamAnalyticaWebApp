@@ -128,7 +128,7 @@
               Comments
             </h6>
             {% for comment in item.comments %}
-            <div class="comment-item">
+            <div class="comment-item" id="comment-{{ comment.id }}">
               <p class="comment-author">{{ comment.name }}</p>
               <p class="comment-text">{{ comment.body }}</p>
               <time class="comment-date">{{ comment.pub }}</time>

@@ -255,6 +255,22 @@ def profile_view(request):
     })
 
 
+@login_required
+def open_notification(request, notification_id):
+    note = get_object_or_404(
+        Notification.objects.select_related('dream', 'comment'),
+        id=notification_id,
+        recipient=request.user,
+    )
+    if not note.read:
+        note.read = True
+        note.save(update_fields=['read'])
+    return redirect(
+        reverse('main:specific_dream', kwargs={'dream_id': note.dream_id}) +
+        f'#comment-{note.comment_id}'
+    )
+
+
 def _login_user_from_google_token(token):
     if not settings.GOOGLE_CLIENT_ID:
         raise ValueError('Google sign-in is not configured')
