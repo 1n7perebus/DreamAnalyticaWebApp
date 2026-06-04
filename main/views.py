@@ -17,7 +17,7 @@ from google.auth.transport import requests as google_requests
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
-from datetime import timedelta
+from datetime import timedelta, date
 from django.utils import timezone
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
@@ -781,7 +781,9 @@ def app(request):
     return render(request, "dreamapp/app.html")
 
 def about(request):
-    return render(request, "dreamapp/about.html")
+    current_year = date.today().year
+    age = current_year - 1990
+    return render(request, "dreamapp/about.html",{"age": age})
 
 def error(request):
     return render(request, "dreamapp/error.html")
