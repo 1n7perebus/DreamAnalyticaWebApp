@@ -21,6 +21,10 @@ from django.views.generic import RedirectView
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path(
+        "favicon.ico",
+        RedirectView.as_view(url="/static/main/img/favicon.ico", permanent=True),
+    ),
     #path('', RedirectView.as_view(url='https://www.dreamanalytica.com/', permanent=True)),
     path("", include("main.urls")),
     path('app-ads.txt', TemplateView.as_view(template_name="app-ads.txt", content_type='text/plain')),
