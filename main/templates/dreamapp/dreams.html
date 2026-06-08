@@ -52,48 +52,151 @@
     {% endif %}
   </section>
 
-  {% if dreams_with_comments %}
-  <div class="dream-wall-controls reveal" data-dream-wall-controls>
+  {% if dream_count %}
+  <form class="dream-wall-controls reveal" method="get" action="{% url 'main:dreams' %}" data-dream-wall-controls id="dream-wall-filters">
     <div class="dream-wall-controls__group">
       <span class="dream-wall-controls__label">Filter by mood</span>
-      <div class="dream-filters" role="group" aria-label="Filter dreams by mood score">
-        <span class="neon-chip chip-filter is-active" data-filter="all" tabindex="0">All Dreams</span>
-        <span class="neon-chip chip-filter chip-score score-4" data-filter="positive" tabindex="0">Positive</span>
-        <span class="neon-chip chip-filter chip-score score-3" data-filter="neutral" tabindex="0">Neutral</span>
-        <span class="neon-chip chip-filter chip-score score-1" data-filter="negative" tabindex="0">Negative</span>
+      <div class="dream-filters" role="radiogroup" aria-label="Filter dreams by mood score">
+        <label class="neon-chip chip-filter{% if wall_filters.mood == 'all' %} is-active{% endif %}">
+          <input type="radio" name="mood" value="all" class="dream-wall-controls__sr"{% if wall_filters.mood == 'all' %} checked{% endif %}>
+          <span>All Dreams</span>
+        </label>
+        <label class="neon-chip chip-filter chip-score score-4{% if wall_filters.mood == 'positive' %} is-active{% endif %}">
+          <input type="radio" name="mood" value="positive" class="dream-wall-controls__sr"{% if wall_filters.mood == 'positive' %} checked{% endif %}>
+          <span>Positive</span>
+        </label>
+        <label class="neon-chip chip-filter chip-score score-3{% if wall_filters.mood == 'neutral' %} is-active{% endif %}">
+          <input type="radio" name="mood" value="neutral" class="dream-wall-controls__sr"{% if wall_filters.mood == 'neutral' %} checked{% endif %}>
+          <span>Neutral</span>
+        </label>
+        <label class="neon-chip chip-filter chip-score score-1{% if wall_filters.mood == 'negative' %} is-active{% endif %}">
+          <input type="radio" name="mood" value="negative" class="dream-wall-controls__sr"{% if wall_filters.mood == 'negative' %} checked{% endif %}>
+          <span>Negative</span>
+        </label>
       </div>
     </div>
     <div class="dream-wall-controls__group">
-      <span class="dream-wall-controls__label">Sort by</span>
-      <div class="wall-analytics__tabs dream-sort-tabs" role="tablist" aria-label="Sort dreams">
-        <button type="button" class="wall-analytics__tab is-active" role="tab" data-sort="newest" aria-selected="true">Newest</button>
-        <button type="button" class="wall-analytics__tab" role="tab" data-sort="personality" aria-selected="false">Personality</button>
-        <button type="button" class="wall-analytics__tab" role="tab" data-sort="age" aria-selected="false">Age</button>
-        <button type="button" class="wall-analytics__tab" role="tab" data-sort="gender" aria-selected="false">Gender</button>
-        <button type="button" class="wall-analytics__tab" role="tab" data-sort="geo" aria-selected="false">Geography</button>
+      <span class="dream-wall-controls__label">Filter by</span>
+      <div class="dream-facet-row" role="group" aria-label="Filter dreams by demographics">
+        {% if facet_options.mbti %}
+        <div class="dream-facet{% if wall_filters.mbti %} has-selection{% endif %}" data-facet="mbti">
+          <button type="button" class="dream-facet__trigger wall-analytics__tab" aria-expanded="false" aria-haspopup="listbox">
+            Personality{% if wall_filters.mbti %}<span class="dream-facet__badge">{{ wall_filters.mbti|length }}</span>{% endif %}
+          </button>
+          <div class="dream-facet__panel" role="listbox" aria-label="Personality types" hidden>
+            <div class="dream-facet__panel-head">
+              <span class="dream-facet__panel-title">Personality type</span>
+              <button type="button" class="dream-facet__clear" data-facet-clear="mbti">Clear</button>
+            </div>
+            <ul class="dream-facet__options">
+              {% for opt in facet_options.mbti %}
+              <li>
+                <label class="dream-facet__option">
+                  <input type="checkbox" name="mbti" value="{{ opt.value }}"{% if opt.value in wall_filters.mbti %} checked{% endif %}>
+                  <span class="dream-facet__option-label">{{ opt.value }}</span>
+                  <span class="dream-facet__count">{{ opt.count }}</span>
+                </label>
+              </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+        {% endif %}
+        {% if facet_options.age %}
+        <div class="dream-facet{% if wall_filters.age %} has-selection{% endif %}" data-facet="age">
+          <button type="button" class="dream-facet__trigger wall-analytics__tab" aria-expanded="false" aria-haspopup="listbox">
+            Age{% if wall_filters.age %}<span class="dream-facet__badge">{{ wall_filters.age|length }}</span>{% endif %}
+          </button>
+          <div class="dream-facet__panel" role="listbox" aria-label="Age ranges" hidden>
+            <div class="dream-facet__panel-head">
+              <span class="dream-facet__panel-title">Age range</span>
+              <button type="button" class="dream-facet__clear" data-facet-clear="age">Clear</button>
+            </div>
+            <ul class="dream-facet__options">
+              {% for opt in facet_options.age %}
+              <li>
+                <label class="dream-facet__option">
+                  <input type="checkbox" name="age" value="{{ opt.key }}"{% if opt.key in wall_filters.age %} checked{% endif %}>
+                  <span class="dream-facet__option-label">{{ opt.label }}</span>
+                  <span class="dream-facet__count">{{ opt.count }}</span>
+                </label>
+              </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+        {% endif %}
+        {% if facet_options.gender %}
+        <div class="dream-facet{% if wall_filters.gender %} has-selection{% endif %}" data-facet="gender">
+          <button type="button" class="dream-facet__trigger wall-analytics__tab" aria-expanded="false" aria-haspopup="listbox">
+            Gender{% if wall_filters.gender %}<span class="dream-facet__badge">{{ wall_filters.gender|length }}</span>{% endif %}
+          </button>
+          <div class="dream-facet__panel" role="listbox" aria-label="Gender" hidden>
+            <div class="dream-facet__panel-head">
+              <span class="dream-facet__panel-title">Gender</span>
+              <button type="button" class="dream-facet__clear" data-facet-clear="gender">Clear</button>
+            </div>
+            <ul class="dream-facet__options">
+              {% for opt in facet_options.gender %}
+              <li>
+                <label class="dream-facet__option">
+                  <input type="checkbox" name="gender" value="{{ opt.value }}"{% if opt.value in wall_filters.gender %} checked{% endif %}>
+                  <span class="dream-facet__option-label">{{ opt.value }}</span>
+                  <span class="dream-facet__count">{{ opt.count }}</span>
+                </label>
+              </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+        {% endif %}
+        {% if facet_options.country %}
+        <div class="dream-facet{% if wall_filters.country %} has-selection{% endif %}" data-facet="country">
+          <button type="button" class="dream-facet__trigger wall-analytics__tab" aria-expanded="false" aria-haspopup="listbox">
+            Geography{% if wall_filters.country %}<span class="dream-facet__badge">{{ wall_filters.country|length }}</span>{% endif %}
+          </button>
+          <div class="dream-facet__panel" role="listbox" aria-label="Countries" hidden>
+            <div class="dream-facet__panel-head">
+              <span class="dream-facet__panel-title">Country</span>
+              <button type="button" class="dream-facet__clear" data-facet-clear="country">Clear</button>
+            </div>
+            <ul class="dream-facet__options">
+              {% for opt in facet_options.country %}
+              <li>
+                <label class="dream-facet__option">
+                  <input type="checkbox" name="country" value="{{ opt.code }}"{% if opt.code in wall_filters.country %} checked{% endif %}>
+                  <span class="dream-facet__option-label">{{ opt.name }}</span>
+                  <span class="dream-facet__count">{{ opt.count }}</span>
+                </label>
+              </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+        {% endif %}
       </div>
     </div>
-  </div>
+    <p class="dream-wall-summary">
+      Showing {{ filtered_dream_count }} dream{{ filtered_dream_count|pluralize }} · newest first
+      {% if has_active_wall_filters %}
+      · <a class="dream-wall-summary__clear" href="{% url 'main:dreams' %}">Clear all</a>
+      {% endif %}
+    </p>
+    <div class="dream-facet__backdrop" hidden data-facet-backdrop></div>
+  </form>
   {% endif %}
 
   <div class="row dreams-list-row">
     <section class="dreams-list col s12 m10 l8 offset-m1 offset-l2">
       {% if dreams_with_comments %}
       {% for item in dreams_with_comments %}
-      <article class="dream-card reveal{% if focus_dream and focus_dream.id == item.dream.id %} dream-card--focus{% endif %}" id="dream-{{ item.dream.id }}"
-               data-score="{{ item.dream.scale }}"
-               data-mbti="{{ item.dream.mbti_type }}"
-               data-age="{% if item.dream.age is not None %}{{ item.dream.age }}{% endif %}"
-               data-gender="{{ item.dream.gender }}"
-               data-country-code="{{ item.dream.country_code }}"
-               data-country-name="{{ item.dream.country_name }}"
-               data-pub="{{ item.dream.pub|date:'U' }}">
+      <article class="dream-card reveal{% if focus_dream and focus_dream.id == item.dream.id %} dream-card--focus{% endif %}" id="dream-{{ item.dream.id }}">
         <div class="dream-card-inner">
           <header class="dream-header">
             {% if item.dream.title %}
             <h5 class="goldman-regular dream-title">{{ item.dream.title }}</h5>
             {% endif %}
-            <p class="dream-author">{{ item.dream.name }}</p>
+            <p class="dream-author">By: {{ item.dream.name }}</p>
             <div class="dream-chips">
               {% if item.dream.mbti_type %}
               <span class="dream-chip chip-mbti">{{ item.dream.mbti_type }}</span>
@@ -161,6 +264,12 @@
         </div>
       </article>
       {% endfor %}
+      {% elif dream_count and has_active_wall_filters %}
+      <div class="dreams-empty dreams-empty--filtered reveal">
+        <h5 class="goldman-regular">No dreams match these filters</h5>
+        <p>Try adjusting your mood or facet selections.</p>
+        <a href="{% url 'main:dreams' %}" class="neon-btn neon-btn--primary neon-btn--lg">Clear all filters</a>
+      </div>
       {% else %}
       <div class="dreams-empty reveal">
         <svg width="160" height="160" viewBox="0 0 160 160" aria-hidden="true" style="margin: 0 auto; display:block;">
@@ -189,7 +298,7 @@
   </div>
 </div>
 
-<script src="{% static 'main/js/wall-analytics.js' %}?v=20260528t"></script>
+<script src="{% static 'main/js/wall-analytics.js' %}?v=20260608a"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     if (typeof M !== 'undefined' && M.textareaAutoInit) {

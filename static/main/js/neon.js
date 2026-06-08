@@ -464,173 +464,136 @@
   }
 
   // ------------------------------------------------------------------
-  // Wall of Dreams — mood filters + demographic sort
+  // Wall of Dreams — server-side facet filters (URL-driven)
   // ------------------------------------------------------------------
   function initDreamWallControls() {
-    const root = document.querySelector('[data-dream-wall-controls]');
-    const list = document.querySelector('.dreams-list');
-    if (!root || !list) return;
+    const form = document.querySelector('[data-dream-wall-controls]');
+    if (!form || form.tagName !== 'FORM') return;
 
-    const filterRow = root.querySelector('.dream-filters');
-    const sortTabs = root.querySelectorAll('.dream-sort-tabs [data-sort]');
-    const filterChips = filterRow ? filterRow.querySelectorAll('.chip-filter') : [];
-    let cards = Array.from(list.querySelectorAll('.dream-card[data-score]'));
-    let activeFilter = 'all';
-    let activeSort = 'newest';
-    let activeCountryCode = '';
-    const defaultFilter = 'all';
-    const defaultSort = 'newest';
+    const facets = Array.from(form.querySelectorAll('.dream-facet'));
+    const backdrop = form.querySelector('[data-facet-backdrop]');
+    const facetParamNames = ['mbti', 'age', 'gender', 'country'];
+    let submitTimer = null;
 
-    const genderRank = { FEMALE: 0, MALE: 1 };
-
-    function pubTs(card) {
-      return parseInt(card.getAttribute('data-pub'), 10) || 0;
-    }
-
-    function cardMatchesFilter(card) {
-      const score = parseInt(card.getAttribute('data-score'), 10) || 0;
-      const mbti = (card.getAttribute('data-mbti') || '').toUpperCase();
-      const countryCode = (card.getAttribute('data-country-code') || '').toUpperCase();
-      if (activeCountryCode && countryCode !== activeCountryCode) return false;
-      if (activeFilter === 'positive') return score >= 4;
-      if (activeFilter === 'neutral') return score === 3;
-      if (activeFilter === 'negative') return score <= 2;
-      if (activeFilter.startsWith('mbti:')) {
-        return mbti === activeFilter.slice(5).toUpperCase();
+    function buildWallFilterUrl() {
+      const params = new URLSearchParams();
+      const mood = form.querySelector('input[name="mood"]:checked');
+      if (mood && mood.value !== 'all') {
+        params.set('mood', mood.value);
       }
-      return true;
-    }
-
-    function compareCards(a, b) {
-      const aPub = pubTs(a);
-      const bPub = pubTs(b);
-
-      if (activeSort === 'newest') {
-        return bPub - aPub;
-      }
-
-      if (activeSort === 'personality') {
-        const aM = (a.getAttribute('data-mbti') || '').toUpperCase();
-        const bM = (b.getAttribute('data-mbti') || '').toUpperCase();
-        if (!aM && bM) return 1;
-        if (aM && !bM) return -1;
-        if (aM !== bM) return aM.localeCompare(bM);
-        return bPub - aPub;
-      }
-
-      if (activeSort === 'age') {
-        const aAge = parseInt(a.getAttribute('data-age'), 10);
-        const bAge = parseInt(b.getAttribute('data-age'), 10);
-        const aHas = !Number.isNaN(aAge);
-        const bHas = !Number.isNaN(bAge);
-        if (!aHas && bHas) return 1;
-        if (aHas && !bHas) return -1;
-        if (aHas && bHas && aAge !== bAge) return aAge - bAge;
-        return bPub - aPub;
-      }
-
-      if (activeSort === 'gender') {
-        const aG = (a.getAttribute('data-gender') || '').toUpperCase();
-        const bG = (b.getAttribute('data-gender') || '').toUpperCase();
-        const aR = genderRank[aG] !== undefined ? genderRank[aG] : 2;
-        const bR = genderRank[bG] !== undefined ? genderRank[bG] : 2;
-        if (aR !== bR) return aR - bR;
-        if (aG !== bG) return aG.localeCompare(bG);
-        return bPub - aPub;
-      }
-
-      if (activeSort === 'geo') {
-        const aGeo = (
-          a.getAttribute('data-country-name') ||
-          a.getAttribute('data-country-code') ||
-          ''
-        ).toUpperCase();
-        const bGeo = (
-          b.getAttribute('data-country-name') ||
-          b.getAttribute('data-country-code') ||
-          ''
-        ).toUpperCase();
-        if (!aGeo && bGeo) return 1;
-        if (aGeo && !bGeo) return -1;
-        if (aGeo !== bGeo) return aGeo.localeCompare(bGeo);
-        return bPub - aPub;
-      }
-
-      return bPub - aPub;
-    }
-
-    function syncFilterUi() {
-      filterChips.forEach((chip) => {
-        const isOn = (chip.getAttribute('data-filter') || defaultFilter) === activeFilter;
-        chip.classList.toggle('is-active', isOn);
+      facetParamNames.forEach((name) => {
+        const values = Array.from(form.querySelectorAll(`input[name="${name}"]:checked`))
+          .map((input) => input.value);
+        if (values.length) {
+          params.set(name, values.join(','));
+        }
       });
+      const action = form.getAttribute('action') || window.location.pathname;
+      const qs = params.toString();
+      return qs ? `${action}?${qs}` : action;
     }
 
-    function syncSortUi() {
-      sortTabs.forEach((tab) => {
-        const on = (tab.getAttribute('data-sort') || defaultSort) === activeSort;
-        tab.classList.toggle('is-active', on);
-        tab.setAttribute('aria-selected', on ? 'true' : 'false');
+    function submitWallFilters() {
+      window.location.assign(buildWallFilterUrl());
+    }
+
+    function scheduleSubmit() {
+      clearTimeout(submitTimer);
+      submitTimer = setTimeout(submitWallFilters, 280);
+    }
+
+    function closeAllFacets() {
+      form.classList.remove('is-facet-open');
+      facets.forEach((facet) => {
+        facet.classList.remove('is-open');
+        const trigger = facet.querySelector('.dream-facet__trigger');
+        const panel = facet.querySelector('.dream-facet__panel');
+        if (trigger) {
+          trigger.classList.remove('is-open');
+          trigger.setAttribute('aria-expanded', 'false');
+        }
+        if (panel) panel.hidden = true;
       });
+      if (backdrop) backdrop.hidden = true;
     }
 
-    function resetToDefaultState() {
-      activeCountryCode = '';
-      activeFilter = defaultFilter;
-      activeSort = defaultSort;
-      syncFilterUi();
-      syncSortUi();
-      applyWallState();
+    function openFacet(facet) {
+      closeAllFacets();
+      form.classList.add('is-facet-open');
+      facet.classList.add('is-open');
+      const trigger = facet.querySelector('.dream-facet__trigger');
+      const panel = facet.querySelector('.dream-facet__panel');
+      if (trigger) {
+        trigger.classList.add('is-open');
+        trigger.setAttribute('aria-expanded', 'true');
+      }
+      if (panel) panel.hidden = false;
+      if (backdrop) backdrop.hidden = false;
     }
 
-    function applyWallState() {
-      cards.sort(compareCards);
-      cards.forEach((card) => list.appendChild(card));
-      cards.forEach((card) => {
-        card.classList.toggle('is-hidden', !cardMatchesFilter(card));
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      submitWallFilters();
+    });
+
+    form.querySelectorAll('input[name="mood"]').forEach((radio) => {
+      radio.addEventListener('change', () => {
+        form.querySelectorAll('.dream-filters label.neon-chip').forEach((label) => {
+          label.classList.remove('is-active');
+        });
+        const label = radio.closest('label');
+        if (label) label.classList.add('is-active');
+        submitWallFilters();
       });
-    }
+    });
 
-    filterChips.forEach((chip) => {
-      const activate = () => {
-        filterChips.forEach((c) => c.classList.remove('is-active'));
-        chip.classList.add('is-active');
-        activeFilter = chip.getAttribute('data-filter') || 'all';
-        applyWallState();
-      };
-      chip.addEventListener('click', activate);
-      chip.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          activate();
+    facetParamNames.forEach((name) => {
+      form.querySelectorAll(`input[name="${name}"]`).forEach((checkbox) => {
+        checkbox.addEventListener('change', scheduleSubmit);
+      });
+    });
+
+    form.querySelectorAll('[data-facet-clear]').forEach((button) => {
+      button.addEventListener('click', (event) => {
+        event.preventDefault();
+        const facetName = button.getAttribute('data-facet-clear');
+        if (!facetName) return;
+        form.querySelectorAll(`input[name="${facetName}"]`).forEach((input) => {
+          input.checked = false;
+        });
+        submitWallFilters();
+      });
+    });
+
+    facets.forEach((facet) => {
+      const trigger = facet.querySelector('.dream-facet__trigger');
+      const panel = facet.querySelector('.dream-facet__panel');
+      if (!trigger || !panel) return;
+
+      trigger.addEventListener('click', (event) => {
+        event.preventDefault();
+        const isOpen = !panel.hidden;
+        if (isOpen) {
+          closeAllFacets();
+        } else {
+          openFacet(facet);
         }
       });
     });
 
-    sortTabs.forEach((tab) => {
-      tab.addEventListener('click', () => {
-        activeCountryCode = '';
-        activeSort = tab.getAttribute('data-sort') || 'newest';
-        syncSortUi();
-        applyWallState();
-      });
+    if (backdrop) {
+      backdrop.addEventListener('click', closeAllFacets);
+    }
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') closeAllFacets();
     });
 
-    document.addEventListener('wall:country-toggle', (event) => {
-      const detail = event.detail || {};
-      if (!detail.active || !detail.countryCode) {
-        resetToDefaultState();
-        return;
+    document.addEventListener('click', (event) => {
+      if (!form.contains(event.target)) {
+        closeAllFacets();
       }
-      activeCountryCode = String(detail.countryCode).toUpperCase();
-      activeSort = 'geo';
-      syncSortUi();
-      applyWallState();
     });
-
-    syncFilterUi();
-    syncSortUi();
-    applyWallState();
   }
 
   // ------------------------------------------------------------------

@@ -754,17 +754,31 @@ def dreams(request, dream_id=None):
             messages.error(request, "Invalid form data. Please check the entered information.")
             return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
-    active_dreams = Dreams.objects.filter(active=True).prefetch_related('comments').order_by('-pub')
+    from .wall_analytics import (
+        apply_wall_filters,
+        build_wall_analytics,
+        build_wall_facet_options,
+        has_active_wall_filters,
+        parse_wall_filters,
+    )
+
+    base_qs = Dreams.objects.filter(active=True)
+    wall_filters = parse_wall_filters(request.GET)
+    facet_options = build_wall_facet_options(base_qs)
+    filtered_qs = (
+        apply_wall_filters(base_qs, wall_filters)
+        .prefetch_related('comments')
+        .order_by('-pub')
+    )
     dreams_with_comments = [
         {'dream': dream, 'comments': dream.comments.all()}
-        for dream in active_dreams
+        for dream in filtered_qs
     ]
 
-    dream_count = active_dreams.count()
+    dream_count = base_qs.count()
+    filtered_dream_count = filtered_qs.count()
 
-    from .wall_analytics import build_wall_analytics
-
-    analytics = build_wall_analytics(active_dreams, dream_count)
+    analytics = build_wall_analytics(base_qs, dream_count)
 
     return render(request, "dreamapp/dreams.html", {
         "dreams_with_comments": dreams_with_comments,
@@ -774,6 +788,10 @@ def dreams(request, dream_id=None):
         "health_status": health_status,
         "health_color": health_color,
         "dream_count": dream_count,
+        "filtered_dream_count": filtered_dream_count,
+        "wall_filters": wall_filters,
+        "facet_options": facet_options,
+        "has_active_wall_filters": has_active_wall_filters(wall_filters),
         "focus_dream": focus_dream,
         **analytics,
     })

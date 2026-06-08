@@ -15,16 +15,70 @@
   const GEO_ZOOM_STEP = 0.35;
   const GEO_DRAG_THRESHOLD = 6;
 
-  function emitCountryToggle(code, name, active) {
-    document.dispatchEvent(
-      new CustomEvent('wall:country-toggle', {
-        detail: {
-          countryCode: code || '',
-          countryName: name || '',
-          active: !!active
-        }
-      })
-    );
+  function parseCountryParam(value) {
+    return (value || '')
+      .split(',')
+      .map((part) => part.trim().toUpperCase())
+      .filter((part) => part.length === 2);
+  }
+
+  function buildWallUrlWithCountries(codes) {
+    const params = new URLSearchParams(window.location.search);
+    const unique = [...new Set(codes.map((code) => code.toUpperCase()))];
+    if (unique.length) {
+      params.set('country', unique.join(','));
+    } else {
+      params.delete('country');
+    }
+    const qs = params.toString();
+    const path = window.location.pathname;
+    return qs ? `${path}?${qs}` : path;
+  }
+
+  function navigateWallToggleCountry(code) {
+    const upper = (code || '').toUpperCase();
+    if (!upper) return;
+    const current = parseCountryParam(new URLSearchParams(window.location.search).get('country'));
+    const next = current.includes(upper)
+      ? current.filter((item) => item !== upper)
+      : current.concat(upper);
+    window.location.assign(buildWallUrlWithCountries(next));
+  }
+
+  function navigateWallClearCountry() {
+    window.location.assign(buildWallUrlWithCountries([]));
+  }
+
+  function selectedCountriesFromUrl() {
+    return parseCountryParam(new URLSearchParams(window.location.search).get('country'));
+  }
+
+  function applyGeoSelectionFromUrl(wrap) {
+    const svg = wrap && wrap.querySelector('svg');
+    if (!svg) return;
+
+    svg.querySelectorAll('.geo-country--selected').forEach((path) => {
+      path.classList.remove('geo-country--selected');
+      if (path.dataset.geoBaseFill) path.style.fill = path.dataset.geoBaseFill;
+      if (path.dataset.geoBaseStroke) path.style.stroke = path.dataset.geoBaseStroke;
+      path.style.strokeWidth = '0.75';
+      path.style.filter = 'url(#geoGlow)';
+      path.style.fillOpacity = '';
+    });
+
+    const selected = selectedCountriesFromUrl();
+    wrap.dataset.geoSelectedCode = selected.join(',');
+
+    selected.forEach((code) => {
+      countryPathsByCode(svg, code).forEach((path) => {
+        path.classList.add('geo-country--selected');
+        path.style.fill = GEO_SELECTED_FILL;
+        path.style.stroke = GEO_SELECTED_STROKE;
+        path.style.strokeWidth = '1.2';
+        path.style.fillOpacity = '0.92';
+        path.style.filter = 'url(#geoRainbowGlow)';
+      });
+    });
   }
 
   function ensureGeoRainbowDefs(svgRoot) {
@@ -218,6 +272,15 @@
 
     window.addEventListener('resize', () => setActive(activeIndex, false));
     setActive(activeIndex, false);
+
+    root.querySelectorAll('.geo-country-list li').forEach((item) => {
+      const codeEl = item.querySelector('.geo-country-list__code');
+      if (!codeEl) return;
+      item.classList.add('geo-country-list__item--clickable');
+      item.addEventListener('click', () => {
+        navigateWallToggleCountry(codeEl.textContent.trim());
+      });
+    });
   }
 
   function getCountryData() {
@@ -561,7 +624,6 @@
     wrap.dataset.geoTooltipBound = '1';
 
     let hoverCode = null;
-    let selectedCode = null;
 
     const hideTooltip = () => {
       tooltip.classList.remove('is-visible');
@@ -584,35 +646,7 @@
       tooltip.classList.add('is-visible');
     };
 
-    const applyCountrySelectedState = (code) => {
-      const svg = wrap.querySelector('svg');
-      if (!svg) return;
-
-      if (selectedCode) {
-        countryPathsByCode(svg, selectedCode).forEach((path) => {
-          path.classList.remove('geo-country--selected');
-          if (path.dataset.geoBaseFill) path.style.fill = path.dataset.geoBaseFill;
-          if (path.dataset.geoBaseStroke) path.style.stroke = path.dataset.geoBaseStroke;
-          path.style.strokeWidth = '0.75';
-          path.style.filter = 'url(#geoGlow)';
-          path.style.fillOpacity = '';
-        });
-      }
-
-      selectedCode = code || null;
-      wrap.dataset.geoSelectedCode = selectedCode || '';
-
-      if (!selectedCode) return;
-
-      countryPathsByCode(svg, selectedCode).forEach((path) => {
-        path.classList.add('geo-country--selected');
-        path.style.fill = GEO_SELECTED_FILL;
-        path.style.stroke = GEO_SELECTED_STROKE;
-        path.style.strokeWidth = '1.2';
-        path.style.fillOpacity = '0.92';
-        path.style.filter = 'url(#geoRainbowGlow)';
-      });
-    };
+    applyGeoSelectionFromUrl(wrap);
 
     wrap.addEventListener('pointermove', (event) => {
       const svg = wrap.querySelector('svg');
@@ -658,34 +692,16 @@
         ? event.target.closest('.geo-country--active')
         : null;
       if (!target) {
-        applyCountrySelectedState(null);
-        emitCountryToggle('', '', false);
-        hideTooltip();
+        navigateWallClearCountry();
         return;
       }
-      const text = target.getAttribute('data-tooltip');
-      if (!text) return;
       const nextCode = (
         target.getAttribute('data-iso2') ||
         target.getAttribute('data-iso3') ||
         ''
       ).toUpperCase();
-      const nextName = text.split(':')[0] || nextCode;
-      const isTogglingOff = selectedCode === nextCode;
-      applyCountrySelectedState(isTogglingOff ? null : nextCode);
-      emitCountryToggle(
-        isTogglingOff ? '' : nextCode,
-        isTogglingOff ? '' : nextName,
-        !isTogglingOff
-      );
-      const rect = wrap.getBoundingClientRect();
-      const x = event.clientX - rect.left + 14;
-      const y = event.clientY - rect.top + 14;
-      if (isTogglingOff) {
-        hideTooltip();
-      } else {
-        showTooltip(text, x, y, true);
-      }
+      if (!nextCode) return;
+      navigateWallToggleCountry(nextCode);
     });
 
     document.addEventListener('pointerdown', (event) => {
@@ -707,6 +723,7 @@
       setupGeoZoom(wrap);
       setupGeoTooltip(wrap);
       paintCountries(existing, countries);
+      applyGeoSelectionFromUrl(wrap);
       return;
     }
 
@@ -728,7 +745,10 @@
         setupGeoZoom(wrap);
         setupGeoTooltip(wrap);
         const svg = wrap.querySelector('svg');
-        if (svg) paintCountries(svg, countries);
+        if (svg) {
+          paintCountries(svg, countries);
+          applyGeoSelectionFromUrl(wrap);
+        }
       })
       .catch(() => {
         /* Keep any static fallback already in the template */

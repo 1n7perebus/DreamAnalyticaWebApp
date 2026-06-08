@@ -23,6 +23,10 @@
   --r-md: 12px;
   --r-sm: 8px;
   --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --font-body: 'Nunito', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-display: 'Goldman', sans-serif;
+  --font-weight-regular: 300;
+  --font-weight-bold: 700;
 }
 
 /* =====================================================
@@ -42,11 +46,20 @@ body {
   margin: 0;
   padding: 0;
   min-height: 100vh;
-  font-family: 'Exo 2', 'Segoe UI', sans-serif;
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-regular);
   font-size: clamp(17.5px, 0.52vw + 15.3px, 19.5px);
-  line-height: 1.6;
+  line-height: 1.65;
   overflow-x: hidden;
   position: relative;
+}
+
+strong, b {
+  font-weight: var(--font-weight-bold);
+}
+
+input, textarea, select, button {
+  font-family: inherit;
 }
 
 /* Animated grid + scanline background applied to body via fixed overlay */
@@ -94,19 +107,32 @@ main, nav, .container, section, footer {
 
 /* Headlines / typography */
 .goldman-regular {
-  font-family: 'Goldman', sans-serif;
+  font-family: var(--font-display);
   font-weight: 400;
   letter-spacing: 0.04em;
 }
 
-.exo-200t, .exo-300t, .exo-200text, .exo-200, .exo-200d {
-  font-family: 'Exo 2', sans-serif;
-  font-weight: 300;
-  letter-spacing: 0.02em;
+.nunito-reg,
+.exo-200t, .exo-300t, .exo-200text, .exo-200, .exo-200d,
+.exo-zero, .exo-blue, .exo-200s, .exo-300s, .exo-300, .exo-400, .exo-500 {
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-regular);
+  letter-spacing: 0.01em;
+  transform: none;
 }
 
-.exo-200t { font-weight: 200; }
-.exo-300t { font-weight: 300; }
+.nunito-bold {
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.01em;
+}
+
+/* Materialize + form controls — match mobile app body font */
+.input-field input, .input-field textarea, .input-field label,
+.btn, .btn-large, .btn-small, .toast, .dropdown-content li > a,
+.collection .collection-item, .helper-text, .modal, .card .card-content {
+  font-family: var(--font-body);
+}
 
 a { color: var(--cyan); text-decoration: none; transition: color 0.25s var(--ease); }
 a:hover { color: var(--magenta); }
@@ -292,7 +318,7 @@ nav .nav-wrapper .brand-logo {
 }
 
 .nav-user {
-  font-family: 'Exo 2', sans-serif;
+  font-family: var(--font-body);
   font-size: 0.85rem;
   color: var(--muted);
   white-space: nowrap;
@@ -300,7 +326,7 @@ nav .nav-wrapper .brand-logo {
 
 .nav-user strong {
   color: var(--cyan);
-  font-weight: 600;
+  font-weight: var(--font-weight-bold);
 }
 
 .nav-profile-link {
@@ -328,7 +354,7 @@ nav .nav-wrapper .brand-logo {
   height: 1.4rem;
   padding: 0 0.42rem;
   border-radius: 999px;
-  font-family: 'Exo 2', sans-serif;
+  font-family: var(--font-body);
   font-size: 0.74rem;
   font-weight: 700;
   line-height: 1;
@@ -493,7 +519,7 @@ nav .nav-wrapper .brand-logo {
 
 .nav-logout,
 .nav-login {
-  font-family: 'Exo 2', sans-serif;
+  font-family: var(--font-body);
   font-size: 0.75rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -582,7 +608,7 @@ nav .nav-wrapper .brand-logo {
   border: 1px solid var(--cyan-dim);
   border-radius: 999px !important;
   padding: 0.7em 1.8em !important;
-  font-family: 'Exo 2', sans-serif;
+  font-family: var(--font-body);
   font-weight: 300;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -792,7 +818,7 @@ nav .nav-wrapper .brand-logo {
   background: rgba(0, 240, 255, 0.06);
   color: var(--text);
   transition: all 0.25s var(--ease);
-  font-family: 'Exo 2', sans-serif;
+  font-family: var(--font-body);
 }
 
 .neon-chip:hover,
@@ -867,7 +893,7 @@ nav .nav-wrapper .brand-logo {
   color: var(--text) !important;
   padding: 0.9em 1em !important;
   box-shadow: none !important;
-  font-family: 'Exo 2', sans-serif;
+  font-family: var(--font-body);
   font-weight: 300;
   font-size: 15px;
   transition: all 0.25s var(--ease);
@@ -886,7 +912,7 @@ nav .nav-wrapper .brand-logo {
 
 .input-field label {
   color: var(--muted) !important;
-  font-family: 'Exo 2', sans-serif;
+  font-family: var(--font-body);
   letter-spacing: 0.08em;
   font-size: 14px;
   left: 1em !important;
@@ -948,7 +974,7 @@ nav .nav-wrapper .brand-logo {
 .dropdown-content li > span,
 .dropdown-content li > a {
   color: var(--text) !important;
-  font-family: 'Exo 2', sans-serif;
+  font-family: var(--font-body);
   font-weight: 300;
   display: block;
   padding: 12px 16px !important;
@@ -1042,7 +1068,7 @@ nav .nav-wrapper .brand-logo {
   border-radius: 999px;
   background: rgba(0, 240, 255, 0.1);
   color: var(--cyan);
-  font-family: 'Exo 2', sans-serif;
+  font-family: var(--font-body);
   font-size: 0.78rem;
   letter-spacing: 0.04em;
   cursor: pointer;
@@ -1095,7 +1121,7 @@ nav .nav-wrapper .brand-logo {
 
 [type="checkbox"] + span:not(.lever) {
   color: var(--text);
-  font-family: 'Exo 2', sans-serif;
+  font-family: var(--font-body);
 }
 
 [type="checkbox"]:checked + span:not(.lever)::before {
@@ -1531,7 +1557,7 @@ nav .nav-wrapper .brand-logo {
 }
 
 .hero-title {
-  font-family: 'Goldman', sans-serif;
+  font-family: var(--font-display);
   font-size: clamp(2.6rem, 7vw, 5.2rem);
   line-height: 1;
   margin: 0 0 0.5em;
@@ -1632,7 +1658,7 @@ nav .nav-wrapper .brand-logo {
 }
 
 .trust-stat__value {
-  font-family: 'Goldman', sans-serif;
+  font-family: var(--font-display);
   font-size: 2.2rem;
   color: var(--cyan);
   text-shadow: 0 0 14px rgba(0, 240, 255, 0.4);
@@ -1822,13 +1848,13 @@ nav .nav-wrapper .brand-logo {
   font-size: 4rem;
   color: var(--cyan);
   opacity: 0.25;
-  font-family: 'Goldman', sans-serif;
+  font-family: var(--font-display);
   line-height: 1;
 }
 
 .testimonial-card__name {
   color: var(--cyan);
-  font-family: 'Goldman', sans-serif;
+  font-family: var(--font-display);
   letter-spacing: 0.15em;
   margin: 0 0 0.6em;
   font-size: 0.95rem;
@@ -1886,7 +1912,7 @@ nav .nav-wrapper .brand-logo {
   font-size: 13px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  font-family: 'Exo 2', sans-serif;
+  font-family: var(--font-body);
 }
 
 .sticky-cta__close {
@@ -1969,7 +1995,7 @@ nav .nav-wrapper .brand-logo {
 }
 
 .ring-meter__value {
-  font-family: 'Goldman', sans-serif;
+  font-family: var(--font-display);
   font-size: 3.4rem;
   line-height: 1;
   color: var(--cyan);
@@ -2093,7 +2119,7 @@ nav .nav-wrapper .brand-logo {
 }
 
 .stat-label__text--mbti {
-  font-family: 'Goldman', sans-serif;
+  font-family: var(--font-display);
   font-size: 13px;
   color: var(--cyan);
   letter-spacing: 0.06em;
@@ -2136,7 +2162,7 @@ nav .nav-wrapper .brand-logo {
 .stat-value {
   color: var(--cyan);
   text-align: right;
-  font-family: 'Goldman', sans-serif;
+  font-family: var(--font-display);
   font-size: 14px;
 }
 
@@ -2280,7 +2306,7 @@ nav .nav-wrapper .brand-logo {
   border-radius: 999px;
   background: transparent;
   color: var(--muted);
-  font-family: 'Exo 2', sans-serif;
+  font-family: var(--font-body);
   font-size: 11px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -2401,7 +2427,7 @@ nav .nav-wrapper .brand-logo {
 }
 
 .age-bar-row__value {
-  font-family: 'Goldman', sans-serif;
+  font-family: var(--font-display);
   font-size: 13px;
   color: var(--cyan);
   text-align: right;
@@ -2492,7 +2518,7 @@ nav .nav-wrapper .brand-logo {
 }
 
 .gender-pie__total {
-  font-family: 'Goldman', sans-serif;
+  font-family: var(--font-display);
   font-size: clamp(1.9rem, 5.5vw, 2.25rem);
   color: var(--cyan);
   line-height: 1;
@@ -2576,7 +2602,7 @@ nav .nav-wrapper .brand-logo {
 }
 
 .gender-pie-legend__mood-value {
-  font-family: 'Goldman', sans-serif;
+  font-family: var(--font-display);
   font-size: 1.15rem;
   line-height: 1;
 }
@@ -2597,7 +2623,7 @@ nav .nav-wrapper .brand-logo {
 }
 
 .gender-pie-footnote strong {
-  font-family: 'Goldman', sans-serif;
+  font-family: var(--font-display);
   color: var(--text);
   font-weight: 400;
 }
@@ -2651,7 +2677,7 @@ nav .nav-wrapper .brand-logo {
 }
 
 .symbol-cloud__meta {
-  font-family: 'Goldman', sans-serif;
+  font-family: var(--font-display);
   color: var(--cyan);
   font-size: 0.72rem;
 }
@@ -2680,7 +2706,7 @@ nav .nav-wrapper .brand-logo {
 
 .symbol-card__name {
   color: var(--cyan);
-  font-family: 'Goldman', sans-serif;
+  font-family: var(--font-display);
   letter-spacing: 0.05em;
   font-size: 0.95rem;
 }
@@ -2742,7 +2768,7 @@ nav .nav-wrapper .brand-logo {
 .symbol-list__value {
   color: var(--cyan);
   text-align: right;
-  font-family: 'Goldman', sans-serif;
+  font-family: var(--font-display);
   font-size: 0.84rem;
 }
 
@@ -2800,7 +2826,7 @@ nav .nav-wrapper .brand-logo {
   border: 1px solid rgba(0, 240, 255, 0.35);
   background: rgba(0, 240, 255, 0.08);
   color: var(--cyan);
-  font-family: 'Goldman', sans-serif;
+  font-family: var(--font-display);
   font-size: 1rem;
   line-height: 1;
   cursor: pointer;
@@ -2820,7 +2846,7 @@ nav .nav-wrapper .brand-logo {
 }
 
 .geo-map-controls__level {
-  font-family: 'Goldman', sans-serif;
+  font-family: var(--font-display);
   font-size: 0.62rem;
   letter-spacing: 0.08em;
   color: var(--muted);
@@ -2898,9 +2924,18 @@ nav .nav-wrapper .brand-logo {
 }
 
 .geo-country-list__code {
-  font-family: 'Goldman', sans-serif;
+  font-family: var(--font-display);
   color: var(--cyan);
   margin-right: 0.35em;
+}
+
+.geo-country-list__item--clickable {
+  cursor: pointer;
+  transition: color 0.2s var(--ease);
+}
+
+.geo-country-list__item--clickable:hover {
+  color: var(--cyan);
 }
 
 .geo-country-list__count {
@@ -2979,11 +3014,18 @@ nav .nav-wrapper .brand-logo {
 }
 
 .dream-wall-controls {
+  position: relative;
+  z-index: 50;
   margin: 2em auto 2em;
   max-width: 760px;
   display: flex;
   flex-direction: column;
   gap: 1.25em;
+}
+
+.dream-wall-controls.is-facet-open {
+  z-index: 350;
+  transform: none !important;
 }
 
 .dream-wall-controls__group {
@@ -2994,7 +3036,7 @@ nav .nav-wrapper .brand-logo {
 }
 
 .dream-wall-controls__label {
-  font-family: 'Exo 2', sans-serif;
+  font-family: var(--font-body);
   font-size: 10px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -3029,6 +3071,232 @@ nav .nav-wrapper .brand-logo {
   padding-right: 0.9em;
 }
 
+.dream-wall-controls__sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.dream-filters label.neon-chip {
+  cursor: pointer;
+}
+
+.dream-wall-summary {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  text-align: center;
+}
+
+.dream-wall-summary__clear {
+  color: var(--cyan);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(0, 240, 255, 0.35);
+}
+
+.dream-wall-summary__clear:hover {
+  color: #fff;
+  border-bottom-color: var(--cyan);
+}
+
+.dream-facet-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45em;
+  justify-content: center;
+  width: fit-content;
+  max-width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.dream-facet {
+  position: relative;
+}
+
+.dream-facet.is-open {
+  z-index: 5;
+}
+
+.dream-facet__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  cursor: pointer;
+}
+
+.dream-facet__trigger.is-open,
+.dream-facet.has-selection .dream-facet__trigger {
+  background: rgba(0, 240, 255, 0.12);
+  border-color: rgba(0, 240, 255, 0.45);
+  color: var(--cyan);
+}
+
+.dream-facet.has-selection .dream-facet__trigger {
+  box-shadow: var(--glow-cyan);
+}
+
+.dream-facet__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.35em;
+  height: 1.35em;
+  padding: 0 0.35em;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0;
+  color: #05060a;
+  background: var(--cyan);
+}
+
+.dream-facet__panel {
+  position: absolute;
+  top: calc(100% + 0.45em);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 360;
+  width: min(18rem, calc(100vw - 2rem));
+  max-height: 16.5rem;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, rgba(12, 16, 28, 0.98), rgba(8, 10, 18, 0.98));
+  border: 1px solid rgba(0, 240, 255, 0.28);
+  border-radius: var(--r-md);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45), var(--glow-cyan);
+}
+
+.dream-facet__panel[hidden] {
+  display: none !important;
+}
+
+.dream-facet__panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75em;
+  padding: 0.65em 0.85em;
+  border-bottom: 1px solid rgba(0, 240, 255, 0.12);
+  flex-shrink: 0;
+}
+
+.dream-facet__panel-title {
+  font-family: var(--font-body);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.dream-facet__clear {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font-family: var(--font-body);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--magenta);
+  cursor: pointer;
+}
+
+.dream-facet__clear:hover {
+  color: #fff;
+}
+
+.dream-facet__options {
+  list-style: none;
+  margin: 0;
+  padding: 0.35em 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.dream-facet__option {
+  display: flex;
+  align-items: center;
+  gap: 0.65em;
+  min-height: 44px;
+  padding: 0.45em 0.85em;
+  cursor: pointer;
+  transition: background 0.2s var(--ease);
+}
+
+.dream-facet__option:hover,
+.dream-facet__option:focus-within {
+  background: rgba(0, 240, 255, 0.06);
+}
+
+.dream-facet__option input[type="checkbox"] {
+  flex-shrink: 0;
+  accent-color: var(--cyan);
+  width: 1rem;
+  height: 1rem;
+}
+
+.dream-facet__option-label {
+  flex: 1;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: #e8f4ff;
+}
+
+.dream-facet__count {
+  flex-shrink: 0;
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.dream-facet__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 340;
+  background: rgba(5, 6, 10, 0.62);
+  backdrop-filter: blur(2px);
+}
+
+.dream-facet__backdrop[hidden] {
+  display: none !important;
+}
+
+.dreams-empty--filtered {
+  text-align: center;
+  padding: 2.5em 1.25em;
+}
+
+@media (max-width: 767px) {
+  .dream-facet__panel {
+    position: fixed;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    transform: none;
+    z-index: 360;
+    width: 100%;
+    max-width: none;
+    max-height: 70vh;
+    border-radius: var(--r-lg) var(--r-lg) 0 0;
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+
+  .dream-facet__options {
+    max-height: calc(70vh - 3.25rem);
+  }
+}
+
 .chip-age {
   border-color: rgba(0, 240, 255, 0.35);
   background: rgba(0, 240, 255, 0.06);
@@ -3041,7 +3309,11 @@ nav .nav-wrapper .brand-logo {
   color: var(--magenta);
 }
 
-.dreams-list-row { margin-bottom: 0; }
+.dreams-list-row {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 0;
+}
 .dreams-list { padding: 0; float: none; }
 
 .dream-card {
@@ -3132,7 +3404,7 @@ nav .nav-wrapper .brand-logo {
   font-size: 0.86rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  font-family: 'Exo 2', sans-serif;
+  font-family: var(--font-body);
 }
 
 .dream-toggle:hover { color: var(--magenta); }
@@ -3183,9 +3455,9 @@ nav .nav-wrapper .brand-logo {
 
 .comment-author {
   margin: 0 0 0.35em;
-  font-family: 'Exo 2', sans-serif;
+  font-family: var(--font-body);
   font-size: 0.78rem;
-  font-weight: 600;
+  font-weight: var(--font-weight-bold);
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--cyan);
@@ -3256,7 +3528,7 @@ nav .nav-wrapper .brand-logo {
    ===================================================== */
 
 .section-title {
-  font-family: 'Goldman', sans-serif;
+  font-family: var(--font-display);
   letter-spacing: 0.06em;
   font-size: clamp(1.6rem, 4vw, 2.4rem);
   text-align: center;
@@ -3366,7 +3638,7 @@ nav .nav-wrapper .brand-logo {
   border-radius: var(--r-sm);
   padding: 1.2em 0.5em;
   text-align: center;
-  font-family: 'Goldman', sans-serif;
+  font-family: var(--font-display);
   font-size: 1.4rem;
   color: var(--muted);
   transition: all 0.25s var(--ease);
@@ -3481,7 +3753,7 @@ nav .nav-wrapper .brand-logo {
 }
 
 .about-intro h3 {
-  font-family: 'Goldman', sans-serif;
+  font-family: var(--font-display);
   font-size: clamp(1.8rem, 4vw, 2.6rem);
   margin: 0 0 0.3em;
 }
@@ -3534,7 +3806,7 @@ nav .nav-wrapper .brand-logo {
 }
 
 .timeline-item__title {
-  font-family: 'Goldman', sans-serif;
+  font-family: var(--font-display);
   color: var(--cyan);
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -3604,7 +3876,7 @@ nav .nav-wrapper .brand-logo {
 }
 
 .phone-mockup__title {
-  font-family: 'Goldman', sans-serif;
+  font-family: var(--font-display);
   color: var(--cyan);
   text-shadow: 0 0 12px rgba(0, 240, 255, 0.6);
   font-size: 1.1rem;
@@ -3733,9 +4005,9 @@ nav .nav-wrapper .brand-logo {
 
 .auth-card__eyebrow {
   display: block;
-  font-family: 'Exo 2', sans-serif;
+  font-family: var(--font-body);
   font-size: 0.7rem;
-  font-weight: 600;
+  font-weight: var(--font-weight-bold);
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--cyan);
@@ -3744,7 +4016,7 @@ nav .nav-wrapper .brand-logo {
 }
 
 .auth-card__title {
-  font-family: 'Goldman', sans-serif;
+  font-family: var(--font-display);
   font-size: clamp(1.5rem, 4vw, 1.85rem);
   letter-spacing: 0.06em;
   margin: 0 0 0.5em;
@@ -3754,7 +4026,7 @@ nav .nav-wrapper .brand-logo {
 
 .auth-card__lead {
   margin: 0;
-  font-family: 'Exo 2', sans-serif;
+  font-family: var(--font-body);
   font-size: 0.95rem;
   font-weight: 300;
   line-height: 1.55;
@@ -3779,9 +4051,9 @@ nav .nav-wrapper .brand-logo {
 
 .auth-panel__label {
   margin: 0 0 0.65em;
-  font-family: 'Exo 2', sans-serif;
+  font-family: var(--font-body);
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: var(--font-weight-bold);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--muted-2);
@@ -3838,13 +4110,13 @@ nav .nav-wrapper .brand-logo {
   padding-top: 1.25em;
   border-top: 1px solid rgba(0, 240, 255, 0.1);
   color: var(--muted);
-  font-family: 'Exo 2', sans-serif;
+  font-family: var(--font-body);
   font-size: 0.9rem;
 }
 
 .auth-card__footer a {
   color: var(--cyan);
-  font-weight: 500;
+  font-weight: var(--font-weight-bold);
   margin-left: 0.25em;
   transition: color 0.2s var(--ease);
 }
@@ -3866,7 +4138,7 @@ nav .nav-wrapper .brand-logo {
   gap: 0.85em;
   margin: 1.35em 0;
   color: var(--muted-2);
-  font-family: 'Exo 2', sans-serif;
+  font-family: var(--font-body);
   font-size: 0.72rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -3892,7 +4164,7 @@ nav .nav-wrapper .brand-logo {
   border: 1px solid rgba(255, 43, 214, 0.25);
   border-radius: var(--r-sm);
   color: #ff8ed4;
-  font-family: 'Exo 2', sans-serif;
+  font-family: var(--font-body);
   font-size: 0.875rem;
   line-height: 1.45;
 }
@@ -3921,7 +4193,7 @@ nav .nav-wrapper .brand-logo {
 
 .auth-google__status {
   margin: 0;
-  font-family: 'Exo 2', sans-serif;
+  font-family: var(--font-body);
   font-size: 0.9rem;
   color: var(--muted);
   text-align: center;
@@ -3936,7 +4208,7 @@ nav .nav-wrapper .brand-logo {
 .dreams-login-cta__text {
   text-align: center;
   color: var(--muted);
-  font-family: 'Exo 2', sans-serif;
+  font-family: var(--font-body);
   font-size: 0.95rem;
   margin: 0 0 1em;
 }
@@ -3957,7 +4229,7 @@ nav .nav-wrapper .brand-logo {
 }
 
 .error-code {
-  font-family: 'Goldman', sans-serif;
+  font-family: var(--font-display);
   font-size: clamp(6rem, 18vw, 12rem);
   line-height: 1;
   margin: 0;
@@ -4026,7 +4298,7 @@ nav .nav-wrapper .brand-logo {
 
 .contact-aside__note strong {
   color: rgba(223, 241, 255, 0.9);
-  font-weight: 600;
+  font-weight: var(--font-weight-bold);
 }
 
 .contact-aside ul {
@@ -4136,7 +4408,7 @@ nav .nav-wrapper .brand-logo {
 
 .contact-success__title {
   margin: 0 0 0.5em;
-  font-family: 'Goldman', sans-serif;
+  font-family: var(--font-display);
   font-size: 1.35rem;
   letter-spacing: 0.08em;
   color: var(--cyan);
@@ -4195,7 +4467,7 @@ nav .nav-wrapper .brand-logo {
   color: var(--text) !important;
   padding: 0.9em 1em !important;
   box-shadow: none !important;
-  font-family: 'Exo 2', sans-serif;
+  font-family: var(--font-body);
   font-weight: 300;
   font-size: 1rem;
   line-height: 1.5;
@@ -4353,7 +4625,7 @@ nav .nav-wrapper .brand-logo {
 }
 
 .profile-info-row dt {
-  font-family: 'Exo 2', sans-serif;
+  font-family: var(--font-body);
   font-size: 0.72rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -4362,7 +4634,7 @@ nav .nav-wrapper .brand-logo {
 
 .profile-info-row dd {
   margin: 0;
-  font-family: 'Exo 2', sans-serif;
+  font-family: var(--font-body);
   color: var(--text);
 }
 
@@ -4485,7 +4757,7 @@ nav .nav-wrapper .brand-logo {
 }
 
 .profile-value-trigger__main {
-  font-family: 'Exo 2', sans-serif;
+  font-family: var(--font-body);
   color: var(--text);
 }
 
@@ -4513,7 +4785,7 @@ nav .nav-wrapper .brand-logo {
   box-sizing: border-box;
   margin: 0;
   padding: 0.85em 2.5em 0.85em 1em;
-  font-family: 'Exo 2', sans-serif;
+  font-family: var(--font-body);
   font-size: 15px;
   font-weight: 300;
   color: var(--text) !important;
@@ -4564,7 +4836,7 @@ nav .nav-wrapper .brand-logo {
 
 .consult-age-snap__value {
   margin: 0 0 0.35rem;
-  font-family: 'Goldman', sans-serif;
+  font-family: var(--font-display);
   font-size: 1.6rem;
   color: var(--cyan);
 }
@@ -4594,7 +4866,7 @@ nav .nav-wrapper .brand-logo {
 
 .consult-identity-snap__value {
   margin: 0 0 0.2rem;
-  font-family: 'Goldman', sans-serif;
+  font-family: var(--font-display);
   font-size: 1.2rem;
   color: var(--cyan);
 }
@@ -4673,7 +4945,7 @@ nav .nav-wrapper .brand-logo {
 
 .profile-notification-text {
   margin: 0 0 0.25rem;
-  font-family: 'Exo 2', sans-serif;
+  font-family: var(--font-body);
   font-size: 0.9rem;
   line-height: 1.45;
 }
@@ -4717,7 +4989,7 @@ nav .nav-wrapper .brand-logo {
 }
 
 .profile-dream-title {
-  font-family: 'Goldman', sans-serif;
+  font-family: var(--font-display);
   font-size: 0.95rem;
   letter-spacing: 0.06em;
   color: var(--text);
@@ -4762,7 +5034,7 @@ nav .nav-wrapper .brand-logo {
 
 .profile-empty {
   color: var(--muted);
-  font-family: 'Exo 2', sans-serif;
+  font-family: var(--font-body);
   margin-bottom: 1rem;
 }
 

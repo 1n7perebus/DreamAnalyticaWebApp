@@ -38,6 +38,153 @@ AGE_BUCKETS = (
     ('95+', 95, 120),
 )
 
+VALID_MOODS = frozenset({'all', 'positive', 'neutral', 'negative'})
+VALID_GENDERS = frozenset({'Female', 'Male'})
+
+AGE_BUCKET_BY_KEY = {
+    label.replace('–', '-'): (lo, hi)
+    for label, lo, hi in AGE_BUCKETS
+}
+
+
+def _split_csv_param(value):
+    if not value:
+        return []
+    return [part.strip() for part in value.split(',') if part.strip()]
+
+
+def _normalize_age_key(key):
+    return key.replace('–', '-')
+
+
+def parse_wall_filters(get_params):
+    from .models import Dreams
+
+    valid_mbti = {code for code, _ in Dreams.MBTI_CHOICES if code}
+
+    mood = (get_params.get('mood') or 'all').strip().lower()
+    if mood not in VALID_MOODS:
+        mood = 'all'
+
+    mbti = [
+        code.upper()
+        for code in _split_csv_param(get_params.get('mbti', ''))
+        if code.upper() in valid_mbti
+    ]
+
+    age = []
+    for key in _split_csv_param(get_params.get('age', '')):
+        normalized = _normalize_age_key(key)
+        if normalized in AGE_BUCKET_BY_KEY:
+            age.append(normalized)
+
+    gender = [
+        g for g in _split_csv_param(get_params.get('gender', ''))
+        if g in VALID_GENDERS
+    ]
+
+    country = [
+        code.upper()
+        for code in _split_csv_param(get_params.get('country', ''))
+        if len(code) == 2 and code.isalpha()
+    ]
+
+    return {
+        'mood': mood,
+        'mbti': mbti,
+        'age': age,
+        'gender': gender,
+        'country': country,
+    }
+
+
+def has_active_wall_filters(filters):
+    return (
+        filters.get('mood', 'all') != 'all'
+        or filters.get('mbti')
+        or filters.get('age')
+        or filters.get('gender')
+        or filters.get('country')
+    )
+
+
+def apply_wall_filters(qs, filters):
+    mood = filters.get('mood', 'all')
+    if mood == 'positive':
+        qs = qs.filter(scale__gte=4)
+    elif mood == 'neutral':
+        qs = qs.filter(scale=3)
+    elif mood == 'negative':
+        qs = qs.filter(scale__lte=2)
+
+    if filters.get('mbti'):
+        qs = qs.filter(mbti_type__in=filters['mbti'])
+
+    if filters.get('gender'):
+        qs = qs.filter(gender__in=filters['gender'])
+
+    if filters.get('country'):
+        qs = qs.filter(country_code__in=filters['country'])
+
+    if filters.get('age'):
+        age_q = Q()
+        for key in filters['age']:
+            lo, hi = AGE_BUCKET_BY_KEY[key]
+            age_q |= Q(age__gte=lo, age__lte=hi)
+        qs = qs.filter(age_q)
+
+    return qs
+
+
+def build_wall_facet_options(active_dreams_qs):
+    mbti = [
+        {'value': row['mbti_type'], 'count': row['count']}
+        for row in (
+            active_dreams_qs.exclude(mbti_type='')
+            .values('mbti_type')
+            .annotate(count=Count('id'))
+            .order_by('-count', 'mbti_type')
+        )
+    ]
+
+    with_age = active_dreams_qs.filter(age__isnull=False)
+    age = []
+    for label, lo, hi in AGE_BUCKETS:
+        count = with_age.filter(age__gte=lo, age__lte=hi).count()
+        if count > 0:
+            age.append({
+                'key': _normalize_age_key(label),
+                'label': label,
+                'count': count,
+            })
+
+    gender = []
+    for value in ('Female', 'Male'):
+        count = active_dreams_qs.filter(gender=value).count()
+        if count > 0:
+            gender.append({'value': value, 'count': count})
+
+    country = [
+        {
+            'code': row['country_code'],
+            'name': row['country_name'] or row['country_code'],
+            'count': row['count'],
+        }
+        for row in (
+            active_dreams_qs.exclude(country_code='')
+            .values('country_code', 'country_name')
+            .annotate(count=Count('id'))
+            .order_by('-count', 'country_name')
+        )
+    ]
+
+    return {
+        'mbti': mbti,
+        'age': age,
+        'gender': gender,
+        'country': country,
+    }
+
 
 def _pct(count, total):
     return round((count / total) * 100, 1) if total else 0.0
