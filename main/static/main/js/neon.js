@@ -477,6 +477,9 @@
     let cards = Array.from(list.querySelectorAll('.dream-card[data-score]'));
     let activeFilter = 'all';
     let activeSort = 'newest';
+    let activeCountryCode = '';
+    const defaultFilter = 'all';
+    const defaultSort = 'newest';
 
     const genderRank = { FEMALE: 0, MALE: 1 };
 
@@ -487,6 +490,8 @@
     function cardMatchesFilter(card) {
       const score = parseInt(card.getAttribute('data-score'), 10) || 0;
       const mbti = (card.getAttribute('data-mbti') || '').toUpperCase();
+      const countryCode = (card.getAttribute('data-country-code') || '').toUpperCase();
+      if (activeCountryCode && countryCode !== activeCountryCode) return false;
       if (activeFilter === 'positive') return score >= 4;
       if (activeFilter === 'neutral') return score === 3;
       if (activeFilter === 'negative') return score <= 2;
@@ -554,6 +559,30 @@
       return bPub - aPub;
     }
 
+    function syncFilterUi() {
+      filterChips.forEach((chip) => {
+        const isOn = (chip.getAttribute('data-filter') || defaultFilter) === activeFilter;
+        chip.classList.toggle('is-active', isOn);
+      });
+    }
+
+    function syncSortUi() {
+      sortTabs.forEach((tab) => {
+        const on = (tab.getAttribute('data-sort') || defaultSort) === activeSort;
+        tab.classList.toggle('is-active', on);
+        tab.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+    }
+
+    function resetToDefaultState() {
+      activeCountryCode = '';
+      activeFilter = defaultFilter;
+      activeSort = defaultSort;
+      syncFilterUi();
+      syncSortUi();
+      applyWallState();
+    }
+
     function applyWallState() {
       cards.sort(compareCards);
       cards.forEach((card) => list.appendChild(card));
@@ -580,15 +609,28 @@
 
     sortTabs.forEach((tab) => {
       tab.addEventListener('click', () => {
-        sortTabs.forEach((t) => {
-          const on = t === tab;
-          t.classList.toggle('is-active', on);
-          t.setAttribute('aria-selected', on ? 'true' : 'false');
-        });
+        activeCountryCode = '';
         activeSort = tab.getAttribute('data-sort') || 'newest';
+        syncSortUi();
         applyWallState();
       });
     });
+
+    document.addEventListener('wall:country-toggle', (event) => {
+      const detail = event.detail || {};
+      if (!detail.active || !detail.countryCode) {
+        resetToDefaultState();
+        return;
+      }
+      activeCountryCode = String(detail.countryCode).toUpperCase();
+      activeSort = 'geo';
+      syncSortUi();
+      applyWallState();
+    });
+
+    syncFilterUi();
+    syncSortUi();
+    applyWallState();
   }
 
   // ------------------------------------------------------------------

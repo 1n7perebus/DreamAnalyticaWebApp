@@ -29,7 +29,7 @@
 
       <div class="wall-analytics__panel is-active" data-panel="geo" role="tabpanel" >
         {% if country_markers %}
-        <p class="wall-panel__hint">{{ geo_total }} geolocated dream{{ geo_total|pluralize }} · brighter countries = more dreams · hover to see top symbol</p>
+        <p class="wall-panel__hint">{{ geo_total }} geolocated dream{{ geo_total|pluralize }} · brighter countries = more dreams · scroll to zoom (4× max) · drag to pan · click to filter wall</p>
         <div class="geo-map-wrap" data-map-url="{% static 'main/svg/world-map.svg' %}" role="img" aria-label="World map showing dream origins by country">
           <noscript>
             <img class="geo-map geo-map-img" src="{% static 'main/svg/world-map.svg' %}" alt="World map">

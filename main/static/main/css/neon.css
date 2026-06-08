@@ -2755,6 +2755,78 @@ nav .nav-wrapper .brand-logo {
   box-shadow: inset 0 0 30px rgba(0, 240, 255, 0.05);
 }
 
+.geo-map-viewport {
+  overflow: hidden;
+  min-height: 12rem;
+  touch-action: none;
+  cursor: default;
+  outline: none;
+}
+
+.geo-map-viewport.is-zoomed {
+  cursor: grab;
+}
+
+.geo-map-viewport.is-panning {
+  cursor: grabbing;
+}
+
+.geo-map-stage {
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+.geo-map-controls {
+  position: absolute;
+  top: 0.55rem;
+  right: 0.55rem;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.28rem;
+  padding: 0.35rem;
+  border-radius: var(--r-sm);
+  border: 1px solid rgba(0, 240, 255, 0.28);
+  background: linear-gradient(160deg, rgba(2, 7, 15, 0.92), rgba(8, 17, 33, 0.88));
+  box-shadow: 0 0 16px rgba(0, 240, 255, 0.18);
+}
+
+.geo-map-controls__btn {
+  width: 1.85rem;
+  height: 1.85rem;
+  padding: 0;
+  border-radius: var(--r-sm);
+  border: 1px solid rgba(0, 240, 255, 0.35);
+  background: rgba(0, 240, 255, 0.08);
+  color: var(--cyan);
+  font-family: 'Goldman', sans-serif;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.15s var(--ease), border-color 0.15s var(--ease), box-shadow 0.15s var(--ease);
+}
+
+.geo-map-controls__btn:hover,
+.geo-map-controls__btn:focus-visible {
+  background: rgba(0, 240, 255, 0.16);
+  border-color: rgba(0, 240, 255, 0.55);
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.25);
+  outline: none;
+}
+
+.geo-map-controls__btn--reset {
+  font-size: 0.95rem;
+}
+
+.geo-map-controls__level {
+  font-family: 'Goldman', sans-serif;
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  user-select: none;
+}
+
 .geo-map,
 .geo-map-object {
   display: block;
@@ -2769,7 +2841,11 @@ nav .nav-wrapper .brand-logo {
   background: transparent;
 }
 
-.geo-map-wrap svg {
+.geo-map-wrap svg,
+.geo-map-stage svg {
+  display: block;
+  width: 100%;
+  height: auto;
   pointer-events: auto;
 }
 
@@ -2894,6 +2970,7 @@ nav .nav-wrapper .brand-logo {
     margin-right: -0.12em;
   }
 
+  .geo-map-viewport,
   .geo-map,
   .geo-map-object,
   .geo-map-img {
