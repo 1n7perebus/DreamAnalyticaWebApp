@@ -88,6 +88,16 @@
           <a href="{% url 'main:password_reset' %}">Forgot password?</a>
         </p>
       </form>
+
+      {% if show_resend_verification %}
+      <form method="post" action="{% url 'main:resend_verification' %}" class="auth-form" style="margin-top: 1rem;">
+        {% csrf_token %}
+        <input type="hidden" name="email" value="{{ resend_email }}">
+        <button class="neon-btn neon-btn--block" type="submit">
+          <span>Resend verification email</span>
+        </button>
+      </form>
+      {% endif %}
     </section>
 
     <p class="auth-card__footer">

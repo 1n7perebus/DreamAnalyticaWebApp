@@ -9,34 +9,37 @@
     <span class="neon-card__corner neon-card__corner--bl"></span>
     <span class="neon-card__corner neon-card__corner--br"></span>
 
-    <h1 class="auth-card__title goldman-regular glitch-text gradient-text" data-text="REGISTER">REGISTER</h1>
-    <p class="auth-card__sub">Join the network</p>
+    <header class="auth-card__head">
+      <span class="auth-card__eyebrow">Join the network</span>
+      <h1 class="auth-card__title goldman-regular glitch-text gradient-text" data-text="REGISTER">REGISTER</h1>
+      <p class="auth-card__lead">Create your account to post dreams and join the Wall.</p>
+    </header>
 
     {% if messages %}
-    <ul class="auth-error-list">
+    <ul class="auth-error-list" role="alert">
       {% for message in messages %}
       <li>{{ message }}</li>
       {% endfor %}
     </ul>
     {% endif %}
 
-    <form method="post" class="auth-form">
+    <form method="post" class="auth-form" novalidate>
       {% csrf_token %}
       <div class="contact-field">
         <label class="contact-field__label" for="id_display_name">{{ form.display_name.label }}</label>
         {{ form.display_name }}
       </div>
       <div class="contact-field">
-        <label class="contact-field__label" for="id_username">{{ form.username.label }}</label>
-        {{ form.username }}
-      </div>
-      <div class="contact-field">
         <label class="contact-field__label" for="id_email">{{ form.email.label }}</label>
         {{ form.email }}
       </div>
       <div class="contact-field">
-        <label class="contact-field__label" for="id_age">{{ form.age.label }}</label>
-        {{ form.age }}
+        <label class="contact-field__label" for="id_birth_year">{{ form.birth_year.label }}</label>
+        <select id="id_birth_year" name="birth_year" class="profile-native-select no-autoinit" required>
+          {% for value, label in form.fields.birth_year.choices %}
+          <option value="{{ value }}"{% if value == '' %} disabled{% if not form.birth_year.value %} selected{% endif %}{% elif form.birth_year.value|stringformat:"s" == value|stringformat:"s" %} selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
       </div>
       <div class="contact-field">
         <label class="contact-field__label" for="id_country_code">{{ form.country_code.label }}</label>
@@ -55,7 +58,7 @@
         {{ form.password2 }}
       </div>
       {% if form.errors %}
-      <ul class="auth-error-list">
+      <ul class="auth-error-list" role="alert">
         {% for field in form %}
           {% for error in field.errors %}
             <li>{{ error }}</li>
@@ -71,8 +74,29 @@
       </button>
     </form>
 
-    <p>Already have an account? <a href="{% url 'main:login' %}">Login here</a>.</p>
+    <p class="auth-card__footer">
+      Already have an account?
+      <a href="{% url 'main:login' %}">Sign in</a>
+    </p>
   </div>
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('select.profile-native-select').forEach(function (selectEl) {
+      if (typeof M !== 'undefined' && M.FormSelect) {
+        var inst = M.FormSelect.getInstance(selectEl);
+        if (inst) inst.destroy();
+      }
+      var wrapper = selectEl.closest('.select-wrapper');
+      if (wrapper && wrapper.parentNode) {
+        wrapper.parentNode.insertBefore(selectEl, wrapper);
+        wrapper.remove();
+      }
+      selectEl.style.display = 'block';
+      selectEl.style.visibility = 'visible';
+    });
+  });
+</script>
 
 {% endblock %}

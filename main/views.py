@@ -1,7 +1,10 @@
 from collections import Counter
+import logging
+
 from django.shortcuts import get_object_or_404, render, redirect
 from django.http import HttpResponseRedirect
 from django.contrib.auth import authenticate, login, logout
+from django.db import transaction
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.auth.tokens import default_token_generator
@@ -58,6 +61,25 @@ from .profile_helpers import (
 # Payment Mothod
 # Adjust Submission Time
 
+logger = logging.getLogger(__name__)
+
+
+def registration_email_error_message(exc):
+    """Return a user-facing message for common verification email failures."""
+    text = str(exc)
+    if 'unique recipients limit' in text.lower() or 'trial' in text.lower():
+        return (
+            'Your account was created, but we could not send the verification email because '
+            'our email service has reached its sending limit. '
+            'Please try resending below, or contact us at r@dreamanalytica.com.'
+        )
+    if 'DEFAULT_FROM_EMAIL' in text:
+        return 'Email is not configured on the server. Please contact support.'
+    return (
+        'Your account was created, but we could not send the verification email right now. '
+        'Please try resending below in a few minutes.'
+    )
+
 
 def redirect_after_login(request, user):
     if not (user.first_name or '').strip():
@@ -83,20 +105,56 @@ def index(request):
 
 
 def register_view(request):
+    if request.user.is_authenticated:
+        return redirect('main:index')
+
     if request.method == 'POST':
         form = UserRegistrationForm(request.POST)
         if form.is_valid():
-            new_user = form.save(commit=False)
-            new_user.set_password(form.cleaned_data['password'])
-            new_user.is_active = False
-            new_user.save()
-            form.save_profile(new_user)
-            send_verification_email(request, new_user)
-            messages.success(request, 'Account created. Check your email to verify your account before signing in.')
-            return redirect('main:login')
+            try:
+                with transaction.atomic():
+                    new_user = form.save(commit=False)
+                    new_user.set_password(form.cleaned_data['password'])
+                    new_user.is_active = False
+                    new_user.save()
+                    form.save_profile(new_user)
+            except Exception:
+                logger.exception('Registration failed while saving user/profile')
+                messages.error(
+                    request,
+                    'We could not create your account. Please check your details and try again.',
+                )
+                return render(request, 'dreamapp/register.html', {'form': form})
+
+            request.session['pending_verify_email'] = new_user.email
+            try:
+                send_verification_email(request, new_user)
+                request.session['verification_email_sent'] = True
+            except Exception as exc:
+                logger.exception('Verification email failed for %s', new_user.email)
+                request.session['verification_email_sent'] = False
+                messages.warning(request, registration_email_error_message(exc))
+
+            return redirect('main:register_verify_sent')
     else:
         form = UserRegistrationForm()
     return render(request, 'dreamapp/register.html', {'form': form})
+
+
+def register_verify_sent(request):
+    email = request.session.get('pending_verify_email')
+    if not email:
+        return redirect('main:login')
+
+    email_sent = request.session.pop('verification_email_sent', True)
+    return render(
+        request,
+        'dreamapp/register_verify_sent.html',
+        {
+            'email': email,
+            'email_sent': email_sent,
+        },
+    )
 
 
 def login_view(request):
@@ -122,10 +180,12 @@ def login_view(request):
         try:
             user = User.objects.get(email=email)
             if not user.is_active:
-                messages.error(request, 'Your account is not verified yet. Please check your email for the verification link.')
+                messages.error(request, 'Your account is not verified yet. Check your email or resend the link below.')
                 return render(request, 'dreamapp/login.html', {
                     'google_client_id': settings.GOOGLE_CLIENT_ID,
                     'google_login_uri': request.build_absolute_uri(reverse('main:google_auth_callback')),
+                    'show_resend_verification': True,
+                    'resend_email': email,
                 })
             user = authenticate(request, username=user.username, password=password)
             if user is not None:
@@ -138,6 +198,7 @@ def login_view(request):
     return render(request, 'dreamapp/login.html', {
         'google_client_id': settings.GOOGLE_CLIENT_ID,
         'google_login_uri': request.build_absolute_uri(reverse('main:google_auth_callback')),
+        'show_resend_verification': False,
     })
 
 
@@ -147,6 +208,9 @@ def logout_view(request):
 
 
 def send_verification_email(request, user):
+    if not settings.DEFAULT_FROM_EMAIL:
+        raise ValueError('Email is not configured (DEFAULT_FROM_EMAIL missing).')
+
     uid = urlsafe_base64_encode(force_bytes(user.pk))
     token = default_token_generator.make_token(user)
     verify_url = request.build_absolute_uri(
@@ -168,6 +232,32 @@ def send_verification_email(request, user):
     email.send(fail_silently=False)
 
 
+@require_POST
+def resend_verification_email(request):
+    email = (request.POST.get('email') or '').strip().lower()
+    if not email:
+        messages.error(request, 'Enter your email address.')
+        return redirect('main:login')
+
+    user = User.objects.filter(email__iexact=email, is_active=False).first()
+    if user:
+        try:
+            send_verification_email(request, user)
+            request.session['pending_verify_email'] = user.email
+            request.session['verification_email_sent'] = True
+            messages.success(request, 'Verification email sent. Check your inbox.')
+            return redirect('main:register_verify_sent')
+        except Exception as exc:
+            logger.exception('Resend verification email failed for %s', email)
+            request.session['pending_verify_email'] = user.email
+            request.session['verification_email_sent'] = False
+            messages.error(request, registration_email_error_message(exc))
+            return redirect('main:register_verify_sent')
+
+    messages.info(request, 'If an unverified account exists for that email, we sent a new link.')
+    return redirect('main:login')
+
+
 def verify_email(request, uidb64, token):
     try:
         uid = force_str(urlsafe_base64_decode(uidb64))
@@ -178,8 +268,9 @@ def verify_email(request, uidb64, token):
     if user and default_token_generator.check_token(user, token):
         user.is_active = True
         user.save(update_fields=['is_active'])
-        messages.success(request, 'Email verified. You can now sign in.')
-        return redirect('main:login')
+        login(request, user)
+        messages.success(request, f'Welcome, {comment_author_name(user)}! Your email is verified.')
+        return redirect(redirect_after_login(request, user))
 
     messages.error(request, 'Verification link is invalid or has expired.')
     return redirect('main:login')

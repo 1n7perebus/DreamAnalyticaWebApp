@@ -52,24 +52,32 @@ def normalize_contact_phone(raw):
     e164 = phonenumbers.format_number(parsed, phonenumbers.PhoneNumberFormat.E164)
     return PhoneNumber.from_string(e164)
 
+def unique_username_from_name(name, email):
+    """Derive a unique username from display name, falling back to email local-part."""
+    base = re.sub(r'[^a-zA-Z]', '', (name or '').strip())[:20]
+    if not base:
+        base = re.sub(r'[^a-zA-Z]', '', (email or '').split('@')[0])[:20] or 'user'
+    username = base
+    n = 1
+    while User.objects.filter(username=username).exists():
+        username = f'{base}{n}'
+        n += 1
+    return username
+
+
 class UserRegistrationForm(forms.ModelForm):
-    username = forms.CharField(
-        max_length=30,
-        validators=[RegexValidator(regex='^[a-zA-Z]*$', message='Username must contain only letters.')],
-        label='Username'
-    )
     display_name = forms.CharField(max_length=50, label='Name')
     country_code = forms.ChoiceField(
         choices=[('', 'Select country…')] + list(COUNTRY_CHOICES),
         label='Country',
         required=True,
     )
-    age = forms.IntegerField(
+    birth_year = forms.TypedChoiceField(
+        choices=[],
+        coerce=int,
         required=True,
-        min_value=13,
-        max_value=120,
-        label='Age',
-        widget=forms.NumberInput(attrs={'min': 13, 'max': 120, 'inputmode': 'numeric'}),
+        label='Birth year',
+        widget=forms.Select(attrs={'class': 'profile-native-select no-autoinit'}),
     )
     mbti_type = forms.ChoiceField(
         choices=[('', 'Select type…')] + [
@@ -85,15 +93,34 @@ class UserRegistrationForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ('username', 'email')
+        fields = ('email',)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        from .profile_helpers import birth_year_choices
+
         input_class = 'contact-field__input'
-        for name in ['display_name', 'username', 'email', 'age', 'password', 'password2']:
+        for name in ['display_name', 'email', 'password', 'password2']:
             self.fields[name].widget.attrs['class'] = input_class
         self.fields['country_code'].widget.attrs['class'] = 'profile-native-select no-autoinit'
         self.fields['mbti_type'].widget.attrs['class'] = 'profile-native-select no-autoinit'
+        self.fields['birth_year'].choices = [('', 'Select birth year…')] + birth_year_choices()
+
+    def clean_email(self):
+        email = (self.cleaned_data.get('email') or '').strip().lower()
+        if User.objects.filter(email__iexact=email).exists():
+            raise forms.ValidationError('An account with this email already exists.')
+        return email
+
+    def clean_birth_year(self):
+        from .profile_helpers import max_birth_year, min_birth_year
+
+        birth_year = self.cleaned_data.get('birth_year')
+        if birth_year in (None, ''):
+            raise forms.ValidationError('Please select your birth year.')
+        if birth_year < min_birth_year() or birth_year > max_birth_year():
+            raise forms.ValidationError('Please choose a valid birth year.')
+        return birth_year
 
     def clean_password2(self):
         cd = self.cleaned_data
@@ -103,17 +130,18 @@ class UserRegistrationForm(forms.ModelForm):
 
     def save(self, commit=True):
         user = super().save(commit=False)
-        user.first_name = self.cleaned_data['display_name'].strip()[:50]
+        display_name = self.cleaned_data['display_name'].strip()[:50]
+        user.first_name = display_name
+        user.username = unique_username_from_name(display_name, user.email)
         if commit:
             user.save()
         return user
 
     def save_profile(self, user):
-        birth_year = timezone.now().year - int(self.cleaned_data['age'])
         UserProfile.objects.update_or_create(
             user=user,
             defaults={
-                'birth_year': birth_year,
+                'birth_year': self.cleaned_data['birth_year'],
                 'birth_year_updates_count': 1,
                 'mbti_type': self.cleaned_data['mbti_type'],
                 'mbti_updates_count': 1,

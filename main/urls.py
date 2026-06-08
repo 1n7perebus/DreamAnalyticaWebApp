@@ -17,6 +17,8 @@ urlpatterns = [
     path('dreams/<uuid:dream_id>/', views.dreams, name='specific_dream'),
     path('login/', views.login_view, name='login'),
     path('register/', views.register_view, name='register'),
+    path('register/verify-sent/', views.register_verify_sent, name='register_verify_sent'),
+    path('resend-verification/', views.resend_verification_email, name='resend_verification'),
     path('logout/', views.logout_view, name='logout'),
     path('verify-email/<uidb64>/<token>/', views.verify_email, name='verify_email'),
     path(
