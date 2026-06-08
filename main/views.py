@@ -73,7 +73,12 @@ def registration_email_error_message(exc):
             'our email service has reached its sending limit. '
             'Please try resending below, or contact us at r@dreamanalytica.com.'
         )
-    if 'DEFAULT_FROM_EMAIL' in text:
+    if (
+        'DEFAULT_FROM_EMAIL' in text
+        or 'EMAIL_HOST_PASSWORD' in text
+        or 'authenticate first' in text.lower()
+        or '535' in text
+    ):
         return 'Email is not configured on the server. Please contact support.'
     return (
         'Your account was created, but we could not send the verification email right now. '
@@ -210,6 +215,8 @@ def logout_view(request):
 def send_verification_email(request, user):
     if not settings.DEFAULT_FROM_EMAIL:
         raise ValueError('Email is not configured (DEFAULT_FROM_EMAIL missing).')
+    if not settings.EMAIL_HOST_PASSWORD:
+        raise ValueError('Email is not configured (EMAIL_HOST_PASSWORD missing).')
 
     uid = urlsafe_base64_encode(force_bytes(user.pk))
     token = default_token_generator.make_token(user)
