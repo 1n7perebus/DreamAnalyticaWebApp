@@ -243,10 +243,17 @@
     if (viewport) {
       let touchStartX = 0;
       let touchStartY = 0;
+      let touchSwipeBlocked = false;
+
+      function isGeoMapTouch(target) {
+        return !!(target && target.closest && target.closest('.geo-map-wrap'));
+      }
 
       viewport.addEventListener(
         'touchstart',
         (e) => {
+          touchSwipeBlocked = isGeoMapTouch(e.target);
+          if (touchSwipeBlocked) return;
           touchStartX = e.touches[0].clientX;
           touchStartY = e.touches[0].clientY;
         },
@@ -256,6 +263,10 @@
       viewport.addEventListener(
         'touchend',
         (e) => {
+          if (touchSwipeBlocked) {
+            touchSwipeBlocked = false;
+            return;
+          }
           if (!isSwipeLayout()) return;
           const dx = e.changedTouches[0].clientX - touchStartX;
           const dy = e.changedTouches[0].clientY - touchStartY;
@@ -431,10 +442,21 @@
       setZoom(scale + delta, anchorX, anchorY);
     }
 
+    function stopMapTouchBubble(event) {
+      event.stopPropagation();
+    }
+
+    [viewport, wrap].forEach((el) => {
+      ['touchstart', 'touchmove', 'touchend', 'touchcancel'].forEach((type) => {
+        el.addEventListener(type, stopMapTouchBubble);
+      });
+    });
+
     viewport.addEventListener(
       'wheel',
       (event) => {
         event.preventDefault();
+        event.stopPropagation();
         const rect = viewport.getBoundingClientRect();
         const x = event.clientX - rect.left;
         const y = event.clientY - rect.top;
