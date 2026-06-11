@@ -106,7 +106,16 @@ def delete_duplicates(dream_post):
 #@login_required
 #@never_cache
 def index(request):
-    return render(request, "dreamapp/index.html", context={})
+    active_dreams = Dreams.objects.filter(active=True)
+    return render(request, "dreamapp/index.html", {
+        'wall_dream_count': active_dreams.count(),
+        'wall_country_count': (
+            active_dreams.exclude(country_code='')
+            .values('country_code')
+            .distinct()
+            .count()
+        ),
+    })
 
 
 def register_view(request):
