@@ -1,0 +1,18 @@
+cd ~/DA
+
+# 1. Move your production DB out of the way
+
+mv db.sqlite3 ~/db.sqlite3.backup
+
+# 2. Delete leftover pycache files
+
+rm -rf main/__pycache__/
+rm -rf mysite/__pycache__/
+
+# 3. Pull the latest changes
+git pull origin main --no-edit
+
+
+# 4. Restore your DB
+
+mv ~/db.sqlite3.backup db.sqlite3

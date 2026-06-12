@@ -1,6 +1,6 @@
 {% extends 'dreamapp/header.html' %}
 {% load static %}
-{% block title %}Dream Analytica — Unlock the Wisdom of Your Dreams{% endblock %}
+{% block title %}Dream Analytica — A Human Guide to Your Unconscious{% endblock %}
 {% block content %}
 
 <section class="hero-stage">
@@ -18,16 +18,16 @@
   </div>
 
   <div class="hero-content">
-    <span class="hero-eyebrow reveal">Jungian Dream Analysis · v2.0</span>
+    <span class="hero-eyebrow reveal">Human-Guided Jungian Dream Analysis</span>
 
     <h1 class="hero-title glitch-text gradient-text reveal reveal--delay-1" data-text="DREAM ANALYTICA">
       DREAM ANALYTICA
     </h1>
 
-    <p class="hero-sub reveal reveal--delay-2">Unlock the wisdom of your dreams</p>
+   
 
     <div class="hero-cta-row reveal reveal--delay-3">
-      <a href="/consult/" class="neon-btn neon-btn--primary neon-btn--lg">Start Your Journey</a>
+      <a href="/consult/" class="neon-btn neon-btn--primary neon-btn--lg">Speak to an Analyst</a>
       <a href="/dreams/" class="neon-btn neon-btn--mag neon-btn--lg">Explore the Wall</a>
     </div>
   </div>
@@ -42,8 +42,14 @@
       <div class="trust-stat__label">Dreams</div>
     </div>
     <div class="trust-stat">
-      <div class="trust-stat__value"><span data-count="98" data-suffix="%">0</span></div>
-      <div class="trust-stat__label">Insight Rate</div>
+      <div class="trust-stat__value">
+        {% if wall_psyche_balance is not None %}
+        <span data-count="{{ wall_psyche_balance }}" data-suffix="%">0</span>
+        {% else %}
+        <span>—</span>
+        {% endif %}
+      </div>
+      <div class="trust-stat__label">Psyche Balance</div>
     </div>
     <div class="trust-stat">
       <div class="trust-stat__value"><span data-count="{{ wall_country_count }}">0</span></div>
@@ -57,10 +63,11 @@
 
   <section class="about-section reveal" style="margin-top:4em;max-width:840px;margin-left:auto;margin-right:auto;text-align:center;">
     <span class="section-eyebrow">Our Approach</span>
-    <h2 class="section-title">Where Ancient Wisdom Meets Modern Code</h2>
+    <h2 class="section-title">A Human Guide to Your Unconscious</h2>
     <p class="flow-text">
-      Using Carl Jung's analytical psychology, we decode the symbols, archetypes, and patterns hidden inside your dreams.
-      Real interpretation. Real growth. Designed for the digital age.
+      Dream Analytica connects you with a human analyst working within the Jungian psychological framework — centered on the analysis of dreams.
+      Your analyst acts as an inner guide to the unconscious, where you can discover parts of yourself you never knew existed.
+      Through an empathetic, warm reading of your inner dynamics, you begin to understand the language of your dreams — and find the missing pieces of the puzzle that is your potential.
     </p>
   </section>
 
@@ -68,25 +75,25 @@
 
   <section style="margin: 4em 0;">
     <div class="reveal" style="text-align:center;margin-bottom:1em;">
-      <span class="section-eyebrow">Why Dream Analytica</span>
-      <h2 class="section-title">Built for Insight</h2>
+      <span class="section-eyebrow">Why It Matters</span>
+      <h2 class="section-title">A Path to Knowing Yourself</h2>
     </div>
 
     <div class="feature-grid">
       <div class="feature-card reveal reveal--delay-1" data-tilt>
         <div class="feature-card__icon"><i class="material-icons">psychology</i></div>
-        <h5 class="goldman-regular">Expert Analysis</h5>
-        <p>Professional interpretation rooted in Jungian psychology — not AI guesswork.</p>
+        <h5 class="goldman-regular">A Real Human Analyst</h5>
+        <p>Not algorithms — a warm, empathetic guide who interprets your dreams through Jungian psychology and walks with you through what they reveal.</p>
       </div>
       <div class="feature-card reveal reveal--delay-2" data-tilt>
         <div class="feature-card__icon"><i class="material-icons">insights</i></div>
-        <h5 class="goldman-regular">Personal Growth</h5>
-        <p>Decode the subconscious patterns shaping your waking life and relationships.</p>
+        <h5 class="goldman-regular">Meet Your Unconscious</h5>
+        <p>Discover hidden parts of yourself, build confidence, and uncover the answers you've been searching for — in the patterns beneath your waking life.</p>
       </div>
       <div class="feature-card reveal reveal--delay-3" data-tilt>
         <div class="feature-card__icon"><i class="material-icons">auto_awesome</i></div>
-        <h5 class="goldman-regular">Modern Approach</h5>
-        <p>Contemporary tools, archetypal depth — accessible from any device, anywhere.</p>
+        <h5 class="goldman-regular">Self-Realization &amp; Inner Peace</h5>
+        <p>Jungian dream work is a powerful tool for self-discovery, discipline, and self-realization — a proud attainment of meaning and inner peace.</p>
       </div>
     </div>
   </section>
@@ -95,8 +102,8 @@
 
   <section style="margin: 4em 0;">
     <div class="reveal" style="text-align:center;margin-bottom:2em;">
-      <span class="section-eyebrow">Signal From the Network</span>
-      <h2 class="section-title">Client Transmissions</h2>
+      <span class="section-eyebrow">Real Stories</span>
+      <h2 class="section-title">What People Discover</h2>
     </div>
 
     <div class="marquee reveal">
@@ -132,21 +139,21 @@
   <hr class="divider-neon">
 
   <section class="reveal" style="margin: 4em 0; text-align:center;">
-    <span class="section-eyebrow">Ready</span>
-    <h2 class="section-title gradient-text">Decode Your Dreams Tonight</h2>
+    <span class="section-eyebrow">Take the First Step</span>
+    <h2 class="section-title gradient-text">Begin Your Journey Inward</h2>
     <p class="flow-text" style="max-width:600px;margin:0 auto 2em;">
-      Submit your dream, get expert Jungian analysis, and join a community uncovering the language of the unconscious.
+      Whether you're looking for answers, greater self-understanding, or a sense of meaning — share your dream with a human analyst and start uncovering what your unconscious has been trying to tell you.
     </p>
     <div class="hero-cta-row">
-      <a href="/consult/" class="neon-btn neon-btn--primary neon-btn--lg">Submit a Dream</a>
+      <a href="/consult/" class="neon-btn neon-btn--primary neon-btn--lg">Speak to an Analyst</a>
       <a href="/contact/" class="neon-btn neon-btn--lg">Contact Us</a>
     </div>
   </section>
 </section>
 
 <div class="sticky-cta" role="region" aria-label="Quick action">
-  <span class="sticky-cta__text">Ready to decode your dream?</span>
-  <a href="/consult/" class="neon-btn neon-btn--primary">Post Dream</a>
+  <span class="sticky-cta__text">Ready to know yourself more deeply?</span>
+  <a href="/consult/" class="neon-btn neon-btn--primary">Speak to an Analyst</a>
   <button class="sticky-cta__close" aria-label="Dismiss">×</button>
 </div>
 

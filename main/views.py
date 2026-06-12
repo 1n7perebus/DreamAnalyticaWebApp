@@ -107,8 +107,13 @@ def delete_duplicates(dream_post):
 #@never_cache
 def index(request):
     active_dreams = Dreams.objects.filter(active=True)
+    avg_scale = active_dreams.aggregate(Avg('scale'))['scale__avg']
+    wall_psyche_balance = (
+        round((avg_scale / 5) * 100) if avg_scale is not None else None
+    )
     return render(request, "dreamapp/index.html", {
         'wall_dream_count': active_dreams.count(),
+        'wall_psyche_balance': wall_psyche_balance,
         'wall_country_count': (
             active_dreams.exclude(country_code='')
             .values('country_code')

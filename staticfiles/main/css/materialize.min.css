@@ -4,132 +4,132 @@
  * MIT License (https://raw.githubusercontent.com/Dogfalo/materialize/master/LICENSE)
  */
  
+.exo-zero {
+	font-family: 'Nunito', sans-serif;
+	font-weight: 400;
+	font-size: 13px;
+	background: none;
+	color: #ff99bc;
+	letter-spacing:1px;
+	transform:scaleY(95%);
+	text-shadow: 0 0 3px #ff99bc;
+	text-transform: uppercase;
+}
+
 .exo-200h {
-	font-family: 'Exo 2', sans-serif;
+	font-family: 'Nunito', sans-serif;
 	font-weight: 300;
 	font-size: 20px;
 	background: none;
-	color: #c5c5c5;
+	color: #d3d3d3;
 	letter-spacing:1px;
 	transform:scaleY(95%);
-	text-shadow: 0 0 3px #c5c5c5;
+	text-shadow: 0 0 3px #d3d3d3;
 	
 }
 
 .exo-200 {
-	font-family: 'Exo 2', sans-serif;
-	font-weight: 400;
+	font-family: 'Nunito', sans-serif;
+	font-weight: 300;
 	font-size: 16px;
 	background: none;
-	color: #c5c5c5;
+	color: #d3d3d3;
 	letter-spacing:1px;
 	transform:scaleY(95%);
 }
 
 .exo-200t {
-	font-family: 'Exo 2', sans-serif;
-	font-weight: 600;
+	font-family: 'Nunito', sans-serif;
+	font-weight: 300;
 	font-size: 18px;
 	background: none;
-	color: #c5c5c5;
+	color: #d3d3d3;
 	letter-spacing:1px;
 	transform:scaleY(95%);
-	line-height: 2em;
 }
 
-.exo-200text {
-	font-family: 'Exo 2', sans-serif;
+.exo-200d {
+	font-family: 'Nunito', sans-serif;
 	font-weight: 300;
-	font-size: 16px;
+	font-size: 12px;
 	letter-spacing: 1px;
 	transform:scaleY(95%);
 	background: none;
-	color: #c5c5c5;
-	line-height: 2em;
-}
-
-
-.exo-200d{
-	font-family: 'Exo 2', sans-serif;
-	font-weight: 300;
-	font-size: 14px;
-	letter-spacing: 1px;
-	transform:scaleY(95%);
-	background: none;
-	color: #c5c5c5;
-	line-height: 2em;
+	color: #d3d3d3;
+	text-transform: uppercase;
 }
 
 .exo-300t {
-	font-family: 'Exo 2', sans-serif;
-	font-weight: 300;
-	font-size: 18px;
+	font-family: 'Nunito', sans-serif;
+	font-weight: 400;
+	font-size: 13px;
 	background: none;
-	color: #c5c5c5;
 	letter-spacing:1px;
 	transform:scaleY(95%);
-	line-height: 1.5em;
-	white-space: pre-wrap;
+	color: #d3d3d3;
+	text-shadow: 0 0 2px #d3d3d3;
+	text-transform: uppercase;
+
 }
 
 .exo-200s {
-	font-family: 'Exo 2', sans-serif;
+	font-family: 'Nunito', sans-serif;
 	font-weight: 400;
 	font-size: 11px;
 	letter-spacing: 1px;
 	transform:scaleY(95%);
 	background: none;
-	color: #c5c5c5;
+	color: #7d7d7d;
 	text-transform: uppercase;
 }
 .exo-300s {
-	font-family: 'Exo 2', sans-serif;
+	font-family: 'Nunito', sans-serif;
 	font-weight: 400;
 	font-size: 17px;
 	letter-spacing: 1px;
 	transform:scaleY(95%);
 	background: none;
-	color: #c5c5c5;
+	color: #7d7d7d;
 	text-transform: uppercase;
 }
 
 .exo-300 {
-	font-family: 'Exo 2', sans-serif;
+	font-family: 'Nunito', sans-serif;
 	font-weight: 400;
-  	font-size: 21px;
+  font-size: 21px;
 	letter-spacing: 1px;
 	transform:scaleY(95%);
 	background: none;
-	color: #c5c5c5;
-	text-shadow: 0 0 1px #ebebeb;
+	color: #d3d3d3;
+	text-shadow: 0 0 1px #d3d3d3;
 	text-transform: uppercase;
 }
 
 .exo-400 {
-	font-family: 'Exo 2', sans-serif;
+	font-family: 'Nunito', sans-serif;
 	font-weight: 400;
 	background: none;
-	color: #c5c5c5;
+	color: #d3d3d3;
 }
 
 .exo-500 {
-	font-family: 'Exo 2', sans-serif;
+	font-family: 'Nunito', sans-serif;
 	font-weight: 500;
 	background: none;
-	color: #c5c5c5;
+	color: #d3d3d3;
 }
  .goldman-regular {
 	font-family: "Goldman", sans-serif;
 	font-weight: 400;
 	font-style: normal;
-	color: #c5c5c5;
+	color: #d3d3d3;
   }
   
   .goldman-bold {
 	font-family: "Goldman", sans-serif;
 	font-weight: 700;
 	font-style: normal;
-	color: #c5c5c5;
+	color: #d3d3d3;
   }
   
 .materialize-red {
@@ -2427,8 +2427,7 @@ progress {
 }
 
 textarea {
-	overflow-y: scroll;
-	max-height:800px;
+	overflow: auto
 }
 
 [type="checkbox"], [type="radio"] {
@@ -2565,7 +2564,7 @@ a {
 	font-weight: 300;
 	z-index: 100;
 	background-color:#0f0f0e;
-  	box-shadow: 0 0 3px #5AFFDD;
+  box-shadow: 0 0 3px #5AFFDD;
 	transition:box-shadow 100ms ease-in, color 400ms ease-in, border 600ms ease-in, background-color .5s ease, 300ms font-weight ease;
 }
 
@@ -2752,7 +2751,6 @@ ul.staggered-list li {
 	.hide-on-small-only, .hide-on-small-and-down {
 		display: none !important
 	}
-
 }
 
 @media only screen and (max-width: 992px) {
@@ -2771,21 +2769,6 @@ ul.staggered-list li {
 	.hide-on-med-only {
 		display: none !important
 	}
-	.mobile-exo200 {
-		font-size: 24px;
-	}
-	.mobile-exo200t {
-		font-size: 30px;
-	}
-	.mobile-exo200h {
-		font-size: 34px;
-	}
-	.scale-form {
-		transform: scale(1.5);
-		padding-top:10em;
-		font-size: 24px;
-	}
-	
 }
 
 @media only screen and (min-width: 993px) {
@@ -4321,7 +4304,6 @@ table span.badge {
 		left: 100%
 	}
 }
-
 /* NAVIGATION BAR COLOR*/
 nav {
 	color: #fff;
@@ -4642,133 +4624,133 @@ small {
 
 @media only screen and (min-width: 360px) {
 	.flow-text {
-		font-size: 1.1rem
+		font-size: 1.2rem
 	}
 }
 
 @media only screen and (min-width: 390px) {
 	.flow-text {
-		font-size: 1.124rem
+		font-size: 1.224rem
 	}
 }
 
 @media only screen and (min-width: 420px) {
 	.flow-text {
-		font-size: 1.148rem
+		font-size: 1.248rem
 	}
 }
 
 @media only screen and (min-width: 450px) {
 	.flow-text {
-		font-size: 1.172rem
+		font-size: 1.272rem
 	}
 }
 
 @media only screen and (min-width: 480px) {
 	.flow-text {
-		font-size: 1.196rem
+		font-size: 1.296rem
 	}
 }
 
 @media only screen and (min-width: 510px) {
 	.flow-text {
-		font-size: 1.22rem
+		font-size: 1.32rem
 	}
 }
 
 @media only screen and (min-width: 540px) {
 	.flow-text {
-		font-size: 1.244rem
+		font-size: 1.344rem
 	}
 }
 
 @media only screen and (min-width: 570px) {
 	.flow-text {
-		font-size: 1.268rem
+		font-size: 1.368rem
 	}
 }
 
 @media only screen and (min-width: 600px) {
 	.flow-text {
-		font-size: 1.292rem
+		font-size: 1.392rem
 	}
 }
 
 @media only screen and (min-width: 630px) {
 	.flow-text {
-		font-size: 1.316rem
+		font-size: 1.416rem
 	}
 }
 
 @media only screen and (min-width: 660px) {
 	.flow-text {
-		font-size: 1.34rem
+		font-size: 1.44rem
 	}
 }
 
 @media only screen and (min-width: 690px) {
 	.flow-text {
-		font-size: 1.364rem
+		font-size: 1.464rem
 	}
 }
 
 @media only screen and (min-width: 720px) {
 	.flow-text {
-		font-size: 1.388rem
+		font-size: 1.488rem
 	}
 }
 
 @media only screen and (min-width: 750px) {
 	.flow-text {
-		font-size: 1.412rem
+		font-size: 1.512rem
 	}
 }
 
 @media only screen and (min-width: 780px) {
 	.flow-text {
-		font-size: 1.436rem
+		font-size: 1.536rem
 	}
 }
 
 @media only screen and (min-width: 810px) {
 	.flow-text {
-		font-size: 1.46rem
+		font-size: 1.56rem
 	}
 }
 
 @media only screen and (min-width: 840px) {
 	.flow-text {
-		font-size: 1.184rem
+		font-size: 1.584rem
 	}
 }
 
-@media only screen and (min-width: 870px) and (max-width: 900px) {
+@media only screen and (min-width: 870px) {
 	.flow-text {
-		font-size: 1.308rem
+		font-size: 1.608rem
 	}
 }
 
-@media only screen and (min-width: 900px) and (max-width: 960px){
+@media only screen and (min-width: 900px) {
 	.flow-text {
-		font-size: 1.332rem
+		font-size: 1.632rem
 	}
 }
 
-@media only screen and (min-width: 960px) and (max-width: 960px){
+@media only screen and (min-width: 930px) {
 	.flow-text {
-		font-size: 1.356rem
+		font-size: 1.656rem
 	}
 }
 
-@media only screen and (min-width: 960px) and (max-width: 992px){
+@media only screen and (min-width: 960px) {
 	.flow-text {
-		font-size: 1.3rem
+		font-size: 1.68rem
 	}
 }
 
 @media only screen and (max-width: 360px) {
 	.flow-text {
-		font-size: 1.0rem
+		font-size: 1.2rem
 	}
 }
 
@@ -5032,7 +5014,6 @@ small {
 }
 
 .toast {
-	font-family: 'Exo 2', sans-serif;
 	border-radius: 2px;
 	top: 35px;
 	width: auto;
@@ -5266,16 +5247,14 @@ small {
 }
 
 .btn, .btn-large, .btn-small {
-	color: #c5c5c5;
+	color: #7d7d7d;
 	background-color: transparent;
 	text-align: center;
 	cursor: pointer;
-	width:90%;
 }
 
 .btn:hover, .btn-large:hover, .btn-small:hover {
-	background-color: #383535;
-	
+	background-color: #1118;
 }
 
 
@@ -5557,31 +5536,18 @@ button.btn-floating {
 }
 
 .dropdown-content {
-    background-color: #211f21;
-    color: white;
-    margin: 0;
-    display: none;
-	height: 500px;
-    min-width: 100%;
-    max-height: 50vh; /* Adjust max-height as needed for scrolling */
-    overflow-y: auto;
-    opacity: 0;
-    position: absolute;
-    left: 0;
-    top: 100%;
-    z-index: 9999;
-    -webkit-transform-origin: 0 0;
-    transform-origin: 0 0;
-}
-
-/* Ensure dropdown content is visible on mobile */
-@media only screen and (max-width: 600px) and (max-width: 992px) {
-    .dropdown-content {
-        min-width: 100%;
-        width: 100%;
-        max-height: 50vh; /* Adjust max-height based on your design */
-        overflow-y: scroll;
-    }
+	background-color: #fff;
+	margin: 0;
+	display: none;
+	min-width: 100px;
+	overflow-y: auto;
+	opacity: 0;
+	position: absolute;
+	left: 0;
+	top: 0;
+	z-index: 9999;
+	-webkit-transform-origin: 0 0;
+	transform-origin: 0 0
 }
 
 .dropdown-content:focus {
@@ -6811,7 +6777,7 @@ input[type=checkbox]:not(:disabled)~.lever:active:before, input[type=checkbox]:n
 }
 
 select {
-	display: none;
+	display: none
 }
 
 select.browser-default {
@@ -6819,14 +6785,13 @@ select.browser-default {
 }
 
 select {
-	background-color: white;
+	background-color: rgba(255, 255, 255, 0.9);
 	width: 100%;
 	padding: 5px;
 	border: 1px solid #f2f2f2;
 	border-radius: 2px;
 	height: 3rem;
-	color: #c5c5c5;
-	z-index: 1;
+	color: white
 }
 
 .select-label {
@@ -6834,8 +6799,7 @@ select {
 }
 
 .select-wrapper {
-	position: relative;
-	z-index: 10;
+	position: relative
 }
 
 .select-wrapper.valid+label, .select-wrapper.invalid+label {
@@ -6847,10 +6811,10 @@ select {
 	position: relative;
 	cursor: pointer;
 	background-color: transparent;
-	font-family: 'Exo 2', sans-serif;
+	font-family: 'Nunito', sans-serif;
 	font-weight: 400;
 	font-size: 20px;
-	color: #c5c5c5;
+	color: #d3d3d3;
 	border: none;
 	border-bottom: 1px solid #9e9e9e;
 	outline: none;
@@ -6865,11 +6829,11 @@ select {
 	-moz-user-select: none;
 	-ms-user-select: none;
 	user-select: none;
-	z-index: 20
+	z-index: 1
 }
 
 .select-wrapper input.select-dropdown:focus {
-	border-bottom: 1px solid #26a69a;
+	border-bottom: 1px solid #26a69a
 }
 
 .select-wrapper .caret {
@@ -6919,7 +6883,7 @@ select:disabled {
 }
 
 body.keyboard-focused .select-dropdown.dropdown-content li:focus {
-	background-color: rgba(0, 0, 0, 0.08);
+	background-color: rgba(0, 0, 0, 0.08)
 }
 
 .select-dropdown.dropdown-content li:hover {
@@ -6927,8 +6891,7 @@ body.keyboard-focused .select-dropdown.dropdown-content li:focus {
 }
 
 .select-dropdown.dropdown-content li.selected {
-	background-color: rgba(0, 0, 0, 0.03);
-	
+	background-color: rgba(0, 0, 0, 0.03)
 }
 
 .prefix~.select-wrapper {
@@ -6949,30 +6912,19 @@ body.keyboard-focused .select-dropdown.dropdown-content li:focus {
 }
 
 .select-dropdown li.optgroup {
-	border-top: 1px solid #eee;
-	z-index: 1000 !important;
+	border-top: 1px solid #eee
 }
 
 .select-dropdown li.optgroup.selected>span {
-	color: rgba(0, 0, 0, 0.7);
-	z-index: 1000 !important;
-	
+	color: rgba(0, 0, 0, 0.7)
 }
 
 .select-dropdown li.optgroup>span {
-	color: rgba(0, 0, 0, 0.4);
-	z-index: 1000 !important;
+	color: rgba(0, 0, 0, 0.4)
 }
 
 .select-dropdown li.optgroup~li.optgroup-option {
-	padding-left: 1rem;
-	z-index: 1000 !important;
-	
-}
-
-.select-dropdown-content {
-    z-index: 1000 !important;
-    position: absolute;
+	padding-left: 1rem
 }
 
 .file-field {
@@ -7219,7 +7171,7 @@ input[type=range]::-ms-thumb {
 	height: calc(100% + 60px);
 	height: -moz-calc(100%);
 	padding-bottom: 60px;
-	background-color: #272425;
+	background-color: #0f0f0e;
 	z-index: 999;
 	overflow-y: auto;
 	will-change: transform;
@@ -7252,16 +7204,17 @@ input[type=range]::-ms-thumb {
 }
 
 .sidenav li>a {
-	color: #c5c5c5;
+	color: #d3d3d3;
 	display: block;
 	font-size: 14px;
+	font-weight: 500;
 	height: 48px;
 	line-height: 48px;
 	padding: 0 32px
 }
 
 .sidenav li>a:hover {
-	background-color: rgba(0, 0, 0, 0.15)
+	background-color: rgba(0, 0, 0, 0.05)
 }
 
 .sidenav li>a.btn, .sidenav li>a.btn-large, .sidenav li>a.btn-small, .sidenav li>a.btn-large, .sidenav li>a.btn-flat, .sidenav li>a.btn-floating {
@@ -9182,190 +9135,6 @@ input[type=range]::-ms-thumb {
 .highlight-blue:hover {
 	color:#5AFFDD;
 	background:none;
-  	text-shadow: 0 0 5px #27a389;
+  	text-shadow: 0 0 5px #5AFFDD;
   	transition: color .5s ease-in, text-shadow .5s ease-out;
 }
-
-.stacked-bar-container {
-	width: 100%;
-	display: flex;
-	flex-direction: row;
-	overflow: visible; /* Ensure that the glow is not cut off */
-  }
-  
-  .stacked-bar {
-	height: 40px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	color: #272425;
-	font-weight: bold;
-	text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
-	margin-right: 2px;
-	border-radius: 5px;
-	transition: all 0.3s ease;
-	overflow: visible; /* Make sure the glow extends beyond the container */
-  }
-  
-  .stacked-bar:hover {
-	transform: scale(1.05); /* Slightly increase size on hover */
-	box-shadow: 0 0 10px 10px #fff; /* Brighter and bigger glow on hover */
-  }
-
-   /* Flexbox for Vertical Centering */
-  .centered-container {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	height: 100vh; /* Full viewport height */
-	padding:1em;
-	margin-top:2em;
-	}	
-  
-  .form-wrapper {
-	width: 100%;
-	max-width: 800px; /* Limiting form width for large screens */
-	padding: 1em;
-	background-color: #2b2728;
-	border: 1px solid #42c9c6;
-	border-radius: 20px;
-	box-shadow: 0 0px 20px #42c9c6; /* Subtle shadow for depth */
-}
-
-    /* Add animation keyframes */
-    @keyframes fadeInUp {
-		0% {
-		  opacity: 0;
-		  transform: translateY(150px);
-		  transform: scale(1.2);
-		}
-  
-		100% {
-		  opacity: 0;
-		  transform: translateY(0);
-		  transform: scale(1);
-		}
-	  }
-  
-	  @keyframes scaleUp {
-		0% {
-		  opacity: 0;
-		  transform: scale(1.2);
-		}
-		
-  
-		100% {
-		  opacity: 0;
-		  transform: scale(1);
-		}
-	  }
-  
-	  /* Animation class for each element */
-	  .animate {
-		opacity: 0;
-		transform: scale(1);
-	  }
-  
-	  .animate.fade-in-up {
-		animation: fadeInUp 1s ease forwards;
-	  }
-  
-	  .animate.scale-up {
-		animation: scaleUp 5s ease forwards;
-	  }
-
-	  @keyframes flashTextPop {
-		0% {
-		  opacity: 0;
-		  transform: scale(0.1);
-		  
-		  color: #42c9c6; /* Start with dimmed color */
-		}
-		50% {
-		  opacity: 1;
-		  transform: scale(1);
-		  color: #42c9c6; /* Full brightness */
-		  text-shadow: 0 0 20px #42c9c6; /* Flash effect using text-shadow */
-		}
-		100% {
-		  opacity: 1;
-		  transform: scale(1); /* Ensure it's at the final size */
-		  color: inherit; /* Revert to the original text color */
-		  text-shadow: none; /* Remove the flash effect */
-		}
-	  }
-	  	  
-	  .animate.flash-text-pop {
-		animation: flashTextPop .3s ease forwards;
-	  }
-
-/* Add these new styles */
-
-.gradient-text {
-    background: linear-gradient(45deg, #42c9c6, #5AFFDD);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    text-shadow: none;
-}
-
-.feature-card {
-    padding: 2em;
-    text-align: center;
-    border: 1px solid rgba(66, 201, 198, 0.1);
-    border-radius: 15px;
-    transition: all 0.3s ease;
-    height: 100%;
-    background: rgba(66, 201, 198, 0.05);
-}
-
-.feature-card:hover {
-    transform: translateY(-5px);
-    border-color: rgba(66, 201, 198, 0.3);
-    box-shadow: 0 5px 15px rgba(66, 201, 198, 0.1);
-}
-
-.btn-large {
-    transition: all 0.3s ease;
-}
-
-.btn-large:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(66, 201, 198, 0.2);
-}
-
-/* Update existing animations */
-@keyframes flashTextPop {
-    0% {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    50% {
-        opacity: 0.8;
-        transform: translateY(10px);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.animate {
-    opacity: 0;
-}
-
-.animate.flash-text-pop {
-    animation: flashTextPop 0.8s ease forwards;
-}
-
-/* Responsive improvements */
-@media only screen and (max-width: 600px) {
-    .hero-section h1 {
-        font-size: 2.5rem !important;
-    }
-    
-    .feature-card {
-        margin-bottom: 1em;
-    }
-}
-
