@@ -49,7 +49,9 @@
         <li><a class="nav-link goldman-regular" href="/dreams/">Wall of Dreams</a></li>
         <li><a class="nav-link goldman-regular" href="/consult/">Dream Form</a></li>
         <li><a class="nav-link goldman-regular" href="/about/">About</a></li>
-        <li><a class="nav-link goldman-regular" href="/contact/">Contact</a></li>
+        {% if user.is_authenticated %}
+        <li><a class="nav-link goldman-regular" href="{% url 'main:contact' %}">Contact</a></li>
+        {% endif %}
         <li><a class="nav-link goldman-regular" href="/app/">App</a></li>
       </ul>
 
@@ -107,7 +109,9 @@
     <li><a class="sidenav-link goldman-regular" href="/dreams/">Wall of Dreams</a></li>
     <li><a class="sidenav-link goldman-regular" href="/consult/">Dream Form</a></li>
     <li><a class="sidenav-link goldman-regular" href="/about/">About</a></li>
-    <li><a class="sidenav-link goldman-regular" href="/contact/">Contact</a></li>
+    {% if user.is_authenticated %}
+    <li><a class="sidenav-link goldman-regular" href="{% url 'main:contact' %}">Contact</a></li>
+    {% endif %}
     <li><a class="sidenav-link goldman-regular" href="/app/">Mobile App</a></li>
     {% if user.is_authenticated %}
     <li class="sidenav-divider"></li>

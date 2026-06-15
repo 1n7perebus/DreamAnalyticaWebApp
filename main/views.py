@@ -23,7 +23,7 @@ from django.utils.html import strip_tags
 from datetime import timedelta, date
 from django.utils import timezone
 from django.utils.encoding import force_bytes, force_str
-from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from django.utils.http import url_has_allowed_host_and_scheme, urlsafe_base64_decode, urlsafe_base64_encode
 from django.contrib import messages
 from django.urls import reverse
 from django.core.paginator import Paginator
@@ -86,10 +86,42 @@ def registration_email_error_message(exc):
     )
 
 
+def _safe_next_url(request):
+    next_url = request.GET.get('next') or request.session.get('next')
+    if next_url and url_has_allowed_host_and_scheme(
+        next_url,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        return next_url
+    return reverse('main:index')
+
+
+def _store_login_next(request):
+    next_param = request.GET.get('next')
+    if next_param and url_has_allowed_host_and_scheme(
+        next_param,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        request.session['next'] = next_param
+
+
+def _login_lead_text(request):
+    next_url = request.GET.get('next') or request.session.get('next', '')
+    if '/contact' in next_url:
+        return 'Sign in to reach our team — contact is available to members only.'
+    return 'Join the network to interpret dreams on the Wall.'
+
+
 def redirect_after_login(request, user):
+    next_url = _safe_next_url(request)
     if not (user.first_name or '').strip():
+        if next_url != reverse('main:index'):
+            request.session['next'] = next_url
         return reverse('main:login') + '?setup=1'
-    return request.session.pop('next', reverse('main:index'))
+    request.session.pop('next', None)
+    return next_url
 
 
 def delete_duplicates(dream_post):
@@ -177,6 +209,8 @@ def register_verify_sent(request):
 
 
 def login_view(request):
+    _store_login_next(request)
+
     if request.user.is_authenticated:
         if request.method == 'POST' and 'display_name' in request.POST:
             name = request.POST.get('display_name', '').strip()[:50]
@@ -205,6 +239,7 @@ def login_view(request):
                     'google_login_uri': request.build_absolute_uri(reverse('main:google_auth_callback')),
                     'show_resend_verification': True,
                     'resend_email': email,
+                    'auth_lead': _login_lead_text(request),
                 })
             user = authenticate(request, username=user.username, password=password)
             if user is not None:
@@ -218,6 +253,7 @@ def login_view(request):
         'google_client_id': settings.GOOGLE_CLIENT_ID,
         'google_login_uri': request.build_absolute_uri(reverse('main:google_auth_callback')),
         'show_resend_verification': False,
+        'auth_lead': _login_lead_text(request),
     })
 
 
@@ -825,6 +861,7 @@ def _contact_topic_prefix(topic_key):
     return f'[Topic: {label}]\n\n'
 
 
+@login_required
 def contact(request):
     contact_sent = request.session.pop('contact_sent', False)
 

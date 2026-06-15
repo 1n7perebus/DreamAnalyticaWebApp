@@ -46,7 +46,7 @@
     <header class="auth-card__head">
       <span class="auth-card__eyebrow">Secure access</span>
       <h1 class="auth-card__title goldman-regular">Sign in</h1>
-      <p class="auth-card__lead">Join the network to interpret dreams on the Wall.</p>
+      <p class="auth-card__lead">{{ auth_lead|default:"Join the network to interpret dreams on the Wall." }}</p>
     </header>
 
     {% if messages %}

@@ -98,7 +98,11 @@
     </p>
     <div class="hero-cta-row">
       <a href="/consult/" class="neon-btn neon-btn--primary neon-btn--lg">Post a Dream</a>
-      <a href="/contact/" class="neon-btn neon-btn--mag neon-btn--lg">Get in Touch</a>
+      {% if user.is_authenticated %}
+      <a href="{% url 'main:contact' %}" class="neon-btn neon-btn--mag neon-btn--lg">Get in Touch</a>
+      {% else %}
+      <a href="{% url 'main:login' %}?next={% url 'main:contact' %}" class="neon-btn neon-btn--mag neon-btn--lg">Get in Touch</a>
+      {% endif %}
     </div>
   </section>
 
