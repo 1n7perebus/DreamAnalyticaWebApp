@@ -20,7 +20,12 @@ urlpatterns = [
     path('register/verify-sent/', views.register_verify_sent, name='register_verify_sent'),
     path('resend-verification/', views.resend_verification_email, name='resend_verification'),
     path('logout/', views.logout_view, name='logout'),
-    path('verify-email/<uidb64>/<token>/', views.verify_email, name='verify_email'),
+    path('verify-email/', views.verify_email, name='verify_email'),
+    path(
+        'verify-email/<uidb64>/<token>/',
+        views.verify_email_legacy,
+        name='verify_email_legacy',
+    ),
     path(
         'password-reset/',
         auth_views.PasswordResetView.as_view(

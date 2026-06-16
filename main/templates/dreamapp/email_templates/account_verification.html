@@ -10,9 +10,9 @@
     <div style="border:1px solid rgba(0,240,255,.28);border-radius:14px;background:linear-gradient(180deg,rgba(12,16,28,.94),rgba(8,10,18,.94));padding:24px;">
       <p style="margin:0 0 8px;font-size:12px;letter-spacing:.18em;color:#7ec7d1;text-transform:uppercase;">Dream Analytica</p>
       <h1 style="margin:0 0 10px;font-size:24px;line-height:1.25;color:#53FFFB;">Verify your account</h1>
-      <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#c6d3e6;">Hi {{ user.first_name|default:user.username }}, confirm your email to activate your account.</p>
+      <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#c6d3e6;">Hi {{ display_name }}, confirm your email to finish creating your Dream Analytica account.</p>
       <a href="{{ verify_url }}" style="display:inline-block;padding:12px 20px;border-radius:999px;border:1px solid #00f0ff;background:rgba(0,240,255,.1);color:#53FFFB;text-decoration:none;letter-spacing:.1em;text-transform:uppercase;font-size:12px;">Verify email</a>
-      <p style="margin:16px 0 0;font-size:13px;color:#8ea0bb;">If the button does not work, paste this link in your browser:</p>
+      <p style="margin:16px 0 0;font-size:13px;color:#8ea0bb;">This link expires in {{ expires_hours }} hours. If the button does not work, paste this link in your browser:</p>
       <p style="margin:8px 0 0;font-size:12px;line-height:1.5;color:#9aa6bc;word-break:break-word;">{{ verify_url }}</p>
     </div>
   </div>

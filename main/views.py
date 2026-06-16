@@ -8,6 +8,7 @@ from django.db import transaction
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.auth.tokens import default_token_generator
+from django.core.signing import BadSignature, SignatureExpired
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
@@ -24,6 +25,7 @@ from datetime import timedelta, date
 from django.utils import timezone
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import url_has_allowed_host_and_scheme, urlsafe_base64_decode, urlsafe_base64_encode
+from urllib.parse import quote
 from django.contrib import messages
 from django.urls import reverse
 from django.core.paginator import Paginator
@@ -34,6 +36,13 @@ from .forms import *
 from .models import *
 from .geo import apply_geo_to_dream, get_client_ip
 from .dream_symbols import resolve_symbol_tags
+from .pending_registration import (
+    PENDING_REGISTRATION_MAX_AGE,
+    build_payload_from_form,
+    create_user_from_pending,
+    issue_pending_registration_token,
+    load_pending_registration_token,
+)
 from .profile_helpers import (
     age_from_birth_year,
     apply_profile_country_to_dreams,
@@ -69,7 +78,7 @@ def registration_email_error_message(exc):
     text = str(exc)
     if 'unique recipients limit' in text.lower() or 'trial' in text.lower():
         return (
-            'Your account was created, but we could not send the verification email because '
+            'We saved your registration, but we could not send the verification email because '
             'our email service has reached its sending limit. '
             'Please try resending below, or contact us at r@dreamanalytica.com.'
         )
@@ -81,7 +90,7 @@ def registration_email_error_message(exc):
     ):
         return 'Email is not configured on the server. Please contact support.'
     return (
-        'Your account was created, but we could not send the verification email right now. '
+        'We saved your registration, but we could not send the verification email right now. '
         'Please try resending below in a few minutes.'
     )
 
@@ -162,27 +171,15 @@ def register_view(request):
     if request.method == 'POST':
         form = UserRegistrationForm(request.POST)
         if form.is_valid():
+            payload = build_payload_from_form(form)
+            token = issue_pending_registration_token(payload)
+            request.session['pending_verify_email'] = payload['email']
+            request.session['pending_verify_token'] = token
             try:
-                with transaction.atomic():
-                    new_user = form.save(commit=False)
-                    new_user.set_password(form.cleaned_data['password'])
-                    new_user.is_active = False
-                    new_user.save()
-                    form.save_profile(new_user)
-            except Exception:
-                logger.exception('Registration failed while saving user/profile')
-                messages.error(
-                    request,
-                    'We could not create your account. Please check your details and try again.',
-                )
-                return render(request, 'dreamapp/register.html', {'form': form})
-
-            request.session['pending_verify_email'] = new_user.email
-            try:
-                send_verification_email(request, new_user)
+                send_pending_verification_email(request, payload, token)
                 request.session['verification_email_sent'] = True
             except Exception as exc:
-                logger.exception('Verification email failed for %s', new_user.email)
+                logger.exception('Verification email failed for %s', payload['email'])
                 request.session['verification_email_sent'] = False
                 messages.warning(request, registration_email_error_message(exc))
 
@@ -232,15 +229,6 @@ def login_view(request):
         password = request.POST['password']
         try:
             user = User.objects.get(email=email)
-            if not user.is_active:
-                messages.error(request, 'Your account is not verified yet. Check your email or resend the link below.')
-                return render(request, 'dreamapp/login.html', {
-                    'google_client_id': settings.GOOGLE_CLIENT_ID,
-                    'google_login_uri': request.build_absolute_uri(reverse('main:google_auth_callback')),
-                    'show_resend_verification': True,
-                    'resend_email': email,
-                    'auth_lead': _login_lead_text(request),
-                })
             user = authenticate(request, username=user.username, password=password)
             if user is not None:
                 login(request, user)
@@ -262,7 +250,38 @@ def logout_view(request):
     return redirect('main:login')
 
 
+def _pending_verification_verify_url(request, token):
+    return request.build_absolute_uri(
+        reverse('main:verify_email') + '?t=' + quote(token, safe='')
+    )
+
+
+def send_pending_verification_email(request, payload, token):
+    if not settings.DEFAULT_FROM_EMAIL:
+        raise ValueError('Email is not configured (DEFAULT_FROM_EMAIL missing).')
+    if not settings.EMAIL_HOST_PASSWORD:
+        raise ValueError('Email is not configured (EMAIL_HOST_PASSWORD missing).')
+
+    verify_url = _pending_verification_verify_url(request, token)
+    context = {
+        'display_name': payload['display_name'],
+        'verify_url': verify_url,
+        'expires_hours': PENDING_REGISTRATION_MAX_AGE // 3600,
+    }
+    html_message = render_to_string('dreamapp/email_templates/account_verification.html', context)
+    plain_message = strip_tags(html_message)
+    email = EmailMultiAlternatives(
+        subject='Verify your Dream Analytica account',
+        body=plain_message,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[payload['email']],
+    )
+    email.attach_alternative(html_message, 'text/html')
+    email.send(fail_silently=False)
+
+
 def send_verification_email(request, user):
+    """Legacy verification for inactive users created before deferred registration."""
     if not settings.DEFAULT_FROM_EMAIL:
         raise ValueError('Email is not configured (DEFAULT_FROM_EMAIL missing).')
     if not settings.EMAIL_HOST_PASSWORD:
@@ -271,11 +290,12 @@ def send_verification_email(request, user):
     uid = urlsafe_base64_encode(force_bytes(user.pk))
     token = default_token_generator.make_token(user)
     verify_url = request.build_absolute_uri(
-        reverse('main:verify_email', kwargs={'uidb64': uid, 'token': token})
+        reverse('main:verify_email_legacy', kwargs={'uidb64': uid, 'token': token})
     )
     context = {
-        'user': user,
+        'display_name': user.first_name or user.username,
         'verify_url': verify_url,
+        'expires_hours': PENDING_REGISTRATION_MAX_AGE // 3600,
     }
     html_message = render_to_string('dreamapp/email_templates/account_verification.html', context)
     plain_message = strip_tags(html_message)
@@ -296,6 +316,38 @@ def resend_verification_email(request):
         messages.error(request, 'Enter your email address.')
         return redirect('main:login')
 
+    session_email = (request.session.get('pending_verify_email') or '').strip().lower()
+    token = request.session.get('pending_verify_token')
+    if token and session_email == email:
+        try:
+            payload = load_pending_registration_token(token)
+        except SignatureExpired:
+            messages.error(
+                request,
+                'Your verification link has expired. Please sign up again.',
+            )
+            request.session.pop('pending_verify_email', None)
+            request.session.pop('pending_verify_token', None)
+            return redirect('main:register')
+        except BadSignature:
+            messages.error(request, 'Could not resend verification. Please sign up again.')
+            request.session.pop('pending_verify_email', None)
+            request.session.pop('pending_verify_token', None)
+            return redirect('main:register')
+
+        token = issue_pending_registration_token(payload)
+        request.session['pending_verify_token'] = token
+        try:
+            send_pending_verification_email(request, payload, token)
+            request.session['verification_email_sent'] = True
+            messages.success(request, 'Verification email sent. Check your inbox.')
+            return redirect('main:register_verify_sent')
+        except Exception as exc:
+            logger.exception('Resend verification email failed for %s', email)
+            request.session['verification_email_sent'] = False
+            messages.error(request, registration_email_error_message(exc))
+            return redirect('main:register_verify_sent')
+
     user = User.objects.filter(email__iexact=email, is_active=False).first()
     if user:
         try:
@@ -311,26 +363,69 @@ def resend_verification_email(request):
             messages.error(request, registration_email_error_message(exc))
             return redirect('main:register_verify_sent')
 
-    messages.info(request, 'If an unverified account exists for that email, we sent a new link.')
-    return redirect('main:login')
+    messages.error(
+        request,
+        'No pending registration found for that email. Please sign up again.',
+    )
+    return redirect('main:register')
 
 
-def verify_email(request, uidb64, token):
+def verify_email(request):
+    token = (request.GET.get('t') or '').strip()
+    if not token:
+        messages.error(request, 'Verification link is invalid.')
+        return redirect('main:register')
+
+    try:
+        payload = load_pending_registration_token(token)
+    except SignatureExpired:
+        messages.error(
+            request,
+            'This verification link has expired. Please sign up again.',
+        )
+        return redirect('main:register')
+    except BadSignature:
+        messages.error(request, 'Verification link is invalid.')
+        return redirect('main:register')
+
+    if User.objects.filter(email__iexact=payload['email']).exists():
+        messages.info(request, 'An account with this email already exists. Please sign in.')
+        return redirect('main:login')
+
+    try:
+        user = create_user_from_pending(payload)
+    except Exception:
+        logger.exception('Failed to create user from pending registration for %s', payload['email'])
+        messages.error(
+            request,
+            'We could not finish creating your account. Please sign up again.',
+        )
+        return redirect('main:register')
+
+    request.session.pop('pending_verify_email', None)
+    request.session.pop('pending_verify_token', None)
+    login(request, user)
+    messages.success(request, f'Welcome, {comment_author_name(user)}! Your email is verified.')
+    return redirect(redirect_after_login(request, user))
+
+
+def verify_email_legacy(request, uidb64, token):
+    """Activate legacy inactive users created before deferred registration."""
     try:
         uid = force_str(urlsafe_base64_decode(uidb64))
         user = User.objects.get(pk=uid)
     except (TypeError, ValueError, OverflowError, User.DoesNotExist):
         user = None
 
-    if user and default_token_generator.check_token(user, token):
+    if user and not user.is_active and default_token_generator.check_token(user, token):
         user.is_active = True
         user.save(update_fields=['is_active'])
         login(request, user)
         messages.success(request, f'Welcome, {comment_author_name(user)}! Your email is verified.')
         return redirect(redirect_after_login(request, user))
 
-    messages.error(request, 'Verification link is invalid or has expired.')
-    return redirect('main:login')
+    messages.error(request, 'Verification link is invalid or has expired. Please sign up again.')
+    return redirect('main:register')
 
 
 def _admin_only_or_redirect(request):

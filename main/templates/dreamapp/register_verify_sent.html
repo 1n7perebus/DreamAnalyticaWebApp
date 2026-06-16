@@ -15,11 +15,11 @@
       {% if email_sent %}
       <p class="auth-card__lead">
         We sent a verification link to <strong>{{ email }}</strong>.
-        Click the link in that email to activate your account and sign in.
+        Click the link within 24 hours to create your account and sign in.
       </p>
       {% else %}
       <p class="auth-card__lead">
-        Your account for <strong>{{ email }}</strong> was created, but the verification email
+        We received your registration for <strong>{{ email }}</strong>, but the verification email
         could not be sent yet. Use the button below to try again.
       </p>
       {% endif %}
