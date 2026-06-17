@@ -207,6 +207,21 @@ class Notification(models.Model):
         return f'Notification for {self.recipient_id}'
 
 
+class RegistrationAttempt(models.Model):
+    """Tracks registration POSTs for IP rate limiting (not pending account data)."""
+    ip_address = models.CharField(max_length=45, db_index=True)
+    email = models.EmailField(max_length=254, blank=True, default='')
+    created_at = models.DateTimeField(default=timezone.now, db_index=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'registration attempt'
+        verbose_name_plural = 'registration attempts'
+
+    def __str__(self):
+        return f'{self.ip_address} at {self.created_at:%Y-%m-%d %H:%M}'
+
+
 class Contact(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
@@ -223,8 +238,5 @@ class Contact(models.Model):
         verbose_name = "contact"
         ordering = ['-pub']
 
-    def __str__(self):
-        return f"Submission from {self.ip_address} at {self.submission_time}"
-    
     def __str__(self):
         return str(self.email)

@@ -4078,6 +4078,22 @@ nav .nav-wrapper .brand-logo {
   margin-top: 0.25em;
 }
 
+.register-honeypot-wrap {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.register-turnstile {
+  display: flex;
+  justify-content: center;
+  margin: 0.5rem 0 1.25rem;
+}
+
 .auth-card__footer {
   text-align: center;
   margin: 1.5em 0 0;

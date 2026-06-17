@@ -67,6 +67,16 @@ def unique_username_from_name(name, email):
 
 class UserRegistrationForm(forms.ModelForm):
     display_name = forms.CharField(max_length=50, label='Name')
+    website = forms.CharField(
+        required=False,
+        label='Website',
+        widget=forms.TextInput(attrs={
+            'class': 'register-honeypot',
+            'tabindex': '-1',
+            'autocomplete': 'off',
+            'aria-hidden': 'true',
+        }),
+    )
     country_code = forms.ChoiceField(
         choices=[('', 'Select country…')] + list(COUNTRY_CHOICES),
         label='Country',
@@ -106,10 +116,29 @@ class UserRegistrationForm(forms.ModelForm):
         self.fields['mbti_type'].widget.attrs['class'] = 'profile-native-select no-autoinit'
         self.fields['birth_year'].choices = [('', 'Select birth year…')] + birth_year_choices()
 
+    def clean_display_name(self):
+        from .spam_checks import looks_like_bot_display_name
+
+        name = (self.cleaned_data.get('display_name') or '').strip()[:50]
+        if not name:
+            raise forms.ValidationError('Please enter your name.')
+        if looks_like_bot_display_name(name):
+            raise forms.ValidationError('Please enter a real display name.')
+        return name
+
+    def clean_website(self):
+        if (self.cleaned_data.get('website') or '').strip():
+            raise forms.ValidationError('Registration could not be completed.')
+        return ''
+
     def clean_email(self):
+        from .spam_checks import is_disposable_email
+
         email = (self.cleaned_data.get('email') or '').strip().lower()
         if User.objects.filter(email__iexact=email).exists():
             raise forms.ValidationError('An account with this email already exists.')
+        if is_disposable_email(email):
+            raise forms.ValidationError('Please use a permanent email address, not a disposable inbox.')
         return email
 
     def clean_birth_year(self):

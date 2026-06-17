@@ -36,6 +36,10 @@ GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID')
 GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET')
 GOOGLE_REDIRECT_URI = os.environ.get('GOOGLE_REDIRECT_URI')
 
+# Cloudflare Turnstile (free) — https://dash.cloudflare.com/?to=/:account/turnstile
+TURNSTILE_SITE_KEY = os.environ.get('TURNSTILE_SITE_KEY', '')
+TURNSTILE_SECRET_KEY = os.environ.get('TURNSTILE_SECRET_KEY', '')
+
 #GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID')
 #GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET')
 #GOOGLE_REDIRECT_URI = os.environ.get('GOOGLE_REDIRECT_URI')

@@ -1,6 +1,10 @@
 {% extends 'dreamapp/header.html' %}
 {% block title %}Register — Dream Analytica{% endblock %}
+
 {% block content %}
+{% if turnstile_site_key %}
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+{% endif %}
 
 <div class="auth-shell">
   <div class="auth-card reveal">
@@ -25,51 +29,79 @@
 
     <form method="post" class="auth-form" novalidate>
       {% csrf_token %}
-      <div class="contact-field">
+      <div class="contact-field{% if form.display_name.errors %} contact-field--invalid{% endif %}">
         <label class="contact-field__label" for="id_display_name">{{ form.display_name.label }}</label>
         {{ form.display_name }}
+        {% if form.display_name.errors %}
+        <span class="contact-field__hint contact-field__hint--error">{{ form.display_name.errors.0 }}</span>
+        {% endif %}
       </div>
-      <div class="contact-field">
+      <div class="contact-field{% if form.email.errors %} contact-field--invalid{% endif %}">
         <label class="contact-field__label" for="id_email">{{ form.email.label }}</label>
         {{ form.email }}
+        {% if form.email.errors %}
+        <span class="contact-field__hint contact-field__hint--error">{{ form.email.errors.0 }}</span>
+        {% endif %}
       </div>
-      <div class="contact-field">
+      <div class="contact-field{% if form.birth_year.errors %} contact-field--invalid{% endif %}">
         <label class="contact-field__label" for="id_birth_year">{{ form.birth_year.label }}</label>
         <select id="id_birth_year" name="birth_year" class="profile-native-select no-autoinit" required>
           {% for value, label in form.fields.birth_year.choices %}
           <option value="{{ value }}"{% if value == '' %} disabled{% if not form.birth_year.value %} selected{% endif %}{% elif form.birth_year.value|stringformat:"s" == value|stringformat:"s" %} selected{% endif %}>{{ label }}</option>
           {% endfor %}
         </select>
+        {% if form.birth_year.errors %}
+        <span class="contact-field__hint contact-field__hint--error">{{ form.birth_year.errors.0 }}</span>
+        {% endif %}
       </div>
-      <div class="contact-field">
+      <div class="contact-field{% if form.country_code.errors %} contact-field--invalid{% endif %}">
         <label class="contact-field__label" for="id_country_code">{{ form.country_code.label }}</label>
         {{ form.country_code }}
+        {% if form.country_code.errors %}
+        <span class="contact-field__hint contact-field__hint--error">{{ form.country_code.errors.0 }}</span>
+        {% endif %}
       </div>
-      <div class="contact-field">
+      <div class="contact-field{% if form.mbti_type.errors %} contact-field--invalid{% endif %}">
         <label class="contact-field__label" for="id_mbti_type">{{ form.mbti_type.label }}</label>
         {{ form.mbti_type }}
+        {% if form.mbti_type.errors %}
+        <span class="contact-field__hint contact-field__hint--error">{{ form.mbti_type.errors.0 }}</span>
+        {% endif %}
       </div>
-      <div class="contact-field">
+      <div class="contact-field{% if form.password.errors %} contact-field--invalid{% endif %}">
         <label class="contact-field__label" for="id_password">{{ form.password.label }}</label>
         {{ form.password }}
+        {% if form.password.errors %}
+        <span class="contact-field__hint contact-field__hint--error">{{ form.password.errors.0 }}</span>
+        {% endif %}
       </div>
-      <div class="contact-field">
+      <div class="contact-field{% if form.password2.errors %} contact-field--invalid{% endif %}">
         <label class="contact-field__label" for="id_password2">{{ form.password2.label }}</label>
         {{ form.password2 }}
+        {% if form.password2.errors %}
+        <span class="contact-field__hint contact-field__hint--error">{{ form.password2.errors.0 }}</span>
+        {% endif %}
       </div>
-      {% if form.errors %}
+      {% if form.non_field_errors %}
       <ul class="auth-error-list" role="alert">
-        {% for field in form %}
-          {% for error in field.errors %}
-            <li>{{ error }}</li>
-          {% endfor %}
-        {% endfor %}
         {% for error in form.non_field_errors %}
-          <li>{{ error }}</li>
+        <li>{{ error }}</li>
         {% endfor %}
       </ul>
       {% endif %}
-      <button class="neon-btn neon-btn--primary neon-btn--block neon-btn--lg" type="submit">
+      <div class="register-honeypot-wrap" aria-hidden="true">
+        {{ form.website }}
+      </div>
+      {% if turnstile_site_key %}
+      <div class="register-turnstile">
+        <div class="cf-turnstile" data-sitekey="{{ turnstile_site_key }}" data-theme="dark"></div>
+      </div>
+      {% elif turnstile_required %}
+      <p class="auth-card__sub" role="alert">
+        Registration security is not configured. Contact the site administrator.
+      </p>
+      {% endif %}
+      <button class="neon-btn neon-btn--primary neon-btn--block neon-btn--lg" type="submit"{% if turnstile_required and not turnstile_site_key %} disabled{% endif %}>
         <span>Create Account</span>
       </button>
     </form>

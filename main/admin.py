@@ -30,6 +30,14 @@ class DreamCommentAdmin(admin.ModelAdmin):
     search_fields = ('name', 'body', 'user__username', 'user__email')
     ordering = ['-pub']
 
+class RegistrationAttemptAdmin(admin.ModelAdmin):
+    list_display = ('ip_address', 'email', 'created_at')
+    list_filter = ('created_at',)
+    search_fields = ('ip_address', 'email')
+    ordering = ('-created_at',)
+    readonly_fields = ('ip_address', 'email', 'created_at')
+
+
 class ContactAdmin(admin.ModelAdmin):
     list_display = ('name','id', 'email', 'phone', 'pub')
     ordering =['-pub']
@@ -82,5 +90,6 @@ admin.site.register(Dreams, DreamsAdmin)
 admin.site.register(DreamSymbol, DreamSymbolAdmin)
 admin.site.register(DreamComment, DreamCommentAdmin)
 admin.site.register(Contact, ContactAdmin)
+admin.site.register(RegistrationAttempt, RegistrationAttemptAdmin)
 admin.site.register(UserProfile, UserProfileAdmin)
 admin.site.register(Notification, NotificationAdmin)

@@ -43,6 +43,8 @@ from .pending_registration import (
     issue_pending_registration_token,
     load_pending_registration_token,
 )
+from .spam_checks import record_registration_attempt, registration_rate_limited
+from .turnstile import verify_turnstile
 from .profile_helpers import (
     age_from_birth_year,
     apply_profile_country_to_dreams,
@@ -168,9 +170,27 @@ def register_view(request):
     if request.user.is_authenticated:
         return redirect('main:index')
 
+    turnstile_site_key = settings.TURNSTILE_SITE_KEY or ''
+
     if request.method == 'POST':
+        ip_address = get_client_ip(request)
         form = UserRegistrationForm(request.POST)
-        if form.is_valid():
+
+        if registration_rate_limited(ip_address):
+            form.add_error(
+                None,
+                'Too many registration attempts from your network. Please try again later.',
+            )
+        elif settings.TURNSTILE_SECRET_KEY and not verify_turnstile(
+            request.POST.get('cf-turnstile-response'),
+            ip_address,
+        ):
+            form.add_error(
+                None,
+                'Please complete the security check and try again.',
+            )
+        elif form.is_valid():
+            record_registration_attempt(ip_address, form.cleaned_data['email'])
             payload = build_payload_from_form(form)
             token = issue_pending_registration_token(payload)
             request.session['pending_verify_email'] = payload['email']
@@ -186,7 +206,12 @@ def register_view(request):
             return redirect('main:register_verify_sent')
     else:
         form = UserRegistrationForm()
-    return render(request, 'dreamapp/register.html', {'form': form})
+
+    return render(request, 'dreamapp/register.html', {
+        'form': form,
+        'turnstile_site_key': turnstile_site_key,
+        'turnstile_required': bool(settings.TURNSTILE_SECRET_KEY),
+    })
 
 
 def register_verify_sent(request):
