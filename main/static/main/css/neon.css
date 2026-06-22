@@ -4203,6 +4203,20 @@ nav .nav-wrapper .brand-logo {
   margin: 0 0 1em;
 }
 
+.dreams-post-cta {
+  text-align: center;
+  margin: 0 0 2.5em;
+}
+
+.dreams-post-cta__text {
+  color: var(--muted);
+  font-family: 'Exo 2', sans-serif;
+  font-size: 0.95rem;
+  margin: 0 auto 1.1em;
+  max-width: 32rem;
+  line-height: 1.55;
+}
+
 /* =====================================================
    Error page
    ===================================================== */

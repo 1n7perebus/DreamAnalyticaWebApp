@@ -50,6 +50,15 @@
     {% if has_wall_analytics %}
     {% include 'dreamapp/_wall_analytics.html' %}
     {% endif %}
+
+    <section class="dreams-post-cta reveal">
+      {% if user.is_authenticated %}
+      <a href="{% url 'main:consult' %}" class="neon-btn neon-btn--primary neon-btn--lg">Post a Dream</a>
+      {% else %}
+      <p class="dreams-post-cta__text">Have a dream to share? Sign in or create a free account to post on the Wall.</p>
+      <a href="{% url 'main:login' %}?next={% url 'main:consult' %}" class="neon-btn neon-btn--primary neon-btn--lg">Post a Dream</a>
+      {% endif %}
+    </section>
   </section>
 
   {% if dream_count %}
@@ -291,7 +300,12 @@
         </svg>
         <h5 class="goldman-regular">The wall is quiet</h5>
         <p>No active dreams yet. Be the first to transmit yours.</p>
+        {% if user.is_authenticated %}
         <a href="{% url 'main:consult' %}" class="neon-btn neon-btn--primary neon-btn--lg">Post a Dream</a>
+        {% else %}
+        <p class="dreams-post-cta__text">Sign in or create a free account to add the first dream.</p>
+        <a href="{% url 'main:login' %}?next={% url 'main:consult' %}" class="neon-btn neon-btn--primary neon-btn--lg">Post a Dream</a>
+        {% endif %}
       </div>
       {% endif %}
     </section>

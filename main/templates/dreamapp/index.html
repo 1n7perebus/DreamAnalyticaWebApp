@@ -27,7 +27,11 @@
    
 
     <div class="hero-cta-row reveal reveal--delay-3">
-      <a href="/consult/" class="neon-btn neon-btn--primary neon-btn--lg">Speak to an Analyst</a>
+      {% if user.is_authenticated %}
+      <a href="{% url 'main:contact' %}" class="neon-btn neon-btn--primary neon-btn--lg">Speak to an Analyst</a>
+      {% else %}
+      <a href="{% url 'main:login' %}?next={% url 'main:contact' %}" class="neon-btn neon-btn--primary neon-btn--lg">Speak to an Analyst</a>
+      {% endif %}
       <a href="/dreams/" class="neon-btn neon-btn--mag neon-btn--lg">Explore the Wall</a>
     </div>
   </div>
@@ -145,7 +149,16 @@
       Whether you're looking for answers, greater self-understanding, or a sense of meaning — share your dream with a human analyst and start uncovering what your unconscious has been trying to tell you.
     </p>
     <div class="hero-cta-row">
-      <a href="/consult/" class="neon-btn neon-btn--primary neon-btn--lg">Speak to an Analyst</a>
+      {% if user.is_authenticated %}
+      <a href="{% url 'main:contact' %}" class="neon-btn neon-btn--primary neon-btn--lg">Speak to an Analyst</a>
+      {% else %}
+      <a href="{% url 'main:login' %}?next={% url 'main:contact' %}" class="neon-btn neon-btn--primary neon-btn--lg">Speak to an Analyst</a>
+      {% endif %}
+      {% if user.is_authenticated %}
+      <a href="{% url 'main:consult' %}" class="neon-btn neon-btn--mag neon-btn--lg">Post a Dream</a>
+      {% else %}
+      <a href="{% url 'main:login' %}?next={% url 'main:consult' %}" class="neon-btn neon-btn--mag neon-btn--lg">Post a Dream</a>
+      {% endif %}
       {% if user.is_authenticated %}
       <a href="{% url 'main:contact' %}" class="neon-btn neon-btn--lg">Contact Us</a>
       {% else %}
@@ -157,7 +170,11 @@
 
 <div class="sticky-cta" role="region" aria-label="Quick action">
   <span class="sticky-cta__text">Ready to know yourself more deeply?</span>
-  <a href="/consult/" class="neon-btn neon-btn--primary">Speak to an Analyst</a>
+  {% if user.is_authenticated %}
+  <a href="{% url 'main:contact' %}" class="neon-btn neon-btn--primary">Speak to an Analyst</a>
+  {% else %}
+  <a href="{% url 'main:login' %}?next={% url 'main:contact' %}" class="neon-btn neon-btn--primary">Speak to an Analyst</a>
+  {% endif %}
   <button class="sticky-cta__close" aria-label="Dismiss">×</button>
 </div>
 

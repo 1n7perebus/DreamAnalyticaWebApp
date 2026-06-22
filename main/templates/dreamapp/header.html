@@ -47,11 +47,11 @@
       <ul id="nav-mobile" class="nav-main hide-on-med-and-down">
         <li><a class="nav-link goldman-regular" href="/">Home</a></li>
         <li><a class="nav-link goldman-regular" href="/dreams/">Wall of Dreams</a></li>
-        <li><a class="nav-link goldman-regular" href="/consult/">Dream Form</a></li>
-        <li><a class="nav-link goldman-regular" href="/about/">About</a></li>
         {% if user.is_authenticated %}
+        <li><a class="nav-link goldman-regular" href="{% url 'main:consult' %}">Dream Form</a></li>
         <li><a class="nav-link goldman-regular" href="{% url 'main:contact' %}">Contact</a></li>
         {% endif %}
+        <li><a class="nav-link goldman-regular" href="/about/">About</a></li>
         <li><a class="nav-link goldman-regular" href="/app/">App</a></li>
       </ul>
 
@@ -107,11 +107,11 @@
   <ul class="sidenav" id="mobile-nav">
     <li><a class="sidenav-link goldman-regular" href="/">Home</a></li>
     <li><a class="sidenav-link goldman-regular" href="/dreams/">Wall of Dreams</a></li>
-    <li><a class="sidenav-link goldman-regular" href="/consult/">Dream Form</a></li>
-    <li><a class="sidenav-link goldman-regular" href="/about/">About</a></li>
     {% if user.is_authenticated %}
+    <li><a class="sidenav-link goldman-regular" href="{% url 'main:consult' %}">Dream Form</a></li>
     <li><a class="sidenav-link goldman-regular" href="{% url 'main:contact' %}">Contact</a></li>
     {% endif %}
+    <li><a class="sidenav-link goldman-regular" href="/about/">About</a></li>
     <li><a class="sidenav-link goldman-regular" href="/app/">Mobile App</a></li>
     {% if user.is_authenticated %}
     <li class="sidenav-divider"></li>

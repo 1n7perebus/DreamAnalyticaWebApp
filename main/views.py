@@ -118,11 +118,28 @@ def _store_login_next(request):
         request.session['next'] = next_param
 
 
-def _login_lead_text(request):
+def _login_auth_context(request):
     next_url = request.GET.get('next') or request.session.get('next', '')
     if '/contact' in next_url:
-        return 'Sign in to reach our team — contact is available to members only.'
-    return 'Join the network to interpret dreams on the Wall.'
+        return {
+            'auth_eyebrow': 'Speak with an analyst',
+            'auth_lead': (
+                'To reach our team, sign in or create a free account. '
+                'Once you are in, the contact form opens so you can start the conversation.'
+            ),
+        }
+    if '/consult' in next_url:
+        return {
+            'auth_eyebrow': 'Post on the Wall',
+            'auth_lead': (
+                'To share a dream, sign in or create a free account. '
+                'Once you are in, the dream form opens so you can add yours to the Wall.'
+            ),
+        }
+    return {
+        'auth_eyebrow': 'Secure access',
+        'auth_lead': 'Join the network to interpret dreams on the Wall.',
+    }
 
 
 def redirect_after_login(request, user):
@@ -170,6 +187,7 @@ def register_view(request):
     if request.user.is_authenticated:
         return redirect('main:index')
 
+    _store_login_next(request)
     turnstile_site_key = settings.TURNSTILE_SITE_KEY or ''
 
     if request.method == 'POST':
@@ -266,7 +284,7 @@ def login_view(request):
         'google_client_id': settings.GOOGLE_CLIENT_ID,
         'google_login_uri': request.build_absolute_uri(reverse('main:google_auth_callback')),
         'show_resend_verification': False,
-        'auth_lead': _login_lead_text(request),
+        **_login_auth_context(request),
     })
 
 
@@ -721,6 +739,7 @@ def google_auth_callback(request):
     return redirect(redirect_after_login(request, user))
 
 
+@login_required
 def consult(request):
     dreams = Dreams.objects.all()
     recent_submission = False
