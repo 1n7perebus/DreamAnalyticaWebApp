@@ -4217,6 +4217,20 @@ nav .nav-wrapper .brand-logo {
   line-height: 1.55;
 }
 
+.dreams-guest-cta {
+  margin: -0.25em auto 2em;
+  max-width: 40rem;
+}
+
+.dreams-guest-cta__text {
+  margin: 0 auto 1.15em;
+  line-height: 1.65;
+}
+
+.dreams-guest-cta__actions {
+  margin-top: 0;
+}
+
 /* =====================================================
    Error page
    ===================================================== */

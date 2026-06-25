@@ -21,6 +21,18 @@
     <h1 class="section-title gradient-text glitch-text" data-text="WALL OF DREAMS">WALL OF DREAMS</h1>
     <p class="dreams-intro">Community dreams · Comments · Real-time signal</p>
 
+    {% if not user.is_authenticated %}
+    <div class="dreams-guest-cta">
+      <p class="dreams-intro dreams-guest-cta__text">
+        Sign in to share your dream or leave a comment · Create a free account to join the community
+      </p>
+      <div class="hero-cta-row dreams-guest-cta__actions">
+        <a href="{% url 'main:login' %}?next={% url 'main:dreams' %}" class="neon-btn neon-btn--primary">Sign In</a>
+        <a href="{% url 'main:register' %}?next={% url 'main:dreams' %}" class="neon-btn neon-btn--mag">Create Account</a>
+      </div>
+    </div>
+    {% endif %}
+  </br>
     {% if average_scale is not None %}
     <div class="ring-meter reveal" data-value="{{ average_scale }}" data-max="5">
       <svg viewBox="0 0 200 200">
@@ -51,14 +63,11 @@
     {% include 'dreamapp/_wall_analytics.html' %}
     {% endif %}
 
+    {% if user.is_authenticated %}
     <section class="dreams-post-cta reveal">
-      {% if user.is_authenticated %}
       <a href="{% url 'main:consult' %}" class="neon-btn neon-btn--primary neon-btn--lg">Post a Dream</a>
-      {% else %}
-      <p class="dreams-post-cta__text">Have a dream to share? Sign in or create a free account to post on the Wall.</p>
-      <a href="{% url 'main:login' %}?next={% url 'main:consult' %}" class="neon-btn neon-btn--primary neon-btn--lg">Post a Dream</a>
-      {% endif %}
     </section>
+    {% endif %}
   </section>
 
   {% if dream_count %}
