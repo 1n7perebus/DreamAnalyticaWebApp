@@ -32,6 +32,9 @@ EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER or '')
 SERVER_EMAIL = os.environ.get('SERVER_EMAIL', DEFAULT_FROM_EMAIL)
 
+# Canonical public URL for links in emails (must match live www host).
+PUBLIC_SITE_URL = os.environ.get('PUBLIC_SITE_URL', '').rstrip('/')
+
 GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID')
 GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET')
 GOOGLE_REDIRECT_URI = os.environ.get('GOOGLE_REDIRECT_URI')
@@ -54,6 +57,9 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 DEBUG = os.environ.get('DJANGO_DEBUG', '').lower() in ('true', '1', 'yes')
 if not DEBUG and 'runserver' in sys.argv:
     DEBUG = True
+
+if not PUBLIC_SITE_URL and not DEBUG:
+    PUBLIC_SITE_URL = 'https://www.dreamanalytica.com'
 
 ALLOWED_HOSTS = ["erebus0013.pythonanywhere.com", "www.dreamanalytica.com", "dreamanalytica.com", "http://www.dreamanalytica.com/", "dreamanalytica.com/", "localhost", "127.0.0.1","http://localhost:8000", "7674-103-6-150-37.ngrok-free.app"]
 

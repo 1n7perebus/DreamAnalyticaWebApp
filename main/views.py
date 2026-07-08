@@ -293,10 +293,21 @@ def logout_view(request):
     return redirect('main:login')
 
 
+def _public_absolute_uri(request, path):
+    """Build an absolute URL for outbound email links.
+
+    Uses PUBLIC_SITE_URL when set so verification links always use the canonical
+    www host and survive bare-domain redirects that drop query strings.
+    """
+    base = (settings.PUBLIC_SITE_URL or '').rstrip('/')
+    if base:
+        return base + path
+    return request.build_absolute_uri(path)
+
+
 def _pending_verification_verify_url(request, token):
-    return request.build_absolute_uri(
-        reverse('main:verify_email') + '?t=' + quote(token, safe='')
-    )
+    path = reverse('main:verify_email') + '?t=' + quote(token, safe='')
+    return _public_absolute_uri(request, path)
 
 
 def send_pending_verification_email(request, payload, token):
@@ -332,8 +343,9 @@ def send_verification_email(request, user):
 
     uid = urlsafe_base64_encode(force_bytes(user.pk))
     token = default_token_generator.make_token(user)
-    verify_url = request.build_absolute_uri(
-        reverse('main:verify_email_legacy', kwargs={'uidb64': uid, 'token': token})
+    verify_url = _public_absolute_uri(
+        request,
+        reverse('main:verify_email_legacy', kwargs={'uidb64': uid, 'token': token}),
     )
     context = {
         'display_name': user.first_name or user.username,
