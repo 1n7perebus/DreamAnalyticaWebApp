@@ -1,0 +1,107 @@
+{% extends 'dreamapp/header.html' %}
+{% block title %}Finish account — Dream Analytica{% endblock %}
+
+{% block content %}
+
+<div class="auth-shell">
+  <div class="auth-card reveal">
+    <span class="neon-card__corner neon-card__corner--tl"></span>
+    <span class="neon-card__corner neon-card__corner--tr"></span>
+    <span class="neon-card__corner neon-card__corner--bl"></span>
+    <span class="neon-card__corner neon-card__corner--br"></span>
+
+    <header class="auth-card__head">
+      <span class="auth-card__eyebrow">Almost there</span>
+      <h1 class="auth-card__title goldman-regular glitch-text gradient-text" data-text="YOUR PROFILE">YOUR PROFILE</h1>
+      <p class="auth-card__lead">
+        Add the same details as registration so your dreams carry age, personality, and country.
+        You can skip and finish later anytime.
+      </p>
+      {% if user_email %}
+      <p class="auth-card__sub">Signed in as {{ user_email }}</p>
+      {% endif %}
+    </header>
+
+    {% if messages %}
+    <ul class="auth-error-list" role="alert">
+      {% for message in messages %}
+      <li>{{ message }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+
+    <form method="post" class="auth-form" novalidate>
+      {% csrf_token %}
+      <div class="contact-field{% if form.display_name.errors %} contact-field--invalid{% endif %}">
+        <label class="contact-field__label" for="id_display_name">{{ form.display_name.label }}</label>
+        {{ form.display_name }}
+        {% if form.display_name.errors %}
+        <span class="contact-field__hint contact-field__hint--error">{{ form.display_name.errors.0 }}</span>
+        {% endif %}
+      </div>
+      <div class="contact-field{% if form.birth_year.errors %} contact-field--invalid{% endif %}">
+        <label class="contact-field__label" for="id_birth_year">{{ form.birth_year.label }}</label>
+        <select id="id_birth_year" name="birth_year" class="profile-native-select no-autoinit" required>
+          {% for value, label in form.fields.birth_year.choices %}
+          <option value="{{ value }}"{% if value == '' %} disabled{% if not form.birth_year.value %} selected{% endif %}{% elif form.birth_year.value|stringformat:"s" == value|stringformat:"s" %} selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+        {% if form.birth_year.errors %}
+        <span class="contact-field__hint contact-field__hint--error">{{ form.birth_year.errors.0 }}</span>
+        {% endif %}
+      </div>
+      <div class="contact-field{% if form.country_code.errors %} contact-field--invalid{% endif %}">
+        <label class="contact-field__label" for="id_country_code">{{ form.country_code.label }}</label>
+        {{ form.country_code }}
+        {% if form.country_code.errors %}
+        <span class="contact-field__hint contact-field__hint--error">{{ form.country_code.errors.0 }}</span>
+        {% endif %}
+      </div>
+      <div class="contact-field{% if form.mbti_type.errors %} contact-field--invalid{% endif %}">
+        <label class="contact-field__label" for="id_mbti_type">{{ form.mbti_type.label }}</label>
+        {{ form.mbti_type }}
+        {% if form.mbti_type.errors %}
+        <span class="contact-field__hint contact-field__hint--error">{{ form.mbti_type.errors.0 }}</span>
+        {% endif %}
+      </div>
+      {% if form.non_field_errors %}
+      <ul class="auth-error-list" role="alert">
+        {% for error in form.non_field_errors %}
+        <li>{{ error }}</li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+      <button class="neon-btn neon-btn--primary neon-btn--block neon-btn--lg" type="submit">
+        <span>Save profile</span>
+      </button>
+    </form>
+
+    <form method="post" class="auth-form complete-profile-skip">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="skip">
+      <button type="submit" class="neon-btn neon-btn--block neon-btn--lg">
+        <span>Skip for now</span>
+      </button>
+    </form>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('select.profile-native-select').forEach(function (selectEl) {
+      if (typeof M !== 'undefined' && M.FormSelect) {
+        var inst = M.FormSelect.getInstance(selectEl);
+        if (inst) inst.destroy();
+      }
+      var wrapper = selectEl.closest('.select-wrapper');
+      if (wrapper && wrapper.parentNode) {
+        wrapper.parentNode.insertBefore(selectEl, wrapper);
+        wrapper.remove();
+      }
+      selectEl.style.display = 'block';
+      selectEl.style.visibility = 'visible';
+    });
+  });
+</script>
+
+{% endblock %}

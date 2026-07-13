@@ -58,6 +58,7 @@ urlpatterns = [
         name='password_reset_complete',
     ),
     path('profile/', views.profile_view, name='profile'),
+    path('profile/complete/', views.complete_profile_view, name='complete_profile'),
     path('profile/contact-reply/', views.admin_contact_reply, name='admin_contact_reply'),
     path('notifications/<int:notification_id>/open/', views.open_notification, name='open_notification'),
     path('google/auth/callback/', views.google_auth_callback, name='google_auth_callback'),

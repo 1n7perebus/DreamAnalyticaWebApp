@@ -61,8 +61,10 @@ from .profile_helpers import (
     enrich_contact_post_data,
     enrich_dream_post_data,
     get_or_create_profile,
+    is_profile_complete,
     mbti_display,
     mbti_updates_remaining,
+    profile_setup_reminder_message,
     resolve_country_from_code,
     user_form_identity,
 )
@@ -148,6 +150,18 @@ def redirect_after_login(request, user):
         if next_url != reverse('main:index'):
             request.session['next'] = next_url
         return reverse('main:login') + '?setup=1'
+
+    profile = get_or_create_profile(user)
+    if not is_profile_complete(user, profile):
+        force_setup = request.session.pop('force_profile_setup', False)
+        if force_setup:
+            if next_url != reverse('main:index'):
+                request.session['next'] = next_url
+            return reverse('main:complete_profile')
+        if not request.session.get('profile_setup_reminded'):
+            request.session['profile_setup_reminded'] = True
+            messages.info(request, profile_setup_reminder_message())
+
     request.session.pop('next', None)
     return next_url
 
@@ -258,14 +272,14 @@ def login_view(request):
                 request.user.first_name = name
                 request.user.save(update_fields=['first_name'])
                 messages.success(request, f'Welcome, {name}!')
-                return redirect(request.session.pop('next', reverse('main:index')))
+                return redirect(redirect_after_login(request, request.user))
             messages.error(request, 'Please enter a display name.')
         if not (request.user.first_name or '').strip() or request.GET.get('setup') == '1':
             return render(request, 'dreamapp/login.html', {
                 'profile_setup': True,
                 'google_client_id': settings.GOOGLE_CLIENT_ID,
             })
-        return redirect('main:index')
+        return redirect(redirect_after_login(request, request.user))
 
     if request.method == 'POST':
         email = request.POST['email']
@@ -491,6 +505,39 @@ def _admin_only_or_redirect(request):
 
 
 @login_required
+def complete_profile_view(request):
+    """Optional post-signup profile form (same fields as register, minus email/password)."""
+    profile = get_or_create_profile(request.user)
+    if is_profile_complete(request.user, profile):
+        return redirect(_safe_next_url(request))
+
+    if request.method == 'POST' and request.POST.get('action') == 'skip':
+        request.session.pop('force_profile_setup', None)
+        messages.info(request, profile_setup_reminder_message())
+        request.session['profile_setup_reminded'] = True
+        return redirect(_safe_next_url(request))
+
+    if request.method == 'POST':
+        form = CompleteProfileForm(request.POST, user=request.user)
+        if form.is_valid():
+            form.save(request.user)
+            code, name = resolve_country_from_code(form.cleaned_data['country_code'])
+            if code and name:
+                apply_profile_country_to_dreams(request.user, code, name)
+            request.session.pop('force_profile_setup', None)
+            request.session.pop('profile_setup_reminded', None)
+            messages.success(request, 'Account profile saved. Welcome!')
+            return redirect(_safe_next_url(request))
+    else:
+        form = CompleteProfileForm(user=request.user)
+
+    return render(request, 'dreamapp/complete_profile.html', {
+        'form': form,
+        'user_email': request.user.email,
+    })
+
+
+@login_required
 def profile_view(request):
     profile = get_or_create_profile(request.user)
 
@@ -707,6 +754,7 @@ def open_notification(request, notification_id):
 
 
 def _login_user_from_google_token(token):
+    """Verify Google ID token and return (user, created)."""
     if not settings.GOOGLE_CLIENT_ID:
         raise ValueError('Google sign-in is not configured')
     idinfo = id_token.verify_oauth2_token(
@@ -717,6 +765,7 @@ def _login_user_from_google_token(token):
         raise ValueError('Email not provided by Google')
     google_name = (idinfo.get('given_name') or idinfo.get('name') or '').strip()[:50]
     user = User.objects.filter(email=email).first()
+    created = False
     if not user:
         base = email.split('@')[0].replace('.', '')[:20] or 'user'
         username = base
@@ -729,10 +778,12 @@ def _login_user_from_google_token(token):
         if google_name:
             user.first_name = google_name
         user.save()
+        get_or_create_profile(user)
+        created = True
     elif google_name and not (user.first_name or '').strip():
         user.first_name = google_name
         user.save(update_fields=['first_name'])
-    return user
+    return user, created
 
 
 @csrf_exempt
@@ -743,11 +794,13 @@ def google_auth_callback(request):
         messages.error(request, 'Google sign-in did not return a token.')
         return redirect('main:login')
     try:
-        user = _login_user_from_google_token(token)
+        user, created = _login_user_from_google_token(token)
     except ValueError as exc:
         messages.error(request, str(exc))
         return redirect('main:login')
     login(request, user)
+    if created:
+        request.session['force_profile_setup'] = True
     return redirect(redirect_after_login(request, user))
 
 

@@ -231,6 +231,31 @@ def get_or_create_profile(user):
     return profile
 
 
+def is_profile_complete(user, profile=None):
+    """True when display name + birth year + MBTI + country match registration requirements."""
+    if not user or not getattr(user, 'is_authenticated', False):
+        return True
+    if not (user.first_name or '').strip():
+        return False
+    if profile is None:
+        try:
+            profile = user.profile
+        except UserProfile.DoesNotExist:
+            return False
+    return bool(
+        profile.birth_year
+        and (profile.mbti_type or '').strip()
+        and (profile.country_code or '').strip()
+    )
+
+
+def profile_setup_reminder_message():
+    return (
+        'Finish setting up your account so your dreams include age, '
+        'personality type, and country.'
+    )
+
+
 def dreams_for_user(user):
     email = (user.email or '').strip()
     filters = Q(posted_by=user)

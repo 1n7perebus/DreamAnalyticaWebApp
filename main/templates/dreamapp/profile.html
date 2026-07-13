@@ -19,6 +19,12 @@
         <span class="neon-card__corner neon-card__corner--br"></span>
 
         <h2 class="profile-card__title goldman-regular">Account</h2>
+        {% if profile_setup_needed %}
+        <div class="profile-setup-inline">
+          <p class="profile-country-note">Your account profile is incomplete. Finish setup to match registration details.</p>
+          <a href="{% url 'main:complete_profile' %}" class="neon-btn neon-btn--mag">Finish account setup</a>
+        </div>
+        {% endif %}
         <dl class="profile-info-grid">
           <div class="profile-info-row">
             <dt>Name</dt>

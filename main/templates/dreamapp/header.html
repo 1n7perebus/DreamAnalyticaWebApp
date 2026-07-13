@@ -24,7 +24,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Goldman:wght@400;700&display=swap" rel="stylesheet">
 
   <link href="{% static 'main/css/materialize.min.css' %}" rel="stylesheet">
-  <link href="{% static 'main/css/neon.css' %}?v=20260622c" rel="stylesheet">
+  <link href="{% static 'main/css/neon.css' %}?v=20260713b" rel="stylesheet">
 
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
@@ -76,6 +76,14 @@
           </button>
           <div class="nav-notify-menu" id="nav-notify-menu" hidden>
             <p class="nav-notify-menu__title">Notifications</p>
+            {% if profile_setup_needed %}
+            <a href="{{ profile_setup_url }}" class="nav-notify-item is-unread nav-notify-item--setup">
+              <span class="nav-notify-item__text">
+                <strong>Finish account setup</strong> — add birth year, country, and personality type
+              </span>
+              <span class="nav-notify-item__time">Action needed</span>
+            </a>
+            {% endif %}
             {% if recent_notifications %}
               {% for note in recent_notifications %}
               <a href="{% url 'main:open_notification' note.id %}" class="nav-notify-item{% if not note.read %} is-unread{% endif %}">
@@ -90,19 +98,28 @@
               <p class="nav-notify-more">And more notifications...</p>
               {% endif %}
               <a href="{% url 'main:profile' %}?notif=all" class="nav-notify-view-all">View all notifications</a>
-            {% else %}
+            {% elif not profile_setup_needed %}
             <p class="nav-notify-empty">No notifications yet.</p>
             {% endif %}
           </div>
           <span class="nav-account__sep" aria-hidden="true"></span>
           <a class="nav-logout" href="{% url 'main:logout' %}">Logout</a>
         </div>
-        {% elif request.resolver_match.url_name != 'login' and request.resolver_match.url_name != 'register' %}
+        {% elif request.resolver_match.url_name != 'login' and request.resolver_match.url_name != 'register' and request.resolver_match.url_name != 'complete_profile' %}
         <a class="nav-login" href="{% url 'main:login' %}">Login</a>
         {% endif %}
       </div>
     </div>
   </nav>
+
+  {% if show_profile_setup_banner %}
+  <div class="profile-setup-banner" role="status">
+    <div class="container profile-setup-banner__inner">
+      <p class="profile-setup-banner__text">{{ profile_setup_reminder_message }}</p>
+      <a href="{{ profile_setup_url }}" class="neon-btn neon-btn--mag profile-setup-banner__cta">Finish setup</a>
+    </div>
+  </div>
+  {% endif %}
 
   <ul class="sidenav" id="mobile-nav">
     <li><a class="sidenav-link goldman-regular" href="/">Home</a></li>
@@ -124,7 +141,7 @@
       </a>
     </li>
     <li><a class="sidenav-link goldman-regular sidenav-logout" href="{% url 'main:logout' %}">Logout</a></li>
-    {% elif request.resolver_match.url_name != 'login' and request.resolver_match.url_name != 'register' %}
+    {% elif request.resolver_match.url_name != 'login' and request.resolver_match.url_name != 'register' and request.resolver_match.url_name != 'complete_profile' %}
     <li class="sidenav-divider"></li>
     <li><a class="sidenav-link goldman-regular sidenav-logout" href="{% url 'main:login' %}">Login</a></li>
     {% endif %}

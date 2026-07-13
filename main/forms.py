@@ -180,6 +180,101 @@ class UserRegistrationForm(forms.ModelForm):
             },
         )
 
+
+class CompleteProfileForm(forms.Form):
+    """Same profile fields as registration, for Google (or incomplete) users — no password/email."""
+
+    display_name = forms.CharField(max_length=50, label='Name')
+    country_code = forms.ChoiceField(
+        choices=[('', 'Select country…')] + list(COUNTRY_CHOICES),
+        label='Country',
+        required=True,
+    )
+    birth_year = forms.TypedChoiceField(
+        choices=[],
+        coerce=int,
+        required=True,
+        label='Birth year',
+        widget=forms.Select(attrs={'class': 'profile-native-select no-autoinit'}),
+    )
+    mbti_type = forms.ChoiceField(
+        choices=[('', 'Select type…')] + [
+            (value, label)
+            for value, label in Dreams.MBTI_CHOICES
+            if value
+        ],
+        label='Personality type',
+        required=True,
+    )
+
+    def __init__(self, *args, user=None, **kwargs):
+        self.user = user
+        super().__init__(*args, **kwargs)
+        from .profile_helpers import birth_year_choices
+
+        self.fields['display_name'].widget.attrs['class'] = 'contact-field__input'
+        self.fields['country_code'].widget.attrs['class'] = 'profile-native-select no-autoinit'
+        self.fields['mbti_type'].widget.attrs['class'] = 'profile-native-select no-autoinit'
+        self.fields['birth_year'].choices = [('', 'Select birth year…')] + birth_year_choices()
+
+        if user is not None and not self.is_bound:
+            self.fields['display_name'].initial = (user.first_name or '').strip()
+            profile = getattr(user, 'profile', None)
+            if profile is None:
+                try:
+                    profile = user.profile
+                except UserProfile.DoesNotExist:
+                    profile = None
+            if profile:
+                if profile.birth_year:
+                    self.fields['birth_year'].initial = profile.birth_year
+                if profile.mbti_type:
+                    self.fields['mbti_type'].initial = profile.mbti_type
+                if profile.country_code:
+                    self.fields['country_code'].initial = profile.country_code
+
+    def clean_display_name(self):
+        from .spam_checks import looks_like_bot_display_name
+
+        name = (self.cleaned_data.get('display_name') or '').strip()[:50]
+        if not name:
+            raise forms.ValidationError('Please enter your name.')
+        if looks_like_bot_display_name(name):
+            raise forms.ValidationError('Please enter a real display name.')
+        return name
+
+    def clean_birth_year(self):
+        from .profile_helpers import max_birth_year, min_birth_year
+
+        birth_year = self.cleaned_data.get('birth_year')
+        if birth_year in (None, ''):
+            raise forms.ValidationError('Please select your birth year.')
+        if birth_year < min_birth_year() or birth_year > max_birth_year():
+            raise forms.ValidationError('Please choose a valid birth year.')
+        return birth_year
+
+    def save(self, user):
+        from .profile_helpers import get_or_create_profile
+
+        display_name = self.cleaned_data['display_name']
+        user.first_name = display_name
+        user.save(update_fields=['first_name'])
+
+        country_code = self.cleaned_data['country_code']
+        profile = get_or_create_profile(user)
+        profile.birth_year = self.cleaned_data['birth_year']
+        if not profile.birth_year_updates_count:
+            profile.birth_year_updates_count = 1
+        profile.mbti_type = self.cleaned_data['mbti_type']
+        if not profile.mbti_updates_count:
+            profile.mbti_updates_count = 1
+        profile.country_code = country_code
+        profile.country_name = dict(COUNTRY_CHOICES).get(country_code, '')
+        profile.country_locked = True
+        profile.save()
+        return profile
+
+
 class DreamForm(forms.ModelForm):
     MBTI_CHOICES = [
         ('', ''),
