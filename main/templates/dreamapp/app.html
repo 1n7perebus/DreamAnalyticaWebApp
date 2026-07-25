@@ -1,4 +1,5 @@
 {% extends 'dreamapp/header.html' %}
+{% load static %}
 {% block title %}Mobile App — Dream Analytica{% endblock %}
 {% block content %}
 
@@ -9,23 +10,33 @@
     <h1 class="section-title gradient-text glitch-text" data-text="DREAM ANALYTICA">DREAM ANALYTICA</h1>
     <p class="section-sub">A Carl Jung psychology app · Privacy-first · Zero data collection</p>
   </section>
-
+<div class="container" >
+  <div class="app-store-links">
+    <a href="https://apps.apple.com/us/app/dreamanalytica/id6473673370" target="_blank" rel="noopener" class="store-link">
+      <img class="store-badge"
+           src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us?size=250x83"
+           alt="Download on App Store">
+    </a>
+    <a href="https://play.google.com/store/apps/details?id=com.erebus0013.DreamAnalytica" target="_blank" rel="noopener" class="store-link">
+      <img class="store-badge store-badge--google"
+           src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png"
+           alt="Get it on Google Play">
+    </a>
+  </div>
+</div>
   <div class="row" style="align-items: center; display: flex; flex-wrap: wrap;">
     <div class="col s12 m6 reveal" style="text-align: center;">
-      <div class="phone-mockup" aria-hidden="true">
-        <div class="phone-mockup__title">DREAM JOURNAL</div>
-        <div class="phone-mockup__ring">
-          <i class="material-icons">nights_stay</i>
-        </div>
-        <div class="phone-mockup__lines">
-          <span></span>
-          <span></span>
-          <span></span>
-        </div>
+      <div class="phone-mockup phone-mockup--screen">
+        <img class="phone-mockup__screen"
+             src="{% static 'main/img/app-screenshot.png' %}"
+             alt="Dream Analytica app home screen showing dream health score and insights"
+             width="240" height="480"
+             loading="lazy">
       </div>
     </div>
 
     <div class="col s12 m6 reveal reveal--delay-1">
+      
       <h2 class="goldman-regular" style="margin-top: 0; font-size: 2rem; letter-spacing: 0.06em;">
         Carry the unconscious in your pocket
       </h2>
@@ -40,7 +51,7 @@
                alt="Download on App Store">
         </a>
         <a href="https://play.google.com/store/apps/details?id=com.erebus0013.DreamAnalytica" target="_blank" rel="noopener" class="store-link">
-          <img class="store-badge"
+          <img class="store-badge store-badge--google"
                src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png"
                alt="Get it on Google Play">
         </a>
@@ -97,7 +108,7 @@
              alt="Download on App Store">
       </a>
       <a href="https://play.google.com/store/apps/details?id=com.erebus0013.DreamAnalytica" target="_blank" rel="noopener" class="store-link">
-        <img class="store-badge"
+        <img class="store-badge store-badge--google"
              src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png"
              alt="Get it on Google Play">
       </a>

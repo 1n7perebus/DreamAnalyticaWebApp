@@ -3858,6 +3858,27 @@ nav .nav-wrapper .brand-logo {
   animation: phoneFloat 6s ease-in-out infinite;
 }
 
+.phone-mockup--screen {
+  padding: 0;
+  background: #05060a;
+  justify-content: flex-start;
+}
+
+.phone-mockup--screen::before {
+  display: none;
+}
+
+.phone-mockup__screen {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  border-radius: 36px;
+  pointer-events: none;
+  user-select: none;
+}
+
 @keyframes phoneFloat {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-12px); }
@@ -3969,6 +3990,13 @@ nav .nav-wrapper .brand-logo {
   height: 44px;
   width: auto;
   display: block;
+}
+
+/* Google's official badge PNG includes large transparent padding;
+   scale it up so the painted artwork matches the App Store badge. */
+.store-badge--google {
+  height: 64px;
+  margin: -10px -8px;
 }
 
 /* =====================================================
