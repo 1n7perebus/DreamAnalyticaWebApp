@@ -4000,6 +4000,139 @@ nav .nav-wrapper .brand-logo {
 }
 
 /* =====================================================
+   App page / tutorial tour
+   ===================================================== */
+
+.app-tour-intro {
+  max-width: 680px;
+  margin: 0 auto 3.5em;
+  text-align: center;
+}
+
+.app-tour-steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.4em;
+  margin: 0 0 5em;
+}
+
+.app-tour-step {
+  text-align: center;
+  padding: 1.8em 1.4em;
+  border: 1px solid rgba(0, 240, 255, 0.14);
+  border-radius: var(--r-lg);
+  background: linear-gradient(180deg, rgba(12, 16, 28, 0.5), rgba(8, 10, 18, 0.3));
+}
+
+.app-tour-step__num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--cyan);
+  color: var(--cyan);
+  font-family: 'Goldman', sans-serif;
+  font-size: 0.95rem;
+  margin-bottom: 0.9em;
+  box-shadow: 0 0 14px rgba(0, 240, 255, 0.25);
+}
+
+.app-tour-step h5 {
+  color: var(--text);
+  font-size: 1.05rem;
+  letter-spacing: 0.04em;
+  margin: 0 0 0.5em;
+}
+
+.app-tour-step p {
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.app-tour-row {
+  display: grid;
+  grid-template-columns: minmax(200px, 300px) 1fr;
+  gap: 3em;
+  align-items: center;
+  margin: 5.5em 0;
+}
+
+.app-tour-row--reverse .app-tour-row__media { order: 2; }
+.app-tour-row--reverse .app-tour-row__text { order: 1; }
+
+.app-tour-row__media {
+  display: flex;
+  justify-content: center;
+}
+
+.app-tour-row__media .phone-mockup {
+  margin: 0 auto;
+}
+
+.app-tour-row__media--pair {
+  display: flex;
+  gap: 1em;
+  justify-content: center;
+}
+
+.app-tour-row__media--pair .phone-mockup {
+  width: 156px;
+  height: 318px;
+}
+
+.app-tour-label {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--cyan);
+  margin-bottom: 0.7em;
+}
+
+.app-tour-row__text h3 {
+  font-family: 'Goldman', sans-serif;
+  font-size: 1.5rem;
+  letter-spacing: 0.03em;
+  margin: 0 0 0.6em;
+  color: var(--text);
+}
+
+.app-tour-row__text p {
+  color: var(--muted);
+  line-height: 1.75;
+  font-size: 1rem;
+  margin: 0 0 0.9em;
+}
+
+.app-tour-row__text p:last-child { margin-bottom: 0; }
+
+.app-tour-note {
+  display: block;
+  font-size: 0.82rem;
+  color: var(--muted-2);
+  margin-top: 0.9em;
+}
+
+@media (max-width: 760px) {
+  .app-tour-row {
+    grid-template-columns: 1fr;
+    gap: 1.8em;
+    margin: 3.5em 0;
+    text-align: center;
+  }
+  .app-tour-row--reverse .app-tour-row__media,
+  .app-tour-row--reverse .app-tour-row__text { order: initial; }
+  .app-tour-row__media--pair .phone-mockup {
+    width: 132px;
+    height: 268px;
+  }
+}
+
+/* =====================================================
    Login / Register
    ===================================================== */
 
