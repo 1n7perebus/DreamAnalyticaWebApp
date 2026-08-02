@@ -84,7 +84,7 @@ def registration_email_error_message(exc):
         return (
             'We saved your registration, but we could not send the verification email because '
             'our email service has reached its sending limit. '
-            'Please try resending below, or contact us at r@dreamanalytica.com.'
+            'Please try resending below, or contact us at dream@dreamanalytica.com.'
         )
     if (
         'DEFAULT_FROM_EMAIL' in text
@@ -859,8 +859,9 @@ def consult(request):
                 dream_post.symbols.set(resolve_symbol_tags(pending_symbols))
             Dreams.objects.filter(name="AlbertJipix").delete()
 
-            from_email = 'dreamanalytica@outlook.com'
-            to_email = 'dreamanalytica08@gmail.com'
+            from_email = settings.DEFAULT_FROM_EMAIL or 'Dream Analytica <dream@dreamanalytica.com>'
+            to_email = 'dream@dreamanalytica.com'
+            support_email = 'support@dreamanalytica.com'
             
             subject = "New Dream Submission"
             context = {
@@ -883,7 +884,7 @@ def consult(request):
                 subject=subject,
                 body=plain_message,
                 from_email=from_email,
-                to=[to_email, sender],
+                to=[to_email, support_email, sender],
             )
             email.attach_alternative(html_message, "text/html")
             #email.send(fail_silently=True)
